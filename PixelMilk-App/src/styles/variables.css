@@ -17,13 +17,14 @@
 
   /* Text Colors */
   --color-text-primary: #8bd0ba;   /* Mint green - main text */
-  --color-text-secondary: #6ab09a; /* Dimmer text */
-  --color-text-muted: #4a907a;     /* Very dim */
+  --color-text-secondary: #6ba89a; /* Dimmer text */
+  --color-text-muted: #4a7a6e;     /* Very dim */
 
   /* Accent & UI Colors */
   --color-accent: #a0e8d0;    /* Bright mint for highlights */
+  --color-accent-beige: #d8c8b8; /* Highlights, hover states */
   --color-border: #1a4a4a;    /* Subtle borders */
-  --color-error: #ff6b6b;     /* Errors */
+  --color-error: #f04e4e;     /* Errors */
   --color-success: #8bd0ba;   /* Success - same as primary */
 
   /* ============================================

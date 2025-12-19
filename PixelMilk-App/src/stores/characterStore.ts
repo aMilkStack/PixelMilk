@@ -8,8 +8,9 @@ interface CharacterState {
 
   // Generated
   identity: CharacterIdentity | null;
-  sprites: SpriteAsset[];
+  currentSprites: Map<Direction, SpriteAsset>;
   currentDirection: Direction;
+  lockedPalette: string[] | null;
 
   // UI State
   isGeneratingIdentity: boolean;
@@ -25,6 +26,7 @@ interface CharacterState {
   setGeneratingIdentity: (generating: boolean) => void;
   setGeneratingSprite: (generating: boolean) => void;
   setError: (error: string | null) => void;
+  lockPalette: (palette: string[]) => void;
   clearCharacter: () => void;
 }
 
@@ -44,8 +46,9 @@ export const useCharacterStore = create<CharacterState>((set) => ({
 
   // Generated
   identity: null,
-  sprites: [],
+  currentSprites: new Map(),
   currentDirection: 'S',
+  lockedPalette: null,
 
   // UI State
   isGeneratingIdentity: false,
@@ -63,9 +66,11 @@ export const useCharacterStore = create<CharacterState>((set) => ({
   setIdentity: (identity) => set({ identity }),
 
   addSprite: (sprite) =>
-    set((state) => ({
-      sprites: [...state.sprites, sprite]
-    })),
+    set((state) => {
+      const newSprites = new Map(state.currentSprites);
+      newSprites.set(sprite.direction, sprite);
+      return { currentSprites: newSprites };
+    }),
 
   setCurrentDirection: (direction) => set({ currentDirection: direction }),
 
@@ -77,13 +82,16 @@ export const useCharacterStore = create<CharacterState>((set) => ({
 
   setError: (error) => set({ error }),
 
+  lockPalette: (palette) => set({ lockedPalette: palette }),
+
   clearCharacter: () =>
     set({
       description: '',
       styleParams: defaultStyleParams,
       identity: null,
-      sprites: [],
+      currentSprites: new Map(),
       currentDirection: 'S',
+      lockedPalette: null,
       isGeneratingIdentity: false,
       isGeneratingSprite: false,
       error: null,

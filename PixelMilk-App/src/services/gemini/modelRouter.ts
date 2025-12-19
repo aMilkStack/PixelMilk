@@ -13,8 +13,10 @@ import type { TaskType, QualityMode, GeminiModel, GeminiConfig } from '../../typ
  * Model selection constants
  */
 const MODELS = {
-  PRO: 'gemini-3-pro-preview' as GeminiModel,
-  FLASH: 'gemini-3-flash' as GeminiModel,
+  PRO_IMAGE: 'gemini-3-pro-image-preview' as GeminiModel,
+  FLASH_IMAGE: 'gemini-2.5-flash-image' as GeminiModel,
+  FLASH_TEXT: 'gemini-2.5-flash' as GeminiModel,
+  PRO_TEXT: 'gemini-3-flash-preview' as GeminiModel,
 } as const;
 
 /**
@@ -41,33 +43,34 @@ const MAX_TOKENS = {
  * Determines which Gemini model to use based on task type and quality mode.
  *
  * Model Selection Logic:
- * - Identity tasks: Always use Pro (requires complex reasoning for character analysis)
- * - Pixel generation (sprite/tile/texture/object):
- *   - Draft: Flash (speed priority)
- *   - Balanced: Flash (good balance of speed and quality)
- *   - Quality: Pro (best output quality)
+ * - Identity tasks: TEXT models (requires complex reasoning for character analysis)
+ *   - Draft/Balanced: FLASH_TEXT
+ *   - Quality: PRO_TEXT
+ * - Pixel generation (sprite/tile/texture/object): IMAGE models
+ *   - Draft/Balanced: FLASH_IMAGE (speed priority)
+ *   - Quality: PRO_IMAGE (best output quality)
  *
  * @param taskType - The type of generation task
  * @param quality - The quality/speed tradeoff preference
  * @returns The appropriate Gemini model identifier
  */
 export function getModelForTask(taskType: TaskType, quality: QualityMode): GeminiModel {
-  // Identity generation always requires Pro for complex reasoning
+  // Identity generation uses TEXT models for complex reasoning
   if (taskType === 'identity') {
-    return MODELS.PRO;
+    return quality === 'quality' ? MODELS.PRO_TEXT : MODELS.FLASH_TEXT;
   }
 
-  // Pixel generation tasks (sprite, tile, texture, object)
+  // Pixel generation tasks (sprite, tile, texture, object) use IMAGE models
   switch (quality) {
     case 'draft':
     case 'balanced':
-      return MODELS.FLASH;
+      return MODELS.FLASH_IMAGE;
     case 'quality':
-      return MODELS.PRO;
+      return MODELS.PRO_IMAGE;
     default:
       // TypeScript exhaustive check
       const _exhaustive: never = quality;
-      return MODELS.FLASH;
+      return MODELS.FLASH_IMAGE;
   }
 }
 
@@ -156,11 +159,11 @@ function getMaxTokens(taskType: TaskType, quality: QualityMode): number {
  * ```typescript
  * // Get config for character identity generation
  * const identityConfig = getConfigForTask('identity', 'quality');
- * // Returns: { model: 'gemini-3-pro-preview', temperature: 0.7, maxTokens: 4096, thinkingLevel: 'high' }
+ * // Returns: { model: 'gemini-3-flash-preview', temperature: 0.7, maxTokens: 4096, thinkingLevel: 'high' }
  *
  * // Get config for quick sprite draft
  * const draftConfig = getConfigForTask('sprite', 'draft');
- * // Returns: { model: 'gemini-3-flash', temperature: 0.3, maxTokens: 2048, thinkingLevel: 'low' }
+ * // Returns: { model: 'gemini-2.5-flash-image', temperature: 0.3, maxTokens: 2048, thinkingLevel: 'low' }
  * ```
  */
 export function getConfigForTask(taskType: TaskType, quality: QualityMode): GeminiConfig {

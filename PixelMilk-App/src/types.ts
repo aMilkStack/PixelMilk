@@ -5,7 +5,7 @@ export interface StyleParameters {
   shadingStyle: 'flat' | 'basic' | 'medium' | 'detailed' | 'highly_detailed';
   detailLevel: 'low' | 'medium' | 'highly_detailed';
   canvasSize: 16 | 32 | 64 | 128 | 256; // 128/256 active, smaller sizes coming soon
-  paletteMode: 'auto' | 'nes' | 'gameboy' | 'pico8';
+  paletteMode: 'auto' | 'nes' | 'gameboy' | 'pico8' | 'custom';
   viewType: 'standard' | 'isometric';
 }
 
@@ -35,6 +35,8 @@ export interface CharacterIdentity {
     west: string;
     south: string;
   };
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface PixelData {
@@ -83,10 +85,10 @@ export type GenerationStatus = 'idle' | 'generating' | 'complete' | 'error';
 
 // Gemini Configuration
 export type GeminiModel =
-  | 'gemini-3-flash'
-  | 'gemini-3-pro-preview'
-  | 'gemini-2.5-flash-preview-05-20'
-  | 'gemini-2.5-pro-preview-05-06';
+  | 'gemini-2.5-flash-image'      // IMAGE model for volume/drafts
+  | 'gemini-3-pro-image-preview'  // IMAGE model for quality/finals
+  | 'gemini-2.5-flash'            // TEXT model for analysis
+  | 'gemini-3-flash-preview';     // TEXT model for prompts
 
 export type TaskType = 'identity' | 'sprite' | 'tile' | 'texture' | 'object';
 

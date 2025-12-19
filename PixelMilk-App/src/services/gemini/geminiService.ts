@@ -4,8 +4,12 @@ import { validateAndSnapPixelData } from "../../utils/paletteGovernor";
 
 const getAI = (apiKey: string) => new GoogleGenAI({ apiKey });
 
-// Using Pro for complex reasoning and structured JSON output
-const MODEL_NAME = "gemini-3-pro-preview";
+// Using TEXT models for identity generation (complex reasoning and structured JSON output)
+const IDENTITY_MODEL = "gemini-2.5-flash";
+
+// Using IMAGE models for sprite generation (actual image output, not JSON pixel arrays)
+const SPRITE_FLASH_MODEL = "gemini-2.5-flash-image";
+const SPRITE_PRO_MODEL = "gemini-3-pro-image-preview";
 
 // Helper for schema definition
 const pixelDataSchema: Schema = {
@@ -56,7 +60,7 @@ export const generateCharacterIdentity = async (
   `;
 
   const response = await ai.models.generateContent({
-    model: MODEL_NAME,
+    model: IDENTITY_MODEL,
     contents: `Character Description: ${description}`,
     config: {
       systemInstruction: systemPrompt,
@@ -81,6 +85,19 @@ export const generateCharacterIdentity = async (
 
 /**
  * Generates the initial South (Front) sprite data
+ * 
+ * TODO: CRITICAL ARCHITECTURAL FIX NEEDED
+ * This function currently uses JSON pixel array output, which is:
+ * - Extremely token-expensive (1024+ hex codes in JSON)
+ * - Poor quality (text models aren't trained for this)
+ * - Architecturally wrong per ARCHITECTURE.md
+ * 
+ * REQUIRED CHANGES:
+ * 1. Use SPRITE_FLASH_MODEL or SPRITE_PRO_MODEL (image models)
+ * 2. Request image output: config: { responseModality: "image" }
+ * 3. Handle binary/base64 image responses instead of JSON
+ * 4. Extract palette from generated images (sample colors from image data)
+ * 5. Convert image to PixelData format for editor compatibility
  */
 export const generateSouthSpriteData = async (
   apiKey: string,
@@ -121,8 +138,9 @@ export const generateSouthSpriteData = async (
   - "transparent" for background.
   `;
 
+  // NOTE: Currently using TEXT model with JSON output - needs to switch to IMAGE model
   const response = await ai.models.generateContent({
-    model: MODEL_NAME,
+    model: IDENTITY_MODEL, // FIXME: Should use SPRITE_FLASH_MODEL with responseModality: "image"
     contents: prompt,
     config: {
       responseMimeType: "application/json",
@@ -149,6 +167,19 @@ export const generateSouthSpriteData = async (
 
 /**
  * Generates a rotated view using the 3D Reference
+ * 
+ * TODO: CRITICAL ARCHITECTURAL FIX NEEDED
+ * This function currently uses JSON pixel array output, which is:
+ * - Extremely token-expensive (1024+ hex codes in JSON)
+ * - Poor quality (text models aren't trained for this)
+ * - Architecturally wrong per ARCHITECTURE.md
+ * 
+ * REQUIRED CHANGES:
+ * 1. Use SPRITE_FLASH_MODEL or SPRITE_PRO_MODEL (image models)
+ * 2. Request image output: config: { responseModality: "image" }
+ * 3. Handle binary/base64 image responses instead of JSON
+ * 4. Convert image to PixelData format for editor compatibility
+ * 5. Enforce locked palette during conversion
  */
 export const generateRotatedSpriteData = async (
   apiKey: string,
@@ -206,8 +237,9 @@ export const generateRotatedSpriteData = async (
     }
   ];
 
+  // NOTE: Currently using TEXT model with JSON output - needs to switch to IMAGE model
   const response = await ai.models.generateContent({
-    model: MODEL_NAME,
+    model: IDENTITY_MODEL, // FIXME: Should use SPRITE_FLASH_MODEL/SPRITE_PRO_MODEL with responseModality: "image"
     contents: { parts },
     config: {
       responseMimeType: "application/json",
