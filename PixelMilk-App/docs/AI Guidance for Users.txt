@@ -1,0 +1,254 @@
+According to the size of lines one can differ pixel art:
+
+Single-pixel art (outline width is 1 pixel)
+Two-pixel art (outline width is 2 pixels)
+Three-pixel art (outline width is 3 pixels), etc.
+By the number of colors there are:
+
+4-bit arts (8 colors)
+8-bit arts (16 colors)
+16-bit arts (32 colors), etc.
+According to the canvas size:
+
+16x16 pixels (the most popular)
+32x32 pixels
+64x64, etc.
+
+Isometric: Pixel art drawn in a near-isometric dimetric projection. Originally used in games to provide a three-dimensional view without using any real three-dimensional processing. Normally drawn with a 1:2 pixel ratio along the X and Y-axis.
+Sprites: Characters and game assets typically drawn in the fashion of platformer games and fighting games such as Streets of Rage or Street Fighter II or JRPGs (Japanese Roleplaying Game) such as Final Fantasy.[3]
+Pixel dolls: Also known as dollz. Sets of pixel art characters, usually with customizable appearance and sets of clothing. Often used as avatars for chatting and forums, or in dress-up games.
+Mock-ups: Concepts for non-existing pixel art games, including a user interface and other game elements. Retro-style mock-ups based on modern games are called 'demakes'.[37]
+
+1. 8-Bit Style: The Classic Look
+When most people think of pixel art, they imagine the iconic 8-bit style from games like the original Super Mario Bros or The Legend of Zelda. This style is defined by its chunky, low-resolution look, limited color palette, and simple shapes.
+
+Best For:
+Beginners who want to start with a simple style.
+Retro game enthusiasts who want to capture that nostalgic feel.
+Designs that are more symbolic and less about detail.
+Tips:
+Focus on clean shapes and using as few colors as possible. Simplicity is key! Even with limited resolution, 8-bit art can be incredibly expressive.
+
+2. 16-Bit Style: More Color, More Detail
+The 16-bit era, popularized by games like Sonic the Hedgehog and Street Fighter II, brought more colors and smoother animations to pixel art. The sprites are more detailed, backgrounds are more vibrant, and the overall aesthetic is more refined.
+
+Best For:
+Artists who want to create more dynamic and colorful designs.
+Character animations with more fluidity.
+Backgrounds and landscapes that require additional detail.
+Tips:
+Experiment with shading and gradients to add depth to your designs. The extra colors give you room to get creative, but be mindful not to overdo it—keep your palette balanced!
+
+3. Isometric Pixel Art: The 3D Illusion
+Isometric pixel art uses a unique perspective that gives 2D images a 3D feel, without using true 3D modeling. Think of games like SimCity 2000 or Habbo Hotel. It's a challenging style that involves creating visuals from a slightly top-down angle, making it ideal for game maps, cityscapes, or small interiors.
+
+Best For:
+Artists interested in architecture or landscape design.
+Creating game environments or intricate scenes.
+Anyone wanting to experiment with perspective.
+Tips:
+Use a consistent 2:1 pixel ratio to maintain the isometric perspective. Start small with basic objects like cubes or furniture before moving on to more complex scenes.
+
+4. Chibi or Miniature Style: Cute and Compact
+This style focuses on creating small, cute characters with oversized heads and tiny bodies. The proportions are often exaggerated, making the characters look endearing and playful. Games like Final Fantasy Tactics and MapleStory are great examples of chibi pixel art in action.
+
+Best For:
+Artists who want to create adorable characters.
+Designing avatars or emotes for social platforms.
+Anyone who loves to capture cuteness in their art.
+Tips:
+Keep the details simple and focus on expressing personality through facial expressions and poses. The goal is to make your characters look lively and full of charm, even with just a few pixels.
+
+5. Dithering Style: Adding Texture with Limited Colors
+Dithering is a shading technique used to create the illusion of more colors and texture. By placing two colors in a checkerboard or patterned arrangement, you can simulate additional shades or gradients. This technique was common in older games to work around hardware limitations.
+
+Best For:
+Artists working with limited color palettes.
+Creating textures like grass, clouds, or fabric.
+Adding depth and complexity to simple designs.
+Tips:
+Dithering can quickly overwhelm an image if overused. Use it sparingly and experiment with different patterns to see how it affects the overall feel of your art.
+
+6. Hi-Bit Style: The Modern Take on Pixel Art
+Hi-bit pixel art takes inspiration from classic 8-bit and 16-bit styles but with modern tools and techniques. This style doesn't adhere to the color and resolution restrictions of retro art, allowing for more expressive designs, smoother animations, and detailed textures.
+
+Best For:
+Artists who want the best of both worlds—retro charm with modern polish.
+Designing for mobile games or apps with a pixel art aesthetic.
+Creating large, detailed pieces without worrying about limitations.
+Tips:
+Feel free to experiment with more complex lighting, shadows, and textures. Hi-bit art gives you the freedom to go beyond traditional pixel boundaries, so use that freedom to create visually stunning pieces.
+
+7. Top-Down RPG Style: Perfect for Game Maps
+Top-down RPG style is often used for classic role-playing games like Pokemon and Zelda. This style is characterized by its overhead perspective and simple yet effective designs that convey a sense of exploration and adventure.
+
+Best For:
+Creating game maps, dungeons, or overworlds.
+Storytelling through environmental details.
+Designing modular tiles that can be reused in different scenes.
+Tips:
+Consistency is key. Make sure all your elements—trees, buildings, paths—follow the same perspective and scale. Adding small details like flowers or rocks can make your environments feel more alive.
+
+8. Monochrome Pixel Art: Beauty in Simplicity
+Monochrome pixel art uses just one color (often black or a single shade) against a white or colored background. This style is perfect for creating striking silhouettes or minimalist designs. Downwell is a great example of a game that used monochrome art to create a unique atmosphere.
+
+Best For:
+Minimalist designs or conceptual art.
+Creating logos, icons, or simplified illustrations.
+Artists who want to focus on shapes and silhouettes.
+Tips:
+Play with negative space to create balance in your art. The fewer colors you use, the more important each shape and line becomes.
+
+9. Minimalist Pixel Art: Less is More
+Minimalist pixel art strips down designs to their core elements, using just a few pixels and limited colors to create a clear, readable image. This style is about conveying the essence of an object or character with as little detail as possible.
+
+Best For:
+Icons, small avatars, or emotes.
+Quick sketches and practice.
+Artists looking to hone their ability to simplify complex forms.
+Tips:
+Experiment with tiny canvases, like 16x16 or 32x32 pixels, to challenge yourself to create readable designs with minimal space.
+
+10. Animated Pixel Art: Bringing Pixels to Life
+While technically more of a technique than a style, animated pixel art deserves its own mention. Adding motion to your designs—whether it's a blinking eye, a character walking, or a flickering flame—can bring your artwork to life. Animation is a powerful tool for adding personality and emotion to your art.
+
+Best For:
+Artists looking to take their pixel art to the next level.
+Game design, GIFs, or web animations.
+Anyone who loves seeing their creations move!
+Tips:
+Start small. Focus on simple animations, like a waving hand or a bouncing ball, to get the hang of it. Use tools like Aseprite or Photoshop to create frame-by-frame animations.
+
+How Many Pixels Should I Use For My Sprites?
+Now that you’ve chosen your game's total resolution, consider the ratio to your game characters and objects. A ratio of 1:24 will make your character look big on-screen, whereas 1:300 will be visible, but pretty hard to see.
+
+Draw all of your game objects in a 1:1 tile in your chosen software. Usually this is between 8:8 or 32:32 pixels, because any more would take a very long time to make. Each time you double the ratio (8:8, 16:16, 32:32), you quadruple the workload for each sprite.
+
+Tile Size
+
+Number of Pixels in a Tile
+
+8x8
+
+64 pixels
+
+16x16
+
+256 pixels
+
+24x24
+
+576 pixels
+
+32x32
+
+1024 pixels
+
+Pixel Art Colour Palettes
+If we consider old gaming software, the NES offered a total of 25 colours at once, whereas the SNES could display 256.
+
+To create classic pixel art, you’ll need to limit your colour palette, but the amount of different colours you use is ultimately up to you.
+
+Think about saturation - how bright or how dark are your colours going to be? Do you want a dark, moody feel, or are you creating something bright and cartoony?
+
+It’s good practice to stay within one area of saturation throughout your game. Try searching images from games with a similar feel to something you want to create.
+
+Check out these tutorials from pixel artists Pixel Pete (Peter Milko) and AdamCYounis on creating colour palettes for games. Adobe also offers a helpful free tool for creating your own colour palette.
+
+
+chicory6.jpg
+
+Chicory: A Colorful Tale by Greg Lobanov
+
+How To Draw a 2D Game Sprite
+Pixel art maestro Saultoon has created a brilliant video tutorial on an efficient way to make pixel art:
+
+1. Draw a silhouette of your sprite. This is often a basic shape with a few extra bits.
+
+
+Pixel_Art_Dog_Silhoutte.jpg
+
+2. Erase the black from the silhouette so you can show some features, then clean up any jaggy lines. Keep a consistent line thickness - usually, this is one pixel.
+
+
+Pixel_Art_Dog_Outline.jpg
+
+3. Add colour, and if you like, outline it to define your pixel art sprite against the background.
+
+
+Pixel_Art_Dog_Colour.jpg
+
+4. Refine your sprite and export it as a .png for stills or a .gif for animations
+
+
+
+Pixel_Art_Dog_Complete.jpg
+
+
+If you'd like another article on a step-by-step process, check out Glauber Kotaki's tutorial where he helps you learn pixel art by drawing a cool game character.
+
+Drawing Curved Lines With Squares
+Does that sound like a jaggy mess? It can be, but there’s a technique to follow that keeps your squares curvy.
+
+Make sure each line in your curve increases in sustained increments in a consecutive order:
+
+PixelArtCurves.png
+
+This is an adaptation of an image from Pixel Logic by Michal Azzi.
+
+Anti-Aliasing
+Anti-aliasing is a method of smoothing jarring edges by adding shading. Add darker or lighter colours to the edges of your creation to create a smoother image, but be warned: overdoing it can result in a lack of clarity.
+
+Here’s a great tutorial by Mort Mort to get you going.
+
+What is Dithering in Pixel Art?
+Here’s a hint: it’s got nothing to do with twiddling your thumbs.
+
+Dithering is a technique used to add depth and sometimes the illusion of additional colours with a limited colour palette.
+
+Make a pattern, or randomly place the colours you have available, to create a gradient.
+
+
+dithering.png
+Pixel Art Techniques: Six different approaches
+21/02/2024
+
+Pixel art needs no introduction as it is a common and well loved medium for game assets. Over the years I have found myself using several different approaches to creating pixel art sprites and textures. Some of these approaches were easy to learn about, others I stumbled upon myself. I have written this summary to share the approaches/processes I follow for making pixel art, and hopefully it will make a nice addition to the body of pixel art knowledge on the internet.
+
+To demonstrate each approach, I created example sprites based on a statue of Lady Justice from my city. She is supposed to hold a sword in her right hand, but it is missing from the original statue. I like the ironic symbolism of that, so I left out the sword, but then unintentionally forgot that she is supposed to be wearing a blindfold. So in some of the examples, you will see that I interpreted the blindfold as hair. As the examples were only created for this article they are quite unrefined.
+
+Freehand (Outline first)
+
+The first method, is one of the most basic. The outline of the sprite is drawn, usually with connected edges so that it can be filled with a bucket tool. Once the "base colours" are filled in, lighting and shading are added by hand. Many artists like to colour the outline too, making it lighter when it is next to lighter tones so that the overall sprite looks more soft and smooth.
+
+The advantage of this approach is that it only requires one software, and none of the work involved with switching/converting mediums. It's also well suited to animation as you can more easily maintain consistency of style, form, and details since you personally drew everything. The downside is that this approach requires the most skill as purely a pixel artist.
+
+Freehand (Silhoette method)
+
+This approach involves painting the sprite with a brush tool, often without any outlines/lineart at all but also often used in conjunction with the method above. The first step is to draw the silhoette, before refining. What I refer to as "refining" is when the artist pays attention to details and edges at the pixel level. This is where they fix "jaggies", dither patterns, and readability. After doing this to the silhoette, the artist then paints in highlights and shadows, before refining the sprite further.
+
+This approach is favoured by a lot of indie game developers because it can be used to achieve a passable quality with minimal attention to individual pixels. Personally, I think in this approach, the better pixel artist's skills shine through in that refinement process. A good advantage of this method is that it is generally going to result in strong, clearly readable silhouettes, but the disadvantage is that refining the brushwork can take a long time.
+
+Photo-based spriting
+
+A technique for the hurried artist, or for when you want to maximise realism. A photo of the subject is taken, then the background is erased before downscaling the image to the desired resolution. Erasing the background first means that you can do it more crudely and quickly without having to clean up the outline as much as if you were to remove the background after downscaling. The colours of the image are then restricted to a certain count or a certain palette. Aseprite makes this particularly easy as you can create a new palette from the image, with a fixed number of colours and automatic dithering. Alternatively you can simply use a paint bucket tool with a high tolerance and manually limit the colours. The last step is of course, refinement. In this approach, refinement may involve simply tidying up the outline and fixing jaggies, or it could include reworking details that were lost after downscaling. Sometimes it's better to add in line art or an outline as well.
+
+I think this approach is best suited to texturing or creating backgrounds, since those do not have outlines that will require correcting. It is a useful method since you don't have to spend as much time creating the original image, but if you choose to, there are some interesting applications such as claymation and stop motion.
+
+Drawing in other mediums first
+
+I have already explained this approach in detail in a previous article. In this process, an artwork is drawn using digital or traditional media, and then converted to pixel art. The fastest way to do this is using the same procedure as for photos, but I think greater quality can be achieved by "brushing over" a downscaled copy of the original artwork. The example above shows a digital drawing I converted to a sprite. Digital artworks are helpful for this purpose since you can choose the colours you will use from the beginning and they will not be lost in the process of scanning/photographing your work. On the other hand, traditional media add texture and detail that can help the final sprite look more interesting. It is worth noting that if you do an artwork with thick lines and monochrome shading, there will be less work involved in re-drawing the lines as pixel art, but you will then also have to re-colour the image and it can be harder to read the downscaled details as you only have the values to interpret them from.
+
+The advantage of this approach is that you have probably the greatest control over style. It also allows you to add fine details and textures that are difficult to draw at a low resolution, but remain readable with the right type of downscaling. The disadvantage is that you are, in a way, doubling the amount of work involved. The sprite needs to be drawn twice. If you then animate the sprite, you have to choose between using inconsistent methods (make new frames from the first pixel art sprite) or having to animate your original drawing in addition to the downscaled sprite. That can be helpful for movements that are difficult to depict in pixel art, but for other movements you may find that they become unreadable after downscaling and you will have to animate them using a different approach.
+
+3D-based spriting
+
+This was very popular in old PC games and low end consoles competing with more powerful 3d consoles. In this approach, you create a 3d model that can be rendered as an image, downscaled, and then refined. Since so much detail is lost in the downscaling process, you can afford to use extremely crude modelling and texture mapping. For the example, I simply projected one of the other sprites onto a block-out, and filled any gaps in the texture map with a tiling stone texture. For creating render from a single perspective, this worked fine, but with more care and effort this method is excellent for creating sprites for different perspectives and angles. It is almost the opposite of drawing high resolution artworks first - instead of needing more assets, you now only need to create one and convert that same asset multiple times to get multiple sprites or animation frames. 3D gives you access to bone based animation too, with correct perspective and depth.
+
+This method is excellent for complicated shapes and perspectives, or maintaining consistency when depicting the same object in multiple sprites. You can use this approach to save time and effort on colouring/lighting, and it can even be used for cool effects like reflections and semi-transparent materials. Of course it is not without disadvantages - it can be hard to escape the distinctive look of 3d rendered images, and without aggressive palette limitations, there can be a lot of work required to refine the image.
+
+Image/Photo editors
+
+Last of all, you can use photo/image editors to get a base image to use with pixel art, or to transform existing pixel art. This is extremely useful when you want to use effects like motion blur, glow, or just generating noise and distortion. It is best suited to texturing, since natural textures have an element of randomness to them that can be hard to achieve by hand. A disadvantage is that it can be hard not to lose details when downscaling, and some software does not have tools to ensure textures tile properly.
+
+These six approaches are all useful in their own way. I think no matter which you prefer, it is worth knowing about them, and what advantages and disadvantages they have. I personally like to draw or paint sprites in other mediums and then convert them, but at some point or other I have used each of them. Of course, there are no rules in art, so use the approach or combination of approaches work for you. Maybe you have another completely different way to do pixel art?

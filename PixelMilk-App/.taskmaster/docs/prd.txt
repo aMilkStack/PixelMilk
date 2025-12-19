@@ -1,0 +1,76 @@
+# PixelMilk Phase 1 Foundation - PRD
+
+## Project Overview
+Build the foundation for PixelMilk by adapting the existing App Prototype into a full app shell with 6-tab navigation, API key management, terminal aesthetic, and service layer.
+
+## Technical Stack
+- React 19 + TypeScript
+- Vite for builds
+- Zustand for state management
+- IndexedDB (via idb) for storage
+- @google/genai for Gemini API
+- Lucide React for icons
+
+## Success Criteria
+- App runs in browser (npm run dev)
+- Terminal aesthetic correct (pub green #021a1a, mint #8bd0ba, NO rounded corners)
+- All 6 tabs clickable (Character, Tile, Object, Texture, Compose, Library)
+- API key modal appears on first load and persists after refresh
+- No TypeScript errors
+
+## Implementation Tasks
+
+### Phase A: Scaffold from Prototype
+
+#### Task A0: Copy Prototype to Project
+Copy App Prototype contents to PixelMilk-App/src directory. This includes types.ts, geminiService.ts, components folder, utils folder, and config files.
+
+#### Task A1: Verify Prototype Runs
+Run npm install and npm run dev to verify the prototype code works. Fix any immediate issues.
+
+#### Task A2: Create Missing Directories
+Create directories: src/stores/, src/hooks/, src/styles/, src/services/storage/, src/components/shared/, src/components/layout/
+
+#### Task A3: Extend Types
+Extend src/types.ts with: TabId, TabConfig, ToolMode, CanvasState, GenerationStatus, GeminiConfig, GeminiModel, TaskType, QualityMode
+
+### Phase B: Foundation Layers (Parallel)
+
+#### Task B1: Create Terminal Styles
+Create src/styles/variables.css with color palette (--color-bg-primary: #021a1a, --color-text-primary: #8bd0ba, etc.), typography (VT323, Playfair Display), and spacing variables. Create src/styles/global.css with reset, grid background, scrollbar styling, and NO border-radius rule.
+
+#### Task B2: Create Shared UI Components
+Create in src/components/shared/: Button.tsx (variants: primary, secondary, danger, ghost), Input.tsx (with label and error), Select.tsx, Panel.tsx (container with title), and index.ts barrel export.
+
+#### Task B3: Extend Gemini Service
+Add to geminiService.ts: getModelForTask() function for model routing (flash for volume, pro for quality), getConfigForTask() function returning GeminiConfig with temperature and thinking level settings.
+
+#### Task B4: Create Storage Service
+Create src/services/storage/ with: db.ts (IndexedDB initialization via idb, with localStorage fallback), assets.ts (CRUD for assets), settings.ts (API key and preferences), index.ts barrel export.
+
+### Phase C: Application Assembly (Sequential)
+
+#### Task C1: Create Zustand Store
+Create src/stores/appStore.ts with: apiKey state, activeTab state, generationStatus state, modal state, and corresponding setters. Create src/stores/index.ts barrel export. Do NOT create canvasStore yet.
+
+#### Task C2: Create Layout Components
+Create src/components/layout/ with: TabBar.tsx (6 tabs with Lucide icons), ApiKeyModal.tsx (with actual API connection test, input trimming), AppShell.tsx (header, tabs, content area), ErrorBoundary.tsx (catch uncaught errors), index.ts barrel export.
+
+#### Task C3: Wire Up App
+Update src/App.tsx to use AppShell, render 6 tabs with placeholder content, import global styles. Update src/main.tsx to import styles.
+
+### Phase D: Validation
+
+#### Task D1: Smoke Test
+Verify: Modal appears on first load, API key validates against actual API, key persists after refresh, all 6 tabs work, terminal aesthetic correct (colors, fonts, no rounded corners), no console errors.
+
+## Dependencies
+- Phase B tasks depend on Phase A completion
+- Phase C tasks depend on Phase B completion
+- Task D1 depends on all previous tasks
+
+## Constraints
+- No Three.js until Phase 4
+- No canvasStore until Phase 3
+- No Tooltip component until Phase 2
+- Must use terminal aesthetic (no rounded corners, no gradients)

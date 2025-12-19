@@ -1,0 +1,167 @@
+{
+  "tasks": [
+    {
+      "id": "1",
+      "title": "A0: Copy prototype to project",
+      "description": "Copy App Prototype contents to PixelMilk-App/src directory",
+      "status": "done",
+      "priority": "high",
+      "dependencies": [],
+      "subtasks": []
+    },
+    {
+      "id": "2",
+      "title": "A1: Verify prototype runs",
+      "description": "Run npm install and npm run dev to verify the prototype code works",
+      "status": "done",
+      "priority": "high",
+      "dependencies": [
+        "1"
+      ],
+      "subtasks": []
+    },
+    {
+      "id": "3",
+      "title": "A2: Create missing directories",
+      "description": "Create directories: stores/, hooks/, styles/, services/storage/, services/gemini/, components/shared/, components/layout/",
+      "status": "done",
+      "priority": "high",
+      "dependencies": [
+        "2"
+      ],
+      "subtasks": []
+    },
+    {
+      "id": "4",
+      "title": "A3: Extend types",
+      "description": "Extend src/types.ts with: TabId, TabConfig, ToolMode, CanvasState, GenerationStatus, GeminiConfig, GeminiModel, TaskType, QualityMode, AssetType, Asset",
+      "status": "done",
+      "priority": "high",
+      "dependencies": [
+        "3"
+      ],
+      "updatedAt": "2025-12-19T03:27:12.002Z",
+      "subtasks": []
+    },
+    {
+      "id": "5",
+      "title": "B1: Create terminal styles",
+      "description": "Create src/styles/variables.css and src/styles/global.css with terminal aesthetic (pub green #021a1a, mint #8bd0ba, VT323 font, NO rounded corners, grid background)",
+      "status": "done",
+      "priority": "high",
+      "dependencies": [
+        "4"
+      ],
+      "metadata": {
+        "agent": "frontend-architect"
+      },
+      "subtasks": [],
+      "updatedAt": "2025-12-19T03:31:00.543Z"
+    },
+    {
+      "id": "6",
+      "title": "B2: Create shared UI components",
+      "description": "Create in src/components/shared/: Button.tsx (variants: primary, secondary, danger, ghost), Input.tsx (with label and error), Select.tsx, Panel.tsx, index.ts barrel export",
+      "status": "done",
+      "priority": "high",
+      "dependencies": [
+        "4"
+      ],
+      "metadata": {
+        "agent": "frontend-architect"
+      },
+      "subtasks": [],
+      "updatedAt": "2025-12-19T03:31:00.546Z"
+    },
+    {
+      "id": "7",
+      "title": "B3: Extend Gemini service",
+      "description": "Add model router to geminiService.ts or create services/gemini/modelRouter.ts with getModelForTask() and getConfigForTask() functions",
+      "status": "done",
+      "priority": "high",
+      "dependencies": [
+        "4"
+      ],
+      "metadata": {
+        "agent": "backend-architect"
+      },
+      "subtasks": [],
+      "updatedAt": "2025-12-19T03:31:00.549Z"
+    },
+    {
+      "id": "8",
+      "title": "B4: Create storage service",
+      "description": "Create src/services/storage/ with db.ts (IndexedDB via idb with localStorage fallback), assets.ts (CRUD), settings.ts (API key), index.ts",
+      "status": "done",
+      "priority": "high",
+      "dependencies": [
+        "4"
+      ],
+      "metadata": {
+        "agent": "backend-architect"
+      },
+      "subtasks": [],
+      "updatedAt": "2025-12-19T03:31:00.551Z"
+    },
+    {
+      "id": "9",
+      "title": "C1: Create Zustand store",
+      "description": "Create src/stores/appStore.ts with apiKey, activeTab, generationStatus, modal state and setters. Create index.ts barrel export",
+      "status": "done",
+      "priority": "high",
+      "dependencies": [
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      "subtasks": [],
+      "updatedAt": "2025-12-19T03:31:31.220Z"
+    },
+    {
+      "id": "10",
+      "title": "C2: Create layout components",
+      "description": "Create src/components/layout/ with TabBar.tsx, ApiKeyModal.tsx (with API connection test), AppShell.tsx, ErrorBoundary.tsx, index.ts",
+      "status": "done",
+      "priority": "high",
+      "dependencies": [
+        "9"
+      ],
+      "subtasks": [],
+      "updatedAt": "2025-12-19T03:33:01.601Z"
+    },
+    {
+      "id": "11",
+      "title": "C3: Wire up App",
+      "description": "Update src/App.tsx to use AppShell, render 6 tabs with placeholder content, import global styles",
+      "status": "done",
+      "priority": "high",
+      "dependencies": [
+        "10"
+      ],
+      "subtasks": [],
+      "updatedAt": "2025-12-19T03:33:44.563Z"
+    },
+    {
+      "id": "12",
+      "title": "D1: Smoke test",
+      "description": "Verify: Modal on first load, API key validation, persistence, 6 tabs work, terminal aesthetic correct, no console errors",
+      "status": "done",
+      "priority": "high",
+      "dependencies": [
+        "11"
+      ],
+      "subtasks": [],
+      "updatedAt": "2025-12-19T03:47:00.722Z"
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "lastModified": "2025-12-19T03:47:00.723Z",
+    "taskCount": 12,
+    "completedCount": 12,
+    "tags": [
+      "master"
+    ]
+  }
+}

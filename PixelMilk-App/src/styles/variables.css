@@ -1,0 +1,92 @@
+/**
+ * PixelMilk Design System - CSS Custom Properties
+ * Terminal Aesthetic Theme
+ *
+ * CRITICAL: No rounded corners (--border-radius: 0px)
+ */
+
+:root {
+  /* ============================================
+   * COLORS - Terminal/Pub Green Palette
+   * ============================================ */
+
+  /* Background Colors */
+  --color-bg-primary: #021a1a;    /* Pub green - main background */
+  --color-bg-secondary: #032828;  /* Slightly lighter for panels */
+  --color-bg-tertiary: #043636;   /* For hover states */
+
+  /* Text Colors */
+  --color-text-primary: #8bd0ba;   /* Mint green - main text */
+  --color-text-secondary: #6ab09a; /* Dimmer text */
+  --color-text-muted: #4a907a;     /* Very dim */
+
+  /* Accent & UI Colors */
+  --color-accent: #a0e8d0;    /* Bright mint for highlights */
+  --color-border: #1a4a4a;    /* Subtle borders */
+  --color-error: #ff6b6b;     /* Errors */
+  --color-success: #8bd0ba;   /* Success - same as primary */
+
+  /* ============================================
+   * TYPOGRAPHY
+   * ============================================ */
+
+  /* Font Families */
+  --font-mono: 'VT323', monospace;           /* Terminal font */
+  --font-display: 'Playfair Display', serif; /* Headings */
+
+  /* Font Sizes */
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 24px;
+
+  /* Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* ============================================
+   * SPACING
+   * ============================================ */
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* ============================================
+   * BORDERS & SHAPES
+   * CRITICAL: Terminal aesthetic = NO rounded corners
+   * ============================================ */
+
+  --border-radius: 0px;
+  --border-width: 1px;
+  --border-style: solid;
+
+  /* ============================================
+   * SHADOWS & EFFECTS
+   * ============================================ */
+
+  --shadow-glow: 0 0 10px rgba(139, 208, 186, 0.3);
+  --shadow-glow-strong: 0 0 20px rgba(139, 208, 186, 0.5);
+
+  /* ============================================
+   * TRANSITIONS
+   * ============================================ */
+
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+
+  /* ============================================
+   * Z-INDEX SCALE
+   * ============================================ */
+
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 300;
+  --z-tooltip: 400;
+  --z-toast: 500;
+}

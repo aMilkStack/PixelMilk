@@ -1,0 +1,206 @@
+import { GoogleGenAI, Schema, Type } from "@google/genai";
+import { CharacterIdentity, Direction, PixelData, StyleParameters } from "./types";
+import { validateAndSnapPixelData } from "./utils/paletteGovernor";
+
+const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+// Using Pro for complex reasoning and structured JSON output
+const MODEL_NAME = "gemini-3-pro-preview";
+
+// Helper for schema definition
+const pixelDataSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    name: { type: Type.STRING },
+    width: { type: Type.INTEGER },
+    height: { type: Type.INTEGER },
+    palette: {
+      type: Type.ARRAY,
+      items: { type: Type.STRING, description: "Hex code #RRGGBB" }
+    },
+    pixels: {
+      type: Type.ARRAY,
+      items: { type: Type.STRING, description: "Hex code #RRGGBB or 'transparent'" }
+    },
+    normalMap: {
+      type: Type.ARRAY,
+      items: { type: Type.STRING, description: "Hex code #RRGGBB" }
+    }
+  },
+  required: ["name", "width", "height", "palette", "pixels", "normalMap"]
+};
+
+export const generateCharacterIdentity = async (
+  description: string,
+  style: StyleParameters
+): Promise<CharacterIdentity> => {
+  const ai = getAI();
+  
+  const systemPrompt = `You are an expert technical game artist. Your task is to analyze a character description and convert it into a structured "Character Identity Document" JSON for a pixel art generation pipeline.
+  
+  The JSON must strictly follow this schema:
+  {
+    "name": "string",
+    "physical_description": { "body_type": "string", "height_style": "string", "silhouette": "string" },
+    "colour_palette": { "primary": "hex", "secondary": "hex", "accent": "hex", "skin": "hex", "hair": "hex", "outline": "hex" },
+    "distinctive_features": ["string"],
+    "style_parameters": {
+       "outline_style": "${style.outlineStyle}",
+       "shading_style": "${style.shadingStyle}",
+       "detail_level": "${style.detailLevel}",
+       "canvas_size": ${style.canvasSize}
+    },
+    "angle_specific_notes": { "north": "string", "east": "string", "west": "string", "south": "string" }
+  }
+  `;
+
+  const response = await ai.models.generateContent({
+    model: MODEL_NAME,
+    contents: `Character Description: ${description}`,
+    config: {
+      systemInstruction: systemPrompt,
+      responseMimeType: "application/json",
+    },
+  });
+
+  const text = response.text;
+  if (!text) throw new Error("No response from model");
+  
+  try {
+    return JSON.parse(text) as CharacterIdentity;
+  } catch (e) {
+    throw new Error("Failed to generate valid identity JSON");
+  }
+};
+
+/**
+ * Generates the initial South (Front) sprite data
+ */
+export const generateSouthSpriteData = async (identity: CharacterIdentity): Promise<PixelData> => {
+  const ai = getAI();
+  const size = identity.style_parameters.canvasSize;
+  
+  let paletteInstruction = "";
+  if (identity.style_parameters.paletteMode === 'auto') {
+     paletteInstruction = "Select appropriate colors. Include at least one highlight, midtone, and shadow per major element.";
+  } else {
+     // If presets were passed, we would handle them here. For now trusting Identity palette + extra if needed.
+     paletteInstruction = `Start with these base colors but expand if needed for shading: ${JSON.stringify(identity.colour_palette)}`;
+  }
+
+  const prompt = `
+  You are a pixel art data generator. Output ONLY valid JSON matching the schema.
+
+  CHARACTER: ${identity.description || identity.name}
+  CANVAS: ${size}x${size} pixels (${size * size} total pixels)
+  STYLE: ${identity.style_parameters.outlineStyle}, ${identity.style_parameters.shadingStyle} shading, ${identity.style_parameters.detailLevel} detail.
+  VIEW: South (Standard Front View)
+  TYPE: ${identity.style_parameters.viewType}
+
+  PALETTE INSTRUCTION: ${paletteInstruction}
+
+  Output a JSON object with:
+  - "name": Character name
+  - "width": ${size}
+  - "height": ${size}
+  - "palette": Array of hex codes actually used.
+  - "pixels": Array of exactly ${size * size} values. Row-major order (top-left to bottom-right). Each value is either a hex code from the palette OR "transparent".
+  - "normalMap": Array of exactly ${size * size} hex codes encoding surface normals. Use #808080 for flat, R channel for X normal, G for Y normal, B for Z depth.
+
+  CRITICAL: 
+  - Output ONLY the JSON object. No markdown.
+  - pixels array must be EXACTLY ${size * size} items.
+  - "transparent" for background.
+  `;
+
+  const response = await ai.models.generateContent({
+    model: MODEL_NAME,
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: pixelDataSchema
+    }
+  });
+
+  const text = response.text;
+  if (!text) throw new Error("No data returned");
+  const data = JSON.parse(text) as PixelData;
+  return validateAndSnapPixelData(data);
+};
+
+/**
+ * Generates a rotated view using the 3D Reference
+ */
+export const generateRotatedSpriteData = async (
+  identity: CharacterIdentity,
+  direction: Direction,
+  referenceImageBase64: string,
+  lockedPalette: string[]
+): Promise<PixelData> => {
+  const ai = getAI();
+  const size = identity.style_parameters.canvasSize;
+  
+  let anglePrompt = "";
+  if (direction === 'N') anglePrompt = `TARGET: NORTH (Back View). Visible: ${identity.angle_specific_notes.north}`;
+  else if (direction === 'E') anglePrompt = `TARGET: EAST (Right Profile). Visible: ${identity.angle_specific_notes.east}`;
+  else if (direction === 'W') anglePrompt = `TARGET: WEST (Left Profile). Visible: ${identity.angle_specific_notes.west}`;
+  else anglePrompt = `TARGET: ${direction} View.`;
+
+  const prompt = `
+  You are a pixel art data generator. Output ONLY valid JSON.
+
+  CHARACTER: ${identity.name}
+  CANVAS: ${size}x${size}
+  VIEW: ${direction}
+  TYPE: ${identity.style_parameters.viewType}
+
+  REFERENCE IMAGE: Attached is a 3D low-poly reference. Match its silhouette and positioning EXACTLY.
+
+  STYLE LOCK (match exactly):
+  - Palette: Use ONLY these colors: ${JSON.stringify(lockedPalette)}
+  - Outline: ${identity.style_parameters.outlineStyle}
+  - Shading: ${identity.style_parameters.shadingStyle}
+
+  IDENTITY LOCK:
+  - Body type: ${identity.physical_description.body_type}
+  - Features: ${identity.distinctive_features.join(', ')}
+
+  Output JSON with:
+  - "name": "${identity.name}"
+  - "width": ${size}
+  - "height": ${size}
+  - "palette": The locked palette array provided above.
+  - "pixels": Array of ${size * size} pixels.
+  - "normalMap": Array of ${size * size} normal map pixels.
+
+  CRITICAL: Use ONLY colors from the locked palette. "transparent" for background.
+  `;
+
+  const parts = [
+    { text: prompt },
+    {
+      inlineData: {
+        mimeType: "image/png",
+        data: referenceImageBase64.replace(/^data:image\/\w+;base64,/, "")
+      }
+    }
+  ];
+
+  const response = await ai.models.generateContent({
+    model: MODEL_NAME,
+    contents: { parts },
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: pixelDataSchema
+    }
+  });
+
+  const text = response.text;
+  if (!text) throw new Error("No data returned");
+  
+  const data = JSON.parse(text) as PixelData;
+  
+  // Enforce the locked palette strictly
+  data.palette = lockedPalette;
+  return validateAndSnapPixelData(data);
+};

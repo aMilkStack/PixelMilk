@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PixelMilk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=VT323&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --color-bg: #021a1a;
+        --color-mint: #8bd0ba;
+        --color-red: #f04e4e;
+        --color-beige: #d8c8b8;
+        --color-dark-green: #0d2b2b;
+      }
+
+      body {
+        background-color: var(--color-bg);
+        color: var(--color-mint);
+        font-family: 'VT323', monospace;
+        letter-spacing: 0.05em;
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+        font-family: 'Playfair Display', serif;
+        letter-spacing: 0.02em;
+      }
+
+      /* STRICT CONSTRAINT: NO ROUNDED CORNERS */
+      * {
+        border-radius: 0px !important;
+      }
+
+      /* Pixel Art Rendering */
+      .pixelated {
+        image-rendering: pixelated;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: crisp-edges;
+      }
+
+      /* Custom Scrollbar - Mechanical Feel */
+      ::-webkit-scrollbar {
+        width: 16px;
+        background: var(--color-bg);
+        border-left: 1px solid var(--color-mint);
+      }
+      ::-webkit-scrollbar-track {
+        background: repeating-linear-gradient(
+          45deg,
+          var(--color-bg),
+          var(--color-bg) 4px,
+          var(--color-dark-green) 4px,
+          var(--color-dark-green) 8px
+        );
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--color-mint);
+        border: 2px solid var(--color-bg);
+        box-shadow: inset 2px 2px 0px rgba(255,255,255,0.2), inset -2px -2px 0px rgba(0,0,0,0.4);
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--color-beige);
+      }
+
+      /* Utility classes for aesthetic */
+      .scanline {
+        background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+        background-size: 100% 4px;
+        pointer-events: none;
+      }
+      
+      .retro-border {
+        border: 2px solid var(--color-mint);
+        box-shadow: 4px 4px 0px var(--color-dark-green);
+      }
+      
+      .text-shadow-retro {
+        text-shadow: 2px 2px 0px #000;
+      }
+
+      /* Form Elements Override */
+      input, select, textarea {
+        background-color: var(--color-bg);
+        border: 1px solid var(--color-mint);
+        color: var(--color-mint);
+        font-family: 'VT323', monospace;
+      }
+      input:focus, select:focus, textarea:focus {
+        outline: none;
+        background-color: var(--color-dark-green);
+        border-color: var(--color-beige);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "three": "https://esm.sh/three@0.160.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-[#021a1a] min-h-screen overflow-hidden">
+    <div id="root" class="h-full"></div>
+    <!-- Subtle CRT Scanline overlay -->
+    <div class="fixed inset-0 scanline z-50 pointer-events-none opacity-20"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>

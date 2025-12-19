@@ -1,0 +1,349 @@
+/**
+ * PixelMilk Global Styles
+ * Terminal Aesthetic Theme
+ */
+
+/* ============================================
+ * IMPORTS
+ * ============================================ */
+
+@import url('./variables.css');
+
+/* Google Fonts - VT323 (terminal) & Playfair Display (headings) */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=VT323&display=swap');
+
+/* ============================================
+ * CSS RESET
+ * ============================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-radius: 0; /* CRITICAL: No rounded corners */
+}
+
+html {
+  font-size: var(--font-size-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ============================================
+ * BODY STYLES
+ * ============================================ */
+
+body {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+
+  /* Subtle grid background pattern */
+  background-image:
+    linear-gradient(rgba(26, 74, 74, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26, 74, 74, 0.3) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: center center;
+}
+
+/* ============================================
+ * TYPOGRAPHY DEFAULTS
+ * ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  color: var(--color-accent);
+}
+
+h1 {
+  font-size: calc(var(--font-size-xl) * 1.5);
+}
+
+h2 {
+  font-size: var(--font-size-xl);
+}
+
+h3 {
+  font-size: var(--font-size-lg);
+}
+
+h4, h5, h6 {
+  font-size: var(--font-size-base);
+}
+
+p {
+  margin-bottom: var(--space-md);
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-text-primary);
+}
+
+code, pre, kbd, samp {
+  font-family: var(--font-mono);
+}
+
+/* ============================================
+ * SELECTION STYLING
+ * ============================================ */
+
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-bg-primary);
+}
+
+::-moz-selection {
+  background-color: var(--color-accent);
+  color: var(--color-bg-primary);
+}
+
+/* ============================================
+ * CUSTOM SCROLLBAR
+ * Thin, mint colored terminal aesthetic
+ * ============================================ */
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-text-muted);
+  border: none;
+  /* No border-radius - terminal aesthetic */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--color-bg-primary);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-text-muted) var(--color-bg-primary);
+}
+
+/* ============================================
+ * FOCUS STATES
+ * Accessible but terminal-styled
+ * ============================================ */
+
+:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ============================================
+ * FORM ELEMENT RESETS
+ * ============================================ */
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: transparent;
+  border: var(--border-width) var(--border-style) var(--color-border);
+  border-radius: 0; /* CRITICAL: No rounded corners */
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ============================================
+ * IMAGE DEFAULTS
+ * ============================================ */
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Pixel art specific - prevent blurring */
+img[data-pixel-art],
+canvas[data-pixel-art] {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* ============================================
+ * LIST RESETS
+ * ============================================ */
+
+ul, ol {
+  list-style: none;
+}
+
+/* ============================================
+ * TABLE RESETS
+ * ============================================ */
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* ============================================
+ * UTILITY CLASSES
+ * ============================================ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.text-accent {
+  color: var(--color-accent);
+}
+
+.text-error {
+  color: var(--color-error);
+}
+
+.text-success {
+  color: var(--color-success);
+}
+
+/* Terminal cursor blink effect */
+@keyframes terminal-blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink {
+  animation: terminal-blink 1s step-end infinite;
+}
+
+/* CRT scanline effect (optional, can be applied to containers) */
+.crt-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.1) 0px,
+    rgba(0, 0, 0, 0.1) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+}
+
+/* Glow effect for terminal elements */
+.terminal-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+.terminal-glow-strong {
+  box-shadow: var(--shadow-glow-strong);
+}
+
+/* ============================================
+ * RESPONSIVE BREAKPOINTS
+ * Mobile-first approach
+ * ============================================ */
+
+/* Mobile: 0 - 639px (default styles) */
+/* Tablet: 640px+ */
+/* Desktop: 1024px+ */
+
+/* Mobile-specific adjustments */
+@media (max-width: 639px) {
+  html {
+    font-size: 14px;
+  }
+
+  body {
+    background-size: 16px 16px;
+  }
+
+  h1 {
+    font-size: var(--font-size-xl);
+  }
+
+  h2 {
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* Tablet and up */
+@media (min-width: 640px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+/* Desktop and up */
+@media (min-width: 1024px) {
+  html {
+    font-size: 16px;
+  }
+}
