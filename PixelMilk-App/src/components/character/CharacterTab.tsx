@@ -41,7 +41,8 @@ export const CharacterTab: React.FC = () => {
     description,
     styleParams,
     identity,
-    sprites,
+    currentSprites,
+    currentDirection,
     isGeneratingIdentity,
     isGeneratingSprite,
     error,
@@ -56,7 +57,7 @@ export const CharacterTab: React.FC = () => {
   } = useCharacterStore();
 
   // Get the current sprite (South facing for now)
-  const currentSprite: PixelData | null = sprites.length > 0 ? sprites[0].data : null;
+  const currentSprite: PixelData | null = currentSprites.has('S') ? currentSprites.get('S')!.data : null;
 
   // Check if description is valid
   const isDescriptionValid = description.length >= 10 && description.length <= 2000;
@@ -138,7 +139,7 @@ export const CharacterTab: React.FC = () => {
 
   // Handle Save to Library
   const handleSaveToLibrary = async () => {
-    if (!identity || sprites.length === 0) {
+    if (!identity || currentSprites.size === 0) {
       setError('Nothing to save. Generate identity and sprite first.');
       return;
     }
@@ -151,7 +152,7 @@ export const CharacterTab: React.FC = () => {
         createdAt: Date.now(),
         updatedAt: Date.now(),
         data: identity,
-        sprites: sprites,
+        sprites: Array.from(currentSprites.values()),
       });
       setError(null);
       // Could show a success message here
@@ -234,7 +235,7 @@ export const CharacterTab: React.FC = () => {
         <div style={sectionStyle}>
           <GenerateControls
             hasIdentity={identity !== null}
-            hasSprite={sprites.length > 0}
+            hasSprite={currentSprites.size > 0}
             isGeneratingIdentity={isGeneratingIdentity}
             isGeneratingSprite={isGeneratingSprite}
             error={error}
