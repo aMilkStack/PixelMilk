@@ -4,8 +4,9 @@ import { TabBar } from './TabBar';
 import { ApiKeyModal } from './ApiKeyModal';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Button } from '../shared';
-import { useAppStore } from '../../stores';
-import { getApiKey } from '../../services/storage';
+import { useAppStore, useCanvasStore } from '../../stores';
+import { initializeClient, validateApiKey } from '../../services/gemini';
+import { getApiKey, clearApiKey } from '../../services/storage';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -26,8 +27,10 @@ const useIsMobile = () => {
 };
 
 export const AppShell: React.FC<AppShellProps> = ({ children }) => {
-  const { apiKey, setApiKey, openApiKeyModal, isApiKeyModalOpen } = useAppStore();
+  const { apiKey, setApiKey, setError, openApiKeyModal, isApiKeyModalOpen, apiKeyStatus, setApiKeyStatus } = useAppStore();
+  const { loadPersistedState: loadCanvasState } = useCanvasStore();
   const isMobile = useIsMobile();
+  const [isValidating, setIsValidating] = useState(false);
 
   const styles: Record<string, React.CSSProperties> = {
     container: {
@@ -56,6 +59,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
     statusDot: {
       width: '8px',
       height: '8px',
+      borderRadius: '50%',
       backgroundColor: 'var(--color-success)',
       marginRight: 'var(--space-xs)',
     },
@@ -78,19 +82,56 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
     },
   };
 
+  // Load persisted canvas state on mount (Bug M7 fix)
   useEffect(() => {
-    // Check for stored API key on mount
-    const checkApiKey = async () => {
-      const storedKey = await getApiKey();
-      if (storedKey) {
-        setApiKey(storedKey);
-      } else {
-        // Open modal if no API key is stored
+    loadCanvasState();
+  }, [loadCanvasState]);
+
+  useEffect(() => {
+    // Check for stored API key on mount with proper error handling (Bug C2)
+    // and validate the key before using it (Bug C5)
+    const initializeApiKey = async () => {
+      setIsValidating(true);
+      setApiKeyStatus('unknown');
+
+      try {
+        const storedKey = await getApiKey();
+
+        if (!storedKey) {
+          // No API key stored - open modal
+          setApiKeyStatus('unknown');
+          openApiKeyModal();
+          return;
+        }
+
+        // Validate the stored key before using it (Bug C5)
+        const isValid = await validateApiKey(storedKey);
+
+        if (isValid) {
+          setApiKey(storedKey);
+          initializeClient(storedKey);
+          setApiKeyStatus('valid');
+        } else {
+          // Key is invalid - clear it and prompt for new one
+          setApiKeyStatus('invalid');
+          setError('Stored API key is no longer valid. Please enter a new key.');
+          await clearApiKey().catch(console.error);
+          setApiKey(null);
+          openApiKeyModal();
+        }
+      } catch (error) {
+        // Storage access failed (Bug C2)
+        console.error('Failed to initialize API key:', error);
+        setApiKeyStatus('error');
+        setError('Failed to access storage. Please check browser permissions and try again.');
         openApiKeyModal();
+      } finally {
+        setIsValidating(false);
       }
     };
-    checkApiKey();
-  }, [setApiKey, openApiKeyModal]);
+
+    initializeApiKey();
+  }, [setApiKey, setError, openApiKeyModal, setApiKeyStatus]);
 
   return (
     <ErrorBoundary>
@@ -108,12 +149,37 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
           </div>
 
           <div style={styles.headerActions}>
-            {apiKey && (
+            {isValidating ? (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{
+                  ...styles.statusDot,
+                  backgroundColor: 'var(--color-warning)',
+                  animation: 'pulse 1s infinite',
+                }} />
+                <span style={styles.statusText}>Validating...</span>
+              </div>
+            ) : apiKey && apiKeyStatus === 'valid' ? (
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <div style={styles.statusDot} />
                 <span style={styles.statusText}>API Connected</span>
               </div>
-            )}
+            ) : apiKeyStatus === 'invalid' ? (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{
+                  ...styles.statusDot,
+                  backgroundColor: 'var(--color-error)',
+                }} />
+                <span style={styles.statusText}>Invalid Key</span>
+              </div>
+            ) : apiKeyStatus === 'error' ? (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{
+                  ...styles.statusDot,
+                  backgroundColor: 'var(--color-error)',
+                }} />
+                <span style={styles.statusText}>Storage Error</span>
+              </div>
+            ) : null}
             <Button
               variant="ghost"
               size="sm"

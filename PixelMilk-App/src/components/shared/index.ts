@@ -5,3 +5,4 @@ export { Button, type ButtonProps, type ButtonVariant, type ButtonSize } from '.
 export { Input, type InputProps } from './Input';
 export { Select, type SelectProps, type SelectOption } from './Select';
 export { Panel, type PanelProps } from './Panel';
+export { Tooltip, type TooltipProps } from './Tooltip';

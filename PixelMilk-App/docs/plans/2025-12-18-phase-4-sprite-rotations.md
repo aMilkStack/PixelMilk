@@ -411,6 +411,290 @@ Update `CharacterTab.tsx` to include `SpriteSheetGenerator` in right panel.
 
 ---
 
+## Task 4.7: Reference Stacking (Multi-Image Identity Lock)
+
+> **Added via NotebookLM Enhancement Plan (2025-12-20)**
+
+**Problem:** Current implementation uses a single reference image for rotations. NotebookLM recommends "Reference Stacking" - uploading up to 14 reference images simultaneously to "lock" character identity.
+
+**Why:** Instead of relying on a text-based "Identity Card" alone, sending multiple visual references (character sheet, front view, side view, etc.) dramatically improves consistency across generations.
+
+**Files:**
+- Update: `src/types.ts`
+- Update: `src/stores/characterStore.ts`
+- Update: `src/services/gemini/geminiService.ts`
+
+**Step 1: Add CharacterReferences type to types.ts**
+
+```typescript
+export interface CharacterReferences {
+  sheet?: string;      // Character design sheet (if available)
+  front?: string;      // Generated front sprite (S direction)
+  back?: string;       // Generated back sprite (N direction)
+  left?: string;       // Generated left sprite (W direction)
+  right?: string;      // Generated right sprite (E direction)
+  frontLeft?: string;  // SW direction
+  frontRight?: string; // SE direction
+  backLeft?: string;   // NW direction
+  backRight?: string;  // NE direction
+  custom?: string[];   // Additional user-uploaded references
+}
+```
+
+**Step 2: Update CharacterState in characterStore.ts**
+
+```typescript
+interface CharacterState {
+  // ... existing fields
+  references: CharacterReferences;
+
+  // New action
+  addReference: (key: keyof CharacterReferences, base64: string) => void;
+}
+
+// In store implementation:
+addReference: (key, base64) => set((state) => ({
+  references: {
+    ...state.references,
+    [key]: base64,
+  },
+})),
+```
+
+**Step 3: Build Reference Stack in geminiService.ts**
+
+```typescript
+function buildReferenceStack(
+  character: CharacterIdentity,
+  references: CharacterReferences
+): Array<{ label: string; base64: string }> {
+  const stack: Array<{ label: string; base64: string }> = [];
+
+  // Priority order: sheet first, then front, then other directions
+  if (references.sheet) {
+    stack.push({ label: 'Character design sheet showing multiple views', base64: references.sheet });
+  }
+  if (references.front) {
+    stack.push({ label: 'Front view reference (S direction)', base64: references.front });
+  }
+  if (references.back) {
+    stack.push({ label: 'Back view reference (N direction)', base64: references.back });
+  }
+  if (references.left) {
+    stack.push({ label: 'Left profile reference (W direction)', base64: references.left });
+  }
+  if (references.right) {
+    stack.push({ label: 'Right profile reference (E direction)', base64: references.right });
+  }
+  // ... add other directions as available
+
+  // Gemini API limit: 14 images max
+  return stack.slice(0, 14);
+}
+```
+
+**Step 4: Update generateRotatedSprite to use Reference Stack**
+
+```typescript
+export const generateRotatedSprite = async (
+  identity: CharacterIdentity,
+  direction: Direction,
+  references: CharacterReferences,  // Changed from single image
+  quality: QualityMode = 'final',
+  lockedPalette?: string[]
+): Promise<string> => {
+  const referenceStack = buildReferenceStack(identity, references);
+
+  // Build labeled prompt per NotebookLM best practice
+  const imageLabels = referenceStack.map((ref, i) =>
+    `Image ${i + 1}: ${ref.label}`
+  ).join('\n');
+
+  const prompt = `Generate a ${size}x${size} pixel art sprite - ${directionDesc}
+
+${imageLabels}
+
+Maintain EXACT consistency with all reference images above.
+Match the character's proportions, colors, and style from the references.
+
+CHARACTER: ${identity.name}
+// ... rest of prompt
+`;
+
+  // Prepare all images with white backgrounds
+  const preparedImages = await Promise.all(
+    referenceStack.map(ref => prepareCanvasForGemini(ref.base64))
+  );
+
+  // Send all images with prompt
+  const response = await client.models.generateContent({
+    model: config.model,
+    contents: {
+      parts: [
+        ...preparedImages.map(img => ({
+          inlineData: { mimeType: 'image/png', data: img }
+        })),
+        { text: prompt },
+      ],
+    },
+    // ... config
+  });
+};
+```
+
+**Step 5: Auto-populate references after generation**
+
+When a sprite is generated successfully, automatically add it to the references store:
+
+```typescript
+// In CharacterTab.tsx after successful sprite generation:
+const base64 = await generateSprite(identity, direction, quality, lockedPalette);
+
+// Map direction to reference key
+const directionToRefKey: Record<Direction, keyof CharacterReferences> = {
+  S: 'front',
+  N: 'back',
+  E: 'right',
+  W: 'left',
+  SE: 'frontRight',
+  SW: 'frontLeft',
+  NE: 'backRight',
+  NW: 'backLeft',
+};
+
+addReference(directionToRefKey[direction], base64);
+```
+
+---
+
+## Task 4.8: Thought Signature Circulation (Pro Model Consistency)
+
+> **Added via NotebookLM Enhancement Plan (2025-12-20)**
+
+**Problem:** When using Gemini 3 Pro's "Thinking" mode for iterative edits, the API returns "Thought Signatures" (encrypted reasoning context). Failure to pass these signatures back in subsequent turns causes the model to lose its "thread" and character identity drifts after 3-4 turns.
+
+**Note:** This feature requires Gemini 3 Pro API which may not be fully available yet. Implementation is forward-compatible.
+
+**Files:**
+- Update: `src/types.ts`
+- Update: `src/stores/characterStore.ts`
+- Update: `src/services/gemini/geminiService.ts`
+
+**Step 1: Add GenerationSession type to types.ts**
+
+```typescript
+export interface GenerationSession {
+  characterId: string;
+  thoughtSignature?: string;  // Encrypted context from Pro model
+  turnCount: number;
+  createdAt: number;
+  lastUsedAt: number;
+}
+```
+
+**Step 2: Add session management to characterStore.ts**
+
+```typescript
+interface CharacterState {
+  // ... existing
+  activeSession?: GenerationSession;
+
+  // Session actions
+  updateSession: (thoughtSignature?: string) => void;
+  clearSession: () => void;
+}
+
+// Implementation:
+updateSession: (thoughtSignature) => set((state) => {
+  const now = Date.now();
+  const existing = state.activeSession;
+
+  // Clear if stale (>5 min) or too many turns
+  if (existing && (now - existing.lastUsedAt > 5 * 60 * 1000 || existing.turnCount >= 4)) {
+    return { activeSession: undefined };
+  }
+
+  return {
+    activeSession: {
+      characterId: state.currentIdentity?.id || '',
+      thoughtSignature,
+      turnCount: (existing?.turnCount || 0) + 1,
+      createdAt: existing?.createdAt || now,
+      lastUsedAt: now,
+    },
+  };
+}),
+
+clearSession: () => set({ activeSession: undefined }),
+```
+
+**Step 3: Extract and pass thought signatures in geminiService.ts**
+
+```typescript
+interface GeminiImageResponse {
+  image: string;
+  thoughtSignature?: string;
+}
+
+async function generateWithSession(
+  prompt: string,
+  images: string[],
+  session?: GenerationSession
+): Promise<GeminiImageResponse> {
+  const response = await client.models.generateContent({
+    // ... existing config
+    config: {
+      // Pass previous thought signature if available
+      ...(session?.thoughtSignature && {
+        previousThoughtSignature: session.thoughtSignature,
+      }),
+    },
+  });
+
+  // Extract new thought signature from response (if present)
+  const newSignature = response.candidates?.[0]?.thoughtSignature;
+
+  return {
+    image: extractImageData(response),
+    thoughtSignature: newSignature,
+  };
+}
+```
+
+**Step 4: Wire into generation flow**
+
+```typescript
+// In CharacterTab or generation handler:
+const { activeSession, updateSession } = useCharacterStore();
+
+const result = await generateWithSession(prompt, images, activeSession);
+
+// Store the new signature for next turn
+updateSession(result.thoughtSignature);
+
+// Use result.image as before
+```
+
+**Why:** Maintains 95%+ character consistency during iterative refining by preserving the model's reasoning context across multiple generations.
+
+---
+
+## Task 4.9: Update Rotation Generation to Use Full Reference Stack
+
+> **Added via NotebookLM Enhancement Plan (2025-12-20)**
+
+**Prerequisite:** Tasks 4.7 and 4.8 must be complete.
+
+Update `generateSpriteFromReference()` to:
+1. Collect all available reference images for the character
+2. Label each with semantic context ("Image 1: Front view", etc.)
+3. Include thought signature if available from active session
+4. Use `prepareCanvasForGemini()` on ALL reference images
+
+This ensures maximum consistency when generating the 8-direction sprite sheet.
+
+---
+
 ## Phase 4 Complete
 
 At this point you have:
@@ -420,5 +704,8 @@ At this point you have:
 - ✅ Batch generation of all 8 directions
 - ✅ Sprite sheet export utility
 - ✅ Download as PNG
+- ✅ Reference Stacking for identity lock (NotebookLM)
+- ✅ Thought Signature circulation for Pro model (NotebookLM)
+- ✅ Multi-image generation with semantic labels (NotebookLM)
 
 **Next Phase:** Tile Tab with seamless patterns and autotile support

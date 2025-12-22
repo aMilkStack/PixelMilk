@@ -10,6 +10,11 @@
 
 **Prerequisites:** Phase 1 complete (foundation, services, app shell)
 
+**Hybrid Workflow Update (2025-12-19):**
+- Sprite generation uses Gemini IMAGE models -> PNG output.
+- Client converts PNG to pixel array with `pngToPixelArray` (canvas getImageData + nearest-neighbor).
+- Pixel arrays (not PNG) are stored and edited; export renders arrays back to PNG.
+
 ---
 
 ## Task 2.1: Create Character Store
@@ -104,30 +109,29 @@ git commit -m "feat(character): add character store"
 ## Task 2.2: Create Character Generation Service
 
 **Files:**
-- Create: `src/services/gemini/character.ts`
+- Update: `src/services/gemini/geminiService.ts`
 - Update: `src/services/gemini/index.ts`
 
-**Step 1: Create src/services/gemini/character.ts**
+**Step 1: Update src/services/gemini/geminiService.ts**
 
 ```typescript
+import { Modality } from '@google/genai';
 import { getClient } from './client';
 import { getConfigForTask } from './modelRouter';
-import { characterIdentitySchema, pixelDataSchema } from './schemas';
-import type { CharacterIdentity, SpriteData, StyleParameters, QualityMode } from '@/types';
+import { characterIdentitySchema } from './schemas';
+import type { CharacterIdentity, StyleParameters, QualityMode, Direction } from '@/types';
 
 const IDENTITY_SYSTEM_PROMPT = `You are an expert technical game artist. Your task is to analyze a character description and create a structured "Character Identity Document" for a pixel art generation pipeline.
 
 Be specific about visual details. Infer reasonable defaults for anything not specified.
 For angleNotes, describe what would be visible from each direction (e.g., "cape flows behind" for North view).`;
 
-const SPRITE_SYSTEM_PROMPT = `You are a pixel art data generator. Output ONLY valid JSON matching the schema.
+const SPRITE_SYSTEM_PROMPT = `You are generating a pixel art sprite as a PNG image.
 
 CRITICAL RULES:
-1. pixels array must be EXACTLY width * height items
-2. Use "transparent" for background pixels
-3. Row-major order: top-left to bottom-right
-4. Every colour in pixels must exist in palette
-5. Respect the style parameters exactly`;
+1. Output must be PNG with transparency
+2. Crisp pixel edges (no anti-aliasing)
+3. Match the provided style parameters exactly`;
 
 export async function generateCharacterIdentity(
   description: string,
@@ -173,10 +177,10 @@ Generate a Character Identity Document JSON.`;
 
 export async function generateSprite(
   identity: CharacterIdentity,
-  direction: 'S' | 'N' | 'E' | 'W' = 'S',
+  direction: Direction = 'S',
   quality: QualityMode = 'draft',
   lockedPalette?: string[]
-): Promise<SpriteData> {
+): Promise<string> {
   const client = getClient();
   const config = getConfigForTask(quality === 'final' ? 'sprite-final' : 'sprite-draft', quality);
   const size = identity.styleParameters.canvasSize;
@@ -201,7 +205,7 @@ DESCRIPTION: ${identity.description}
 PHYSICAL: ${identity.physicalDescription.bodyType}, ${identity.physicalDescription.heightStyle}
 DISTINCTIVE FEATURES: ${identity.distinctiveFeatures.join(', ')}
 
-CANVAS: ${size}x${size} pixels (${size * size} total pixels)
+CANVAS: ${size}x${size} pixels
 VIEW: ${directionDescriptions[direction]}
 ${identity.angleNotes[direction] ? `ANGLE NOTES: ${identity.angleNotes[direction]}` : ''}
 
@@ -212,12 +216,9 @@ STYLE:
 
 ${paletteInstruction}
 
-Generate pixel data JSON with:
-- name: "${identity.name}"
-- width: ${size}
-- height: ${size}
-- palette: Array of hex colours used
-- pixels: Array of exactly ${size * size} values (hex codes or "transparent")
+OUTPUT:
+- PNG image, transparent background
+- Exact size: ${size}x${size} pixels
 `;
 
   const response = await client.models.generateContent({
@@ -225,38 +226,22 @@ Generate pixel data JSON with:
     contents: prompt,
     config: {
       systemInstruction: SPRITE_SYSTEM_PROMPT,
+      responseModalities: [Modality.IMAGE],
       temperature: config.temperature,
-      responseMimeType: 'application/json',
-      responseSchema: pixelDataSchema,
       ...(config.thinkingLevel && {
         thinkingConfig: { thinkingLevel: config.thinkingLevel },
       }),
     },
   });
 
-  const text = response.text;
-  if (!text) throw new Error('No response from model');
-  
-  const data = JSON.parse(text);
-  
-  // Validate pixel count
-  const expectedPixels = size * size;
-  if (data.pixels.length !== expectedPixels) {
-    throw new Error(`Invalid pixel count: got ${data.pixels.length}, expected ${expectedPixels}`);
+  const parts = response.candidates?.[0]?.content?.parts ?? [];
+  const imagePart = parts.find((part) => part.inlineData);
+  if (!imagePart?.inlineData?.data) {
+    throw new Error('No image data in response');
   }
-  
-  const sprite: SpriteData = {
-    id: `sprite_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-    name: data.name,
-    width: size,
-    height: size,
-    palette: data.palette,
-    pixels: data.pixels,
-    direction,
-    createdAt: Date.now(),
-  };
-  
-  return sprite;
+
+  // Returns base64-encoded PNG data.
+  return imagePart.inlineData.data;
 }
 ```
 
@@ -266,7 +251,7 @@ Generate pixel data JSON with:
 export { initializeClient, getClient, isClientInitialized } from './client';
 export { generateContent, generateStructuredContent, generateImage, editImage } from './client';
 export { getModelForTask, getConfigForTask } from './modelRouter';
-export { generateCharacterIdentity, generateSprite } from './character';
+export { generateCharacterIdentity, generateSprite } from './geminiService';
 export * from './schemas';
 ```
 
@@ -454,231 +439,27 @@ git commit -m "feat(canvas): add sprite canvas component"
 
 ---
 
-## Task 2.4: Create Style Controls Component
+## Task 2.4: Style Controls (Aligned)
 
 **Files:**
-- Create: `src/components/character/StyleControls.tsx`
+- Use existing: `src/components/character/StyleSelector.tsx`
 
-**Step 1: Create src/components/character/StyleControls.tsx**
-
-```tsx
-import { Select, Panel } from '@/components/shared';
-import { useCharacterStore } from '@/stores';
-
-export function StyleControls() {
-  const { styleParams, setStyleParams } = useCharacterStore();
-  
-  const gridStyle: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: 'var(--space-3)',
-  };
-  
-  return (
-    <Panel title="Style Parameters">
-      <div style={gridStyle}>
-        <Select
-          label="Canvas Size"
-          value={String(styleParams.canvasSize)}
-          onChange={(e) => setStyleParams({ canvasSize: Number(e.target.value) as 16 | 32 | 64 | 128 })}
-          options={[
-            { value: '16', label: '16×16' },
-            { value: '32', label: '32×32' },
-            { value: '64', label: '64×64' },
-            { value: '128', label: '128×128' },
-          ]}
-        />
-        
-        <Select
-          label="Outline Style"
-          value={styleParams.outlineStyle}
-          onChange={(e) => setStyleParams({ outlineStyle: e.target.value as any })}
-          options={[
-            { value: 'black', label: 'Black outline' },
-            { value: 'colored', label: 'Coloured outline' },
-            { value: 'selective', label: 'Selective' },
-            { value: 'lineless', label: 'No outline' },
-          ]}
-        />
-        
-        <Select
-          label="Shading"
-          value={styleParams.shadingStyle}
-          onChange={(e) => setStyleParams({ shadingStyle: e.target.value as any })}
-          options={[
-            { value: 'flat', label: 'Flat (no shading)' },
-            { value: 'basic', label: 'Basic (2-3 tones)' },
-            { value: 'detailed', label: 'Detailed (4+ tones)' },
-          ]}
-        />
-        
-        <Select
-          label="Detail Level"
-          value={styleParams.detailLevel}
-          onChange={(e) => setStyleParams({ detailLevel: e.target.value as any })}
-          options={[
-            { value: 'low', label: 'Low (iconic)' },
-            { value: 'medium', label: 'Medium' },
-            { value: 'high', label: 'High (intricate)' },
-          ]}
-        />
-        
-        <Select
-          label="Palette"
-          value={styleParams.paletteMode}
-          onChange={(e) => setStyleParams({ paletteMode: e.target.value as any })}
-          options={[
-            { value: 'auto', label: 'Auto' },
-            { value: 'nes', label: 'NES (54 colours)' },
-            { value: 'gameboy', label: 'Game Boy (4 colours)' },
-            { value: 'pico8', label: 'PICO-8 (16 colours)' },
-          ]}
-        />
-        
-        <Select
-          label="View Type"
-          value={styleParams.viewType}
-          onChange={(e) => setStyleParams({ viewType: e.target.value as any })}
-          options={[
-            { value: 'standard', label: 'Standard (top-down)' },
-            { value: 'isometric', label: 'Isometric' },
-          ]}
-        />
-      </div>
-    </Panel>
-  );
-}
-```
-
-**Step 2: Commit**
-
-```bash
-git add .
-git commit -m "feat(character): add style controls component"
-```
+**Notes:**
+- StyleSelector already covers canvas size (128/256 active), outline/shading/detail, palette mode, and view type.
+- Advanced options toggle and mobile layout are built in.
 
 ---
 
-## Task 2.5: Create Character Form Component
+## Task 2.5: Character Inputs (Aligned)
 
 **Files:**
-- Create: `src/components/character/CharacterForm.tsx`
+- Use existing: `src/components/character/DescriptionInput.tsx`
+- Use existing: `src/components/character/GenerateControls.tsx`
 
-**Step 1: Create src/components/character/CharacterForm.tsx**
-
-```tsx
-import { useState } from 'react';
-import { Button, Input, Panel } from '@/components/shared';
-import { useCharacterStore, useAppStore } from '@/stores';
-import { generateCharacterIdentity, generateSprite } from '@/services/gemini';
-import { Sparkles, Loader2 } from 'lucide-react';
-
-export function CharacterForm() {
-  const { description, setDescription, styleParams, setIdentity, addSprite, lockPalette } = useCharacterStore();
-  const { setGenerationStatus, resetGenerationStatus } = useAppStore();
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState('');
-  
-  const handleGenerate = async () => {
-    if (!description.trim()) {
-      setError('Please enter a character description');
-      return;
-    }
-    
-    setIsGenerating(true);
-    setError('');
-    
-    try {
-      // Step 1: Generate identity
-      setGenerationStatus({ isGenerating: true, progress: 20, stage: 'Creating identity...' });
-      const identity = await generateCharacterIdentity(description, styleParams);
-      setIdentity(identity);
-      
-      // Step 2: Generate south-facing sprite
-      setGenerationStatus({ progress: 60, stage: 'Generating sprite...' });
-      const sprite = await generateSprite(identity, 'S', 'draft');
-      addSprite('S', sprite);
-      
-      // Step 3: Lock palette
-      lockPalette(sprite.palette);
-      
-      setGenerationStatus({ progress: 100, stage: 'Complete!' });
-      setTimeout(resetGenerationStatus, 1000);
-      
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Generation failed';
-      setError(message);
-      setGenerationStatus({ error: message });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-  
-  const textareaStyle: React.CSSProperties = {
-    width: '100%',
-    minHeight: '120px',
-    padding: 'var(--space-3)',
-    backgroundColor: 'var(--color-bg-secondary)',
-    border: '1px solid var(--color-border-muted)',
-    color: 'var(--color-text-primary)',
-    fontFamily: 'var(--font-mono)',
-    fontSize: 'var(--font-size-base)',
-    resize: 'vertical',
-  };
-  
-  return (
-    <Panel title="Character Description">
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-        <label style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
-          > Describe your character
-        </label>
-        
-        <textarea
-          style={textareaStyle}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="A brave knight with silver armor and a flowing red cape. She carries a glowing blue sword and has short dark hair."
-          disabled={isGenerating}
-        />
-        
-        {error && (
-          <p style={{ color: 'var(--color-accent-red)', fontSize: 'var(--font-size-sm)' }}>
-            ! {error}
-          </p>
-        )}
-        
-        <Button onClick={handleGenerate} disabled={isGenerating} style={{ alignSelf: 'flex-start' }}>
-          {isGenerating ? (
-            <>
-              <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
-              Generating...
-            </>
-          ) : (
-            <>
-              <Sparkles size={16} />
-              Generate Character
-            </>
-          )}
-        </Button>
-      </div>
-      
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
-    </Panel>
-  );
-}
-```
-
-**Step 2: Commit**
-
-```bash
-git add .
-git commit -m "feat(character): add character form component"
-```
+**Notes:**
+- DescriptionInput validates length (10-2000 chars).
+- GenerateControls triggers identity/sprite generation, save-to-library, and clear actions.
+- After sprite generation, convert PNG to pixel array via `pngToPixelArray` before storing and locking palette.
 
 ---
 
@@ -838,129 +619,19 @@ git commit -m "feat(character): add palette display component"
 
 ---
 
-## Task 2.8: Create Character Tab Layout
+## Task 2.8: Character Tab Layout (Aligned)
 
 **Files:**
-- Create: `src/components/character/CharacterTab.tsx`
-- Create: `src/components/character/index.ts`
+- Update: `src/components/character/CharacterTab.tsx`
+- Update: `src/components/character/index.ts`
 
-**Step 1: Create src/components/character/CharacterTab.tsx**
-
-```tsx
-import { CharacterForm } from './CharacterForm';
-import { StyleControls } from './StyleControls';
-import { IdentityCard } from './IdentityCard';
-import { PaletteDisplay } from './PaletteDisplay';
-import { SpriteCanvas } from '@/components/canvas';
-import { useCharacterStore, useAppStore } from '@/stores';
-import { Panel } from '@/components/shared';
-
-export function CharacterTab() {
-  const { currentSprites } = useCharacterStore();
-  const { generationStatus } = useAppStore();
-  
-  const southSprite = currentSprites.get('S') ?? null;
-  
-  const containerStyle: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: '350px 1fr 280px',
-    gap: 'var(--space-4)',
-    height: '100%',
-    padding: 'var(--space-4)',
-    overflow: 'hidden',
-  };
-  
-  const leftPanelStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--space-4)',
-    overflowY: 'auto',
-  };
-  
-  const centerStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--space-4)',
-    minHeight: 0,
-  };
-  
-  const canvasContainerStyle: React.CSSProperties = {
-    flex: 1,
-    minHeight: 0,
-  };
-  
-  const rightPanelStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--space-4)',
-    overflowY: 'auto',
-  };
-  
-  return (
-    <div style={containerStyle}>
-      {/* Left Panel - Input */}
-      <div style={leftPanelStyle}>
-        <CharacterForm />
-        <StyleControls />
-      </div>
-      
-      {/* Center - Canvas */}
-      <div style={centerStyle}>
-        {generationStatus.isGenerating && (
-          <Panel>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-              <div style={{ 
-                width: '100%', 
-                height: '8px', 
-                backgroundColor: 'var(--color-bg-secondary)',
-                border: '1px solid var(--color-border-muted)',
-              }}>
-                <div style={{ 
-                  width: `${generationStatus.progress}%`, 
-                  height: '100%', 
-                  backgroundColor: 'var(--color-text-primary)',
-                  transition: 'width 0.3s ease',
-                }} />
-              </div>
-              <span style={{ fontSize: 'var(--font-size-sm)', whiteSpace: 'nowrap' }}>
-                {generationStatus.stage}
-              </span>
-            </div>
-          </Panel>
-        )}
-        
-        <div style={canvasContainerStyle}>
-          <SpriteCanvas sprite={southSprite} showGrid={true} />
-        </div>
-        
-        <PaletteDisplay />
-      </div>
-      
-      {/* Right Panel - Info */}
-      <div style={rightPanelStyle}>
-        <IdentityCard />
-      </div>
-    </div>
-  );
-}
-```
-
-**Step 2: Create src/components/character/index.ts**
-
-```typescript
-export { CharacterTab } from './CharacterTab';
-export { CharacterForm } from './CharacterForm';
-export { StyleControls } from './StyleControls';
-export { IdentityCard } from './IdentityCard';
-export { PaletteDisplay } from './PaletteDisplay';
-```
-
-**Step 3: Commit**
-
-```bash
-git add .
-git commit -m "feat(character): add character tab layout"
-```
+**Notes:**
+- Desktop: three-column layout; mobile: stacked layout.
+- Left column: DescriptionInput, StyleSelector, GenerateControls.
+- Center column: SpriteCanvas, zoom controls, PNG download, PaletteDisplay.
+- Right column: IdentityCard.
+- Sprite flow: generate PNG -> pngToPixelArray -> validateAndSnapPixelData -> lock palette.
+- Preserve enhancements: API key modal, save-to-library, 128/256 sizes, PNG download.
 
 ---
 
@@ -1045,13 +716,12 @@ git commit -m "feat(character): wire up character tab to app"
 ## Phase 2 Complete
 
 At this point you have:
-- ✅ Character store with description, identity, sprites, palette
-- ✅ Character generation service (identity + sprite)
-- ✅ Sprite canvas with zoom-aware rendering
-- ✅ Style controls panel
-- ✅ Character description form with generation
-- ✅ Identity card display
-- ✅ Locked palette display
-- ✅ Full Character Tab layout wired to app
+- Character store with description, identity, sprites, palette
+- Character generation service (identity + PNG sprite)
+- Sprite canvas with zoom-aware rendering and PNG export
+- Style selector + description input + generate controls
+- Identity card display
+- Locked palette display
+- Character tab layout wired to app
 
 **Next Phase:** Canvas editing tools, zoom controls, hotspot editing

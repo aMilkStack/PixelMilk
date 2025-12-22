@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Button } from '../shared/Button';
-import type { PixelData } from '../../types';
+import type { SpriteData } from '../../types';
+import { renderPixelDataToDataUrl } from '../../utils/paletteGovernor';
 
 export interface SpritePreviewProps {
-  pixelData: PixelData | null;
+  sprite: SpriteData | null;
   isLoading?: boolean;
   zoom?: number;
   onZoomChange?: (zoom: number) => void;
@@ -12,6 +13,30 @@ export interface SpritePreviewProps {
 type BackgroundType = 'checkered' | 'white' | 'black';
 
 const ZOOM_LEVELS = [1, 2, 4, 8];
+
+// Fun loading messages for pixel art generation
+const LOADING_MESSAGES = [
+  'Pixelating...',
+  'Marioifying...',
+  'Byte me!',
+  'Counting pixels... 1... 2...',
+  'Where was I?',
+  'Sharpening edges...',
+  'Removing anti-alias...',
+  'Adding nostalgia...',
+  'Crunching bits...',
+  'Summoning sprites...',
+  'Consulting the pixel gods...',
+  'Brewing 8-bit magic...',
+  'Dithering intensifies...',
+  'Loading palette...',
+  'Retro-fying...',
+  'Channeling the 90s...',
+  'Pixel perfect...',
+  'Almost there...',
+  'Placing pixels carefully...',
+  'One pixel at a time...',
+];
 
 // Terminal aesthetic colors
 const colors = {
@@ -22,14 +47,40 @@ const colors = {
 };
 
 export const SpritePreview: React.FC<SpritePreviewProps> = ({
-  pixelData,
+  sprite,
   isLoading = false,
   zoom: controlledZoom,
   onZoomChange,
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const [internalZoom, setInternalZoom] = useState(4);
   const [background, setBackground] = useState<BackgroundType>('checkered');
+  const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
+  const [pixelCount, setPixelCount] = useState(0);
+
+  // Rotate through loading messages
+  useEffect(() => {
+    if (!isLoading) {
+      setPixelCount(0);
+      return;
+    }
+
+    // Change message every 2 seconds
+    const messageInterval = setInterval(() => {
+      setLoadingMessage(LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)]);
+    }, 2000);
+
+    // Animate pixel counter
+    const pixelInterval = setInterval(() => {
+      setPixelCount(prev => (prev + Math.floor(Math.random() * 50) + 10) % 16384);
+    }, 100);
+
+    return () => {
+      clearInterval(messageInterval);
+      clearInterval(pixelInterval);
+    };
+  }, [isLoading]);
 
   // Use controlled zoom if provided, otherwise use internal state
   const currentZoom = controlledZoom !== undefined ? controlledZoom : internalZoom;
@@ -42,61 +93,45 @@ export const SpritePreview: React.FC<SpritePreviewProps> = ({
     }
   };
 
-  // Render pixel data to canvas
-  useEffect(() => {
-    if (!pixelData || !canvasRef.current) return;
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d', { alpha: true });
-    if (!ctx) return;
-
-    const { width, height, pixels } = pixelData;
-
-    // Set canvas size to actual pixel dimensions
-    canvas.width = width;
-    canvas.height = height;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height);
-
-    // Draw background if not checkered (checkered is handled by CSS)
-    if (background === 'white') {
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, width, height);
-    } else if (background === 'black') {
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, width, height);
-    }
-
-    // Draw pixels row by row (top-left to bottom-right)
-    for (let i = 0; i < pixels.length; i++) {
-      const pixel = pixels[i];
-
-      // Skip transparent pixels
-      if (pixel === 'transparent' || pixel === '') continue;
-
-      const x = i % width;
-      const y = Math.floor(i / width);
-
-      ctx.fillStyle = pixel;
-      ctx.fillRect(x, y, 1, 1);
-    }
-  }, [pixelData, background]);
-
-  // Download canvas as PNG
+  // Download image as PNG
   const handleDownload = () => {
-    if (!canvasRef.current || !pixelData) return;
+    if (!previewUrl) return;
 
-    const canvas = canvasRef.current;
     const link = document.createElement('a');
-    link.download = `${pixelData.name || 'sprite'}.png`;
-    link.href = canvas.toDataURL('image/png');
+    link.download = `sprite-${sprite?.direction ?? 'S'}-${Date.now()}.png`;
+    link.href = previewUrl;
     link.click();
   };
 
   // Calculate display dimensions
-  const displayWidth = pixelData ? pixelData.width * currentZoom : 0;
-  const displayHeight = pixelData ? pixelData.height * currentZoom : 0;
+  const width = sprite?.width || 128;
+  const height = sprite?.height || 128;
+  const displayWidth = width * currentZoom;
+  const displayHeight = height * currentZoom;
+
+  // Build preview URL from pixel data
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!sprite) {
+      setPreviewUrl('');
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    renderPixelDataToDataUrl(sprite).then((url) => {
+      if (!cancelled) {
+        setPreviewUrl(url);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sprite]);
+
+  const hasImage = !!previewUrl;
 
   return (
     <div
@@ -110,7 +145,7 @@ export const SpritePreview: React.FC<SpritePreviewProps> = ({
         fontFamily: 'monospace',
       }}
     >
-      {/* Canvas Container */}
+      {/* Image Container */}
       <div
         style={{
           position: 'relative',
@@ -121,6 +156,7 @@ export const SpritePreview: React.FC<SpritePreviewProps> = ({
           backgroundColor: colors.bgPrimary,
           border: `1px solid ${colors.bgSecondary}`,
           padding: '16px',
+          overflow: 'auto',
         }}
       >
         {isLoading && (
@@ -134,7 +170,7 @@ export const SpritePreview: React.FC<SpritePreviewProps> = ({
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              backgroundColor: 'rgba(2, 26, 26, 0.9)',
+              backgroundColor: 'rgba(2, 26, 26, 0.95)',
               zIndex: 10,
             }}
           >
@@ -143,33 +179,63 @@ export const SpritePreview: React.FC<SpritePreviewProps> = ({
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '12px',
+                gap: '16px',
+                padding: '24px',
               }}
             >
+              {/* Pixel art style loading animation */}
               <div
                 style={{
-                  width: '40px',
-                  height: '40px',
-                  border: `4px solid ${colors.bgSecondary}`,
-                  borderTop: `4px solid ${colors.mint}`,
-                  animation: 'spin 1s linear infinite',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 12px)',
+                  gap: '4px',
                 }}
-              />
+              >
+                {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <div
+                    key={i}
+                    style={{
+                      width: '12px',
+                      height: '12px',
+                      backgroundColor: colors.mint,
+                      opacity: 0.3,
+                      animation: `pixelPulse 1.5s ease-in-out infinite`,
+                      animationDelay: `${i * 0.1}s`,
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Fun rotating message */}
               <span
                 style={{
                   color: colors.mint,
-                  fontSize: '14px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
+                  fontSize: '16px',
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.05em',
+                  textAlign: 'center',
+                  minHeight: '24px',
                 }}
               >
-                Generating...
+                {loadingMessage}
+              </span>
+
+              {/* Pixel counter */}
+              <span
+                style={{
+                  color: colors.cream,
+                  fontSize: '12px',
+                  fontFamily: 'monospace',
+                  opacity: 0.6,
+                }}
+              >
+                [{pixelCount.toString().padStart(5, '0')}] pixels processed
               </span>
             </div>
           </div>
         )}
 
-        {!pixelData && !isLoading && (
+        {!hasImage && !isLoading && (
           <div
             style={{
               color: colors.cream,
@@ -184,7 +250,7 @@ export const SpritePreview: React.FC<SpritePreviewProps> = ({
           </div>
         )}
 
-        {pixelData && (
+        {hasImage && (
           <div
             style={{
               position: 'relative',
@@ -206,8 +272,10 @@ export const SpritePreview: React.FC<SpritePreviewProps> = ({
                   : 'transparent',
             }}
           >
-            <canvas
-              ref={canvasRef}
+            <img
+              ref={imgRef}
+              src={previewUrl}
+              alt="Generated sprite"
               style={{
                 imageRendering: 'pixelated',
                 width: `${displayWidth}px`,
@@ -323,19 +391,19 @@ export const SpritePreview: React.FC<SpritePreviewProps> = ({
           variant="primary"
           size="md"
           onClick={handleDownload}
-          disabled={!pixelData || isLoading}
+          disabled={!hasImage || isLoading}
           style={{ width: '100%', marginTop: '8px' }}
         >
           Download PNG
         </Button>
       </div>
 
-      {/* CSS Animation for spinner */}
+      {/* CSS Animations */}
       <style>
         {`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+          @keyframes pixelPulse {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
           }
         `}
       </style>

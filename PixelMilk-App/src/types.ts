@@ -1,40 +1,42 @@
 export type Direction = 'S' | 'N' | 'E' | 'W' | 'SE' | 'SW' | 'NE' | 'NW';
 
+// ============================================
+// Core Asset Types
+// ============================================
+
+export type AssetType = 'character' | 'tile' | 'object' | 'texture';
+
 export interface StyleParameters {
-  outlineStyle: 'single_color_black' | 'single_color_outline' | 'selective_outline' | 'lineless';
-  shadingStyle: 'flat' | 'basic' | 'medium' | 'detailed' | 'highly_detailed';
-  detailLevel: 'low' | 'medium' | 'highly_detailed';
+  outlineStyle: 'black' | 'colored' | 'selective' | 'lineless';
+  shadingStyle: 'flat' | 'basic' | 'detailed';
+  detailLevel: 'low' | 'medium' | 'high';
   canvasSize: 16 | 32 | 64 | 128 | 256; // 128/256 active, smaller sizes coming soon
-  paletteMode: 'auto' | 'nes' | 'gameboy' | 'pico8';
+  paletteMode: string; // 'auto' or palette ID (e.g., 'lospec_sweetie-16')
   viewType: 'standard' | 'isometric';
 }
 
 export interface CharacterIdentity {
-  character_id?: string;
+  id: string;
   name: string;
-  description?: string; // Original user prompt
-  physical_description: {
-    body_type: string;
-    height_style: string;
+  description: string; // Original user prompt - required for consistency
+  physicalDescription: {
+    bodyType: string;
+    heightStyle: string;
     silhouette: string;
   };
-  colour_palette: {
+  colourPalette: {
     primary: string;
     secondary: string;
     accent: string;
     skin: string;
     hair: string;
     outline: string;
-    [key: string]: string;
   };
-  distinctive_features: string[];
-  style_parameters: StyleParameters;
-  angle_specific_notes: {
-    north: string;
-    east: string;
-    west: string;
-    south: string;
-  };
+  distinctiveFeatures: string[];
+  styleParameters: StyleParameters;
+  angleNotes: Partial<Record<Direction, string>>; // Phase 2: N/S/E/W only, diagonals added in Phase 4
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface PixelData {
@@ -43,21 +45,19 @@ export interface PixelData {
   height: number;
   palette: string[];
   pixels: string[]; // Array of hex codes or "transparent"
-  normalMap: string[]; // Array of hex codes
+  normalMap?: string[]; // Optional normal map data
 }
 
-export interface SpriteAsset {
+export interface SpriteData extends PixelData {
   id: string;
   direction: Direction;
-  data: PixelData;
-  timestamp: number;
+  createdAt: number;
 }
 
 // ============================================
-// Phase 1 Foundation Types
+// UI Types
 // ============================================
 
-// Tab Navigation
 export type TabId = 'character' | 'tile' | 'object' | 'texture' | 'compose' | 'library';
 
 export interface TabConfig {
@@ -66,49 +66,83 @@ export interface TabConfig {
   icon: string; // Lucide icon name
 }
 
-// Canvas Tools
-export type ToolMode = 'select' | 'draw' | 'erase' | 'fill' | 'eyedropper';
+export type ToolMode = 'select' | 'draw' | 'erase' | 'fill' | 'eyedropper' | 'hotspot';
 
 export interface CanvasState {
-  tool: ToolMode;
   zoom: number;
   panX: number;
   panY: number;
-  gridVisible: boolean;
+  tool: ToolMode;
+  brushSize: number;
   selectedColor: string;
 }
 
-// Generation Status
-export type GenerationStatus = 'idle' | 'generating' | 'complete' | 'error';
+export interface GenerationStatus {
+  isGenerating: boolean;
+  progress: number;
+  stage: string;
+  error?: string;
+}
 
-// Gemini Configuration
+// ============================================
+// Gemini Types
+// ============================================
+
+export type TaskType =
+  | 'sprite-draft'
+  | 'sprite-final'
+  | 'tile'
+  | 'texture'
+  | 'perspective-shift'
+  | 'style-transfer'
+  | 'edit-localised'
+  | 'animation-frame'
+  | 'composite'
+  | 'text-analysis';
+
+export type QualityMode = 'draft' | 'final';
+
 export type GeminiModel =
-  | 'gemini-3-flash'
-  | 'gemini-3-pro-preview'
-  | 'gemini-2.5-flash-preview-05-20'
-  | 'gemini-2.5-pro-preview-05-06';
-
-export type TaskType = 'identity' | 'sprite' | 'tile' | 'texture' | 'object';
-
-export type QualityMode = 'draft' | 'balanced' | 'quality';
+  | 'gemini-2.5-flash-image'
+  | 'gemini-3-pro-image-preview'
+  | 'gemini-2.5-flash'
+  | 'gemini-3-flash-preview';
 
 export interface GeminiConfig {
   model: GeminiModel;
-  temperature: number;
+  temperature?: number;
+  thinkingLevel?: 'minimal' | 'low' | 'medium' | 'high';
+  mediaResolution?: 'low' | 'medium' | 'high';
   maxTokens?: number;
-  thinkingLevel?: 'none' | 'low' | 'medium' | 'high';
 }
 
+// ============================================
 // Asset Storage
-export type AssetType = 'character' | 'tile' | 'object' | 'texture';
+// ============================================
 
 export interface Asset {
   id: string;
   type: AssetType;
   name: string;
+  tags?: string[];
   createdAt: number;
   updatedAt: number;
   thumbnail?: string; // Base64 data URL
-  data: CharacterIdentity | PixelData;
-  sprites?: SpriteAsset[]; // For characters with multiple directions
+  identity?: CharacterIdentity; // For characters
+  sprites?: SpriteData[]; // For characters with multiple directions
+  data?: PixelData; // For non-character assets
+}
+
+// ============================================
+// Palette Types
+// ============================================
+
+export interface Palette {
+  id: string;
+  name: string;
+  colors: string[]; // Array of hex colors (with #)
+  source?: string; // e.g., "lospec", "custom"
+  author?: string;
+  tags?: string[];
+  createdAt: number;
 }

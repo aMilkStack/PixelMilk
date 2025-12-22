@@ -4,7 +4,6 @@ export interface SelectOption {
   value: string;
   label: string;
   disabled?: boolean;
-  badge?: string; // e.g., "SOON" - displayed in accent color
 }
 
 export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onChange' | 'className'> {
@@ -152,13 +151,8 @@ export const Select: React.FC<SelectProps> = ({
           {...rest}
         >
           {options.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-              disabled={option.disabled}
-              style={option.disabled ? { color: '#4a7a6e' } : undefined}
-            >
-              {option.label}{option.badge ? ` [${option.badge}]` : ''}
+            <option key={option.value} value={option.value} disabled={option.disabled}>
+              {option.label}
             </option>
           ))}
         </select>

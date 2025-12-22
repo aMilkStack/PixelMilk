@@ -1,10 +1,16 @@
 import { create } from 'zustand';
 import { TabId, GenerationStatus } from '../types';
 
+export type ApiKeyStatus = 'unknown' | 'valid' | 'invalid' | 'error';
+
 interface AppState {
   // API Key
   apiKey: string | null;
   setApiKey: (key: string | null) => void;
+
+  // API Key Status (U6: API Status Indicator)
+  apiKeyStatus: ApiKeyStatus;
+  setApiKeyStatus: (status: ApiKeyStatus) => void;
 
   // Active Tab
   activeTab: TabId;
@@ -12,8 +18,8 @@ interface AppState {
 
   // Generation Status
   generationStatus: GenerationStatus;
-  generationMessage: string;
-  setGenerationStatus: (status: GenerationStatus, message?: string) => void;
+  setGenerationStatus: (status: Partial<GenerationStatus>) => void;
+  resetGenerationStatus: () => void;
 
   // Modal State
   isApiKeyModalOpen: boolean;
@@ -26,20 +32,32 @@ interface AppState {
   clearError: () => void;
 }
 
+const initialGenerationStatus: GenerationStatus = {
+  isGenerating: false,
+  progress: 0,
+  stage: '',
+};
+
 export const useAppStore = create<AppState>((set) => ({
   // API Key
   apiKey: null,
   setApiKey: (key) => set({ apiKey: key }),
+
+  // API Key Status (U6: API Status Indicator)
+  apiKeyStatus: 'unknown',
+  setApiKeyStatus: (status) => set({ apiKeyStatus: status }),
 
   // Active Tab
   activeTab: 'character',
   setActiveTab: (tab) => set({ activeTab: tab }),
 
   // Generation Status
-  generationStatus: 'idle',
-  generationMessage: '',
-  setGenerationStatus: (status, message = '') =>
-    set({ generationStatus: status, generationMessage: message }),
+  generationStatus: initialGenerationStatus,
+  setGenerationStatus: (status) =>
+    set((state) => ({
+      generationStatus: { ...state.generationStatus, ...status },
+    })),
+  resetGenerationStatus: () => set({ generationStatus: initialGenerationStatus }),
 
   // Modal State
   isApiKeyModalOpen: false,

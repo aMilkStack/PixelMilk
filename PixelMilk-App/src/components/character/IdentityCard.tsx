@@ -64,10 +64,10 @@ export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading 
 
   const {
     name,
-    colour_palette,
-    physical_description,
-    distinctive_features,
-    angle_specific_notes,
+    colourPalette,
+    physicalDescription,
+    distinctiveFeatures,
+    angleNotes,
   } = identity;
 
   return (
@@ -88,7 +88,7 @@ export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading 
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {(['primary', 'secondary', 'accent', 'skin', 'hair', 'outline'] as const).map((colorKey) => {
-              const colorValue = colour_palette[colorKey];
+              const colorValue = colourPalette[colorKey];
               if (!colorValue) return null;
 
               return (
@@ -128,7 +128,7 @@ export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading 
                   Body Type
                 </p>
                 <p className="text-sm text-[#d8c8b8]">
-                  {physical_description.body_type}
+                  {physicalDescription.bodyType}
                 </p>
               </div>
               <div className="p-3">
@@ -136,7 +136,7 @@ export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading 
                   Height Style
                 </p>
                 <p className="text-sm text-[#d8c8b8]">
-                  {physical_description.height_style}
+                  {physicalDescription.heightStyle}
                 </p>
               </div>
               <div className="p-3">
@@ -144,7 +144,7 @@ export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading 
                   Silhouette
                 </p>
                 <p className="text-sm text-[#d8c8b8]">
-                  {physical_description.silhouette}
+                  {physicalDescription.silhouette}
                 </p>
               </div>
             </div>
@@ -152,14 +152,14 @@ export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading 
         </div>
 
         {/* Distinctive Features as Tags/Chips */}
-        {distinctive_features && distinctive_features.length > 0 && (
+        {distinctiveFeatures && distinctiveFeatures.length > 0 && (
           <div>
             <h3 className="text-xs uppercase tracking-widest text-[#d8c8b8] mb-3 flex items-center gap-2">
               <Tag className="w-4 h-4" />
               Distinctive Features
             </h3>
             <div className="flex flex-wrap gap-2">
-              {distinctive_features.map((feature, index) => (
+              {distinctiveFeatures.map((feature, index) => (
                 <span
                   key={index}
                   className="inline-block px-3 py-1.5 text-xs bg-[#8bd0ba]/10 border border-[#8bd0ba]/40 text-[#8bd0ba] hover:bg-[#8bd0ba]/20 transition-colors"
@@ -172,7 +172,7 @@ export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading 
         )}
 
         {/* Collapsible Angle-Specific Notes */}
-        {angle_specific_notes && (
+        {angleNotes && (
           <div className="border-t border-[#8bd0ba]/20 pt-4">
             <button
               onClick={() => setNotesExpanded(!notesExpanded)}
@@ -192,8 +192,8 @@ export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading 
 
             {notesExpanded && (
               <div className="space-y-3 animate-in slide-in-from-top-2 duration-200">
-                {(['north', 'east', 'west', 'south'] as const).map((direction) => {
-                  const note = angle_specific_notes[direction];
+                {(['S', 'N', 'E', 'W', 'SE', 'SW', 'NE', 'NW'] as const).map((direction) => {
+                  const note = angleNotes[direction];
                   if (!note) return null;
 
                   return (

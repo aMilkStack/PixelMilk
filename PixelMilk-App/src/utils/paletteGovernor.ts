@@ -20,6 +20,7 @@ export function rgbToHex(r: number, g: number, b: number): string {
  */
 export function snapColor(color: string, palette: string[]): string {
   if (color === 'transparent' || !color) return 'transparent';
+  if (!palette || palette.length === 0) return color;
   if (palette.includes(color)) return color;
 
   const target = hexToRgb(color);
@@ -47,8 +48,9 @@ export function snapColor(color: string, palette: string[]): string {
 /**
  * Validates and fixes PixelData to ensure strictly adhered palette usage.
  */
-export function validateAndSnapPixelData(data: PixelData): PixelData {
-  const { width, height, pixels, palette } = data;
+export function validateAndSnapPixelData(data: PixelData, lockedPalette?: string[]): PixelData {
+  const { width, height, pixels } = data;
+  const palette = lockedPalette ?? data.palette;
   const expectedLength = width * height;
 
   // 1. Validate Length
@@ -65,10 +67,11 @@ export function validateAndSnapPixelData(data: PixelData): PixelData {
   }
 
   // 2. Snap Colors
-  const snappedPixels = validPixels.map(p => snapColor(p, palette));
+  const snappedPixels = validPixels.map((p) => snapColor(p, palette));
 
   return {
     ...data,
+    palette,
     pixels: snappedPixels
   };
 }
@@ -76,7 +79,10 @@ export function validateAndSnapPixelData(data: PixelData): PixelData {
 /**
  * Utility to convert PixelData to a data URL (PNG) for display/reference
  */
-export async function renderPixelDataToDataUrl(data: PixelData): Promise<string> {
+export async function renderPixelDataToDataUrl(
+  data: PixelData,
+  background?: string | null
+): Promise<string> {
   return new Promise((resolve) => {
     const canvas = document.createElement('canvas');
     canvas.width = data.width;
@@ -89,6 +95,11 @@ export async function renderPixelDataToDataUrl(data: PixelData): Promise<string>
     }
 
     ctx.clearRect(0, 0, data.width, data.height);
+
+    if (background) {
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, data.width, data.height);
+    }
     
     data.pixels.forEach((color, i) => {
       if (color === 'transparent') return;

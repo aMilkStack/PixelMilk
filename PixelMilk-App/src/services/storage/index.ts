@@ -1,5 +1,12 @@
 // Database
-export { getDB, isUsingFallback, closeDB } from './db';
+export {
+  getDB,
+  isUsingFallback,
+  closeDB,
+  getStorageBackendInfo,
+  forceRecoveryAttempt,
+  resetStorageState,
+} from './db';
 
 // Asset operations
 export {
@@ -7,8 +14,10 @@ export {
   getAsset,
   getAllAssets,
   getAssetsByType,
+  getRecentAssets,
   deleteAsset,
   updateAsset,
+  generateAssetId,
 } from './assets';
 
 // Settings operations
@@ -18,4 +27,18 @@ export {
   clearApiKey,
   getSetting,
   setSetting,
+  getDefaultStyleParams,
 } from './settings';
+
+// Palette operations
+export {
+  parseHexFile,
+  loadPaletteFromFile,
+  getAllPalettes,
+  savePalette,
+  deletePalette,
+  getPalette,
+  importPaletteFiles,
+  getAllPalettesWithBuiltins,
+  BUILT_IN_PALETTES,
+} from './palettes';

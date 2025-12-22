@@ -1,4 +1,4 @@
-# PixelMilk Architecture Document
+﻿# PixelMilk Architecture Document
 
 > **For Claude / Code Assistants:** This document captures all architectural decisions for PixelMilk. Read this FIRST before any implementation work.
 
@@ -63,7 +63,7 @@
 
 1. **NO rounded corners** - Everything is sharp, pixel-perfect
 2. **NO gradients** - Flat colours only
-3. **NO shadows** - Use borders for elevation
+3. **Shadows** - TBD; currently used in some components for depth, may be revised
 4. **Terminal aesthetic** - Prompts start with `>`, errors with `!`
 5. **Subtle grid background** - 20px grid pattern on body
 6. **Monospace everywhere** - Except display headings
@@ -75,20 +75,20 @@
 ### Tab System
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│ 🥛 PixelMilk                                    [Connected ⚙]│
-├──────────────────────────────────────────────────────────────┤
-│ [Character] [Tile] [Object] [Texture] [Compose] [Library]    │
-├──────────────────────────────────────────────────────────────┤
-│                                                              │
-│                      Tab Content Area                        │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ ðŸ¥› PixelMilk                                    [Connected âš™]â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ [Character] [Tile] [Object] [Texture] [Compose] [Library]    â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                              â”‚
+â”‚                      Tab Content Area                        â”‚
+â”‚                                                              â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 | Tab | Purpose | Primary Operations |
 |-----|---------|-------------------|
-| **Character** | Sprites with identity | Text→sprite, sketch→sprite, rotations, animations |
+| **Character** | Sprites with identity | Textâ†’sprite, sketchâ†’sprite, rotations, animations |
 | **Tile** | Tileset creation | Seamless tiles, variants, autotile rules |
 | **Object** | Props and items | Objects with interaction sounds, recontextualisation |
 | **Texture** | Materials/patterns | Seamless textures, material properties |
@@ -99,24 +99,24 @@
 
 ```
 src/
-├── components/
-│   ├── shared/           # Button, Input, Select, Panel, Tooltip
-│   ├── layout/           # AppShell, TabBar, ApiKeyModal
-│   ├── canvas/           # PixelCanvas, ZoomControls, ToolPalette
-│   ├── character/        # CharacterForm, IdentityCard, SpriteSheet
-│   ├── tile/             # TileEditor, SeamlessPreview, AutotileRules
-│   ├── object/           # ObjectEditor, ContextPicker
-│   ├── texture/          # TextureEditor, TilingPreview
-│   ├── compose/          # SceneCanvas, LayerPanel, AssetPicker
-│   └── library/          # AssetGrid, FilterPanel, ExportModal
-├── services/
-│   ├── gemini/           # client.ts, modelRouter.ts, schemas.ts
-│   └── storage/          # db.ts, assets.ts, settings.ts
-├── stores/               # appStore.ts, canvasStore.ts, assetStore.ts
-├── hooks/                # useGemini.ts, useCanvas.ts, useKeyboard.ts
-├── types/                # index.ts, gemini.ts, assets.ts, ui.ts
-├── utils/                # paletteGovernor.ts, imageUtils.ts, exportUtils.ts
-└── styles/               # global.css, variables.css
+â”œâ”€â”€ components/
+â”‚   â”œâ”€â”€ shared/           # Button, Input, Select, Panel, Tooltip
+â”‚   â”œâ”€â”€ layout/           # AppShell, TabBar, ApiKeyModal
+â”‚   â”œâ”€â”€ canvas/           # PixelCanvas, ZoomControls, ToolPalette
+â”‚   â”œâ”€â”€ character/        # CharacterForm, IdentityCard, SpriteSheet
+â”‚   â”œâ”€â”€ tile/             # TileEditor, SeamlessPreview, AutotileRules
+â”‚   â”œâ”€â”€ object/           # ObjectEditor, ContextPicker
+â”‚   â”œâ”€â”€ texture/          # TextureEditor, TilingPreview
+â”‚   â”œâ”€â”€ compose/          # SceneCanvas, LayerPanel, AssetPicker
+â”‚   â””â”€â”€ library/          # AssetGrid, FilterPanel, ExportModal
+â”œâ”€â”€ services/
+â”‚   â”œâ”€â”€ gemini/           # client.ts, modelRouter.ts, schemas.ts
+â”‚   â””â”€â”€ storage/          # db.ts, assets.ts, settings.ts
+â”œâ”€â”€ stores/               # appStore.ts, canvasStore.ts, assetStore.ts
+â”œâ”€â”€ hooks/                # useGemini.ts, useCanvas.ts, useKeyboard.ts
+â”œâ”€â”€ types/                # index.ts, gemini.ts, assets.ts, ui.ts
+â”œâ”€â”€ utils/                # paletteGovernor.ts, imageUtils.ts, exportUtils.ts
+â””â”€â”€ styles/               # global.css, variables.css
 ```
 
 ---
@@ -213,7 +213,7 @@ interface StyleParameters {
 
 ### Palette Locking
 
-Once a sprite is generated, its palette is locked. All subsequent operations (rotations, animations, edits) must use ONLY colours from the locked palette. This ensures visual consistency.
+Gemini outputs PNG images. Immediately after generation, the client converts the PNG to a pixel array (canvas drawImage + getImageData with nearest-neighbor scaling) and extracts a palette from the pixels. Once a sprite is generated, its palette is locked. All subsequent operations (rotations, animations, edits) must use ONLY colours from the locked palette. This ensures visual consistency. Conversion is implemented in imageUtils.ts (pngToPixelArray) before paletteGovernor is applied.
 
 ```typescript
 // In paletteGovernor.ts
@@ -234,19 +234,20 @@ function validateAndSnapPixelData(data: PixelData, lockedPalette?: string[]): Pi
 
 ## Key Workflows
 
-### Text → Sprite (Character Tab)
+### Text â†’ Sprite (Character Tab)
 
 ```
 1. User enters description: "A knight with blue armor and a red cape"
 2. [Optional] User adjusts style parameters
 3. Click "Generate"
-4. System generates CharacterIdentity (structured JSON via Gemini)
-5. System generates South-facing sprite using identity
-6. Palette is locked from first sprite
-7. User can then generate other directions using locked palette
+4. System generates CharacterIdentity (structured JSON via Gemini text model)
+5. System generates South-facing sprite as PNG (image model)
+6. Client converts PNG to pixel array and extracts palette
+7. Palette is locked from extracted palette
+8. User can then generate other directions using locked palette
 ```
 
-### Sketch → Sprite (Co-Drawing)
+### Sketch â†’ Sprite (Co-Drawing)
 
 ```
 1. User draws rough sketch on canvas
@@ -342,7 +343,7 @@ interface PixelMilkDB {
 
 - **Assets:** All characters, tiles, objects, textures with full sprite data
 - **Settings:** API key, default style parameters, UI preferences
-- **NOT stored:** Generated images (stored as pixel arrays in assets)
+- **NOT stored:** Raw PNG responses from Gemini (converted to pixel arrays and discarded).
 
 ---
 
@@ -360,13 +361,13 @@ interface PixelMilkDB {
 ### Character Bundle
 ```
 character_name/
-├── sprites/
-│   ├── idle_S.png
-│   ├── idle_N.png
-│   ├── walk_sheet.png
-│   └── ...
-├── identity.json       # Character identity document
-└── metadata.json       # Export settings, palette, etc.
+â”œâ”€â”€ sprites/
+â”‚   â”œâ”€â”€ idle_S.png
+â”‚   â”œâ”€â”€ idle_N.png
+â”‚   â”œâ”€â”€ walk_sheet.png
+â”‚   â””â”€â”€ ...
+â”œâ”€â”€ identity.json       # Character identity document
+â””â”€â”€ metadata.json       # Export settings, palette, etc.
 ```
 
 ### Tileset
@@ -386,7 +387,7 @@ character_name/
 ### Backend Version
 - Vertex AI for fine-tuned models
 - LoRA-trained pixel art SDXL
-- ControlNet for sketch→sprite
+- ControlNet for sketchâ†’sprite
 - User accounts and cloud storage
 
 ### Collaboration
@@ -416,7 +417,7 @@ Located in `C:\Users\User\Desktop\PixelMilk\Resources and Guides\`:
 | Phase | Focus | Key Deliverables |
 |-------|-------|------------------|
 | 1 | Foundation | Project setup, services, shared components, app shell |
-| 2 | Character Tab MVP | Text→sprite, identity system, basic editing |
+| 2 | Character Tab MVP | Textâ†’sprite, identity system, basic editing |
 | 3 | Canvas & Tools | Pixel editor, zoom/pan, drawing tools, hotspot editing |
 | 4 | Sprite Rotations | 3D preview, 8-direction generation, sprite sheets |
 | 5 | Tile Tab | Seamless tiles, variants, autotile support |
@@ -427,3 +428,5 @@ Located in `C:\Users\User\Desktop\PixelMilk\Resources and Guides\`:
 | 10 | AI Guidance | Prompt Wand, Drawing Coach, tooltips |
 
 Each phase has its own detailed plan in `docs/plans/`.
+
+

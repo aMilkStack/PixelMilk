@@ -1,10 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { Key, X, Loader, CheckCircle, AlertCircle } from 'lucide-react';
+import { GoogleGenAI } from '@google/genai';
 import { Button, Input } from '../shared';
 import { useAppStore } from '../../stores';
+import { initializeClient } from '../../services/gemini';
 import { getApiKey, setApiKey as saveApiKey } from '../../services/storage';
 
 type ValidationStatus = 'idle' | 'validating' | 'valid' | 'invalid';
+
+/**
+ * Validates API key format before making network requests.
+ * Gemini API keys typically start with "AIza" and are ~39 characters.
+ * Returns null if valid, or an error message if invalid.
+ */
+const validateApiKeyFormat = (key: string): string | null => {
+  const trimmed = key.trim();
+
+  if (!trimmed) {
+    return 'API key is required';
+  }
+
+  if (trimmed.length < 30) {
+    return 'API key is too short. Gemini keys are typically ~39 characters.';
+  }
+
+  if (trimmed.length > 50) {
+    return 'API key is too long. Please check for extra characters.';
+  }
+
+  if (!trimmed.startsWith('AI')) {
+    return 'Invalid key format. Gemini API keys typically start with "AI".';
+  }
+
+  return null; // Format is valid
+};
 
 const getIsMobile = () => typeof window !== 'undefined' && window.innerWidth < 640;
 
@@ -102,7 +131,7 @@ export const ApiKeyModal: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const isMobile = useIsMobile();
 
-  const styles = {
+  const styles: Record<string, React.CSSProperties> = {
     ...baseStyles,
     modal: {
       ...baseStyles.modal,
@@ -120,23 +149,33 @@ export const ApiKeyModal: React.FC = () => {
   };
 
   useEffect(() => {
+    // Track mounted state to prevent setting state on unmounted component
+    // This fixes race condition when modal rapidly opens/closes (Bug M4)
+    let isMounted = true;
+
     if (isApiKeyModalOpen) {
       // Load existing key if any
       getApiKey().then((key) => {
-        if (key) {
+        // Only update state if component is still mounted
+        if (isMounted && key) {
           setInputValue(key);
         }
       });
     }
+
+    // Cleanup function to mark component as unmounted
+    return () => {
+      isMounted = false;
+    };
   }, [isApiKeyModalOpen]);
 
   const validateApiKey = async (key: string): Promise<boolean> => {
     try {
-      // Test the API key by making a simple request to Gemini
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`
-      );
-      return response.ok;
+      // Validate using SDK - key is sent securely in request body, not URL
+      const testClient = new GoogleGenAI({ apiKey: key });
+      // Use a lightweight call to verify the key works
+      await testClient.models.list();
+      return true;
     } catch {
       return false;
     }
@@ -145,8 +184,11 @@ export const ApiKeyModal: React.FC = () => {
   const handleSubmit = async () => {
     const trimmedKey = inputValue.trim();
 
-    if (!trimmedKey) {
-      setErrorMessage('API key is required');
+    // First, validate format before making expensive network call (Bug M12)
+    const formatError = validateApiKeyFormat(trimmedKey);
+    if (formatError) {
+      setErrorMessage(formatError);
+      setValidationStatus('invalid');
       return;
     }
 
@@ -156,8 +198,17 @@ export const ApiKeyModal: React.FC = () => {
     const isValid = await validateApiKey(trimmedKey);
 
     if (isValid) {
+      // Try to save the key first - don't close modal if save fails
+      try {
+        await saveApiKey(trimmedKey);
+      } catch (saveError) {
+        setValidationStatus('invalid');
+        setErrorMessage('Failed to save API key. Please try again.');
+        return;
+      }
+
       setValidationStatus('valid');
-      await saveApiKey(trimmedKey);
+      initializeClient(trimmedKey);
       setApiKey(trimmedKey);
 
       // Close modal after short delay to show success

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Select, type SelectOption } from '../shared/Select';
 import type { StyleParameters } from '../../types';
+import { LOSPEC_PALETTES, getLospecColors } from '../../data/lospecPalettes';
 
 export interface StyleSelectorProps {
   value: StyleParameters;
@@ -11,17 +12,17 @@ export interface StyleSelectorProps {
 // Canvas size options - 128/256 active, smaller sizes coming soon
 const canvasSizeOptions: SelectOption[] = [
   { value: '128', label: '128x128 (Gameplay)' },
-  { value: '256', label: '256x256 (Portraits)' },
-  { value: '64', label: '64x64', disabled: true, badge: 'SOON' },
-  { value: '32', label: '32x32', disabled: true, badge: 'SOON' },
-  { value: '16', label: '16x16', disabled: true, badge: 'SOON' },
+  { value: '256', label: '256x256 (Portrait)' },
+  { value: '16', label: '16x16 (Coming Soon)', disabled: true },
+  { value: '32', label: '32x32 (Coming Soon)', disabled: true },
+  { value: '64', label: '64x64 (Coming Soon)', disabled: true },
 ];
 
 // Outline style options
 const outlineStyleOptions: SelectOption[] = [
-  { value: 'single_color_black', label: 'Single Color Black' },
-  { value: 'single_color_outline', label: 'Single Color Outline' },
-  { value: 'selective_outline', label: 'Selective Outline' },
+  { value: 'black', label: 'Black Outline' },
+  { value: 'colored', label: 'Colored Outline' },
+  { value: 'selective', label: 'Selective Outline' },
   { value: 'lineless', label: 'Lineless' },
 ];
 
@@ -29,25 +30,17 @@ const outlineStyleOptions: SelectOption[] = [
 const shadingStyleOptions: SelectOption[] = [
   { value: 'flat', label: 'Flat' },
   { value: 'basic', label: 'Basic' },
-  { value: 'medium', label: 'Medium' },
   { value: 'detailed', label: 'Detailed' },
-  { value: 'highly_detailed', label: 'Highly Detailed' },
 ];
 
 // Detail level options
 const detailLevelOptions: SelectOption[] = [
   { value: 'low', label: 'Low' },
   { value: 'medium', label: 'Medium' },
-  { value: 'highly_detailed', label: 'Highly Detailed' },
+  { value: 'high', label: 'High' },
 ];
 
-// Advanced options (palette mode and view type)
-const paletteModeOptions: SelectOption[] = [
-  { value: 'auto', label: 'Auto' },
-  { value: 'nes', label: 'NES' },
-  { value: 'gameboy', label: 'Game Boy' },
-  { value: 'pico8', label: 'PICO-8' },
-];
+// View type options (palette mode is built dynamically from lospec palettes)
 
 const viewTypeOptions: SelectOption[] = [
   { value: 'standard', label: 'Standard' },
@@ -60,6 +53,21 @@ export const StyleSelector: React.FC<StyleSelectorProps> = ({
   disabled = false,
 }) => {
   const [advancedOpen, setAdvancedOpen] = useState(false);
+
+  // Build palette options from lospec palettes
+  const paletteModeOptions: SelectOption[] = useMemo(() => {
+    const baseOptions: SelectOption[] = [
+      { value: 'auto', label: 'Auto (AI Chooses)' },
+    ];
+
+    // Add lospec palettes with color count
+    const lospecOptions = LOSPEC_PALETTES.map(palette => ({
+      value: palette.id,
+      label: `${palette.name} (${palette.colors.length})`,
+    }));
+
+    return [...baseOptions, ...lospecOptions];
+  }, []);
 
   // Styles
   const containerStyle: React.CSSProperties = {
@@ -129,6 +137,30 @@ export const StyleSelector: React.FC<StyleSelectorProps> = ({
     color: 'var(--color-text-secondary)',
     marginBottom: 'var(--space-xs)',
   };
+
+  const palettePreviewContainerStyle: React.CSSProperties = {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '2px',
+    marginTop: 'var(--space-xs)',
+    padding: 'var(--space-xs)',
+    background: 'var(--color-bg-secondary)',
+    border: '1px solid var(--color-border)',
+  };
+
+  const paletteSwatchStyle: React.CSSProperties = {
+    width: '16px',
+    height: '16px',
+    flexShrink: 0,
+  };
+
+  // Get colors for the selected Lospec palette
+  const selectedPaletteColors = useMemo(() => {
+    if (value.paletteMode.startsWith('lospec_')) {
+      return getLospecColors(value.paletteMode);
+    }
+    return undefined;
+  }, [value.paletteMode]);
 
   // Use media query for mobile detection
   const [isMobile, setIsMobile] = useState(false);
@@ -219,15 +251,32 @@ export const StyleSelector: React.FC<StyleSelectorProps> = ({
         <div style={sectionTitleStyle}>Advanced Settings</div>
 
         <div style={isMobile ? mobileGridStyle : gridStyle}>
-          <Select
-            label="Palette Mode"
-            options={paletteModeOptions}
-            value={value.paletteMode}
-            onChange={(e) => onChange({
-              paletteMode: e.target.value as StyleParameters['paletteMode']
-            })}
-            disabled={disabled}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <Select
+              label="Palette Mode"
+              options={paletteModeOptions}
+              value={value.paletteMode}
+              onChange={(e) => onChange({
+                paletteMode: e.target.value as StyleParameters['paletteMode']
+              })}
+              disabled={disabled}
+            />
+            {/* Lospec Palette Color Preview */}
+            {selectedPaletteColors && selectedPaletteColors.length > 0 && (
+              <div style={palettePreviewContainerStyle}>
+                {selectedPaletteColors.map((color, index) => (
+                  <div
+                    key={`${color}-${index}`}
+                    style={{
+                      ...paletteSwatchStyle,
+                      backgroundColor: color,
+                    }}
+                    title={color}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
 
           <Select
             label="View Type"

@@ -13,6 +13,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=VT323&display=swap');
 
 /* ============================================
+ * TAILWIND v4 - Using CSS import syntax
+ * Note: Only importing components and utilities (not base) to avoid overriding custom styles
+ * ============================================ */
+
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities);
+
+/* ============================================
  * CSS RESET
  * ============================================ */
 

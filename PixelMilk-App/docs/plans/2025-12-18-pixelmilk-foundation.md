@@ -8,6 +8,9 @@
 
 **Tech Stack:** React 19, TypeScript, Vite, @google/genai, IndexedDB (idb), Zustand (state), Three.js (3D preview), Lucide React (icons)
 
+## Implementation Note (2025-12-19)
+Gemini image generation outputs PNG. The client converts PNG to pixel arrays (canvas getImageData with nearest-neighbor scaling) and stores pixel arrays in IndexedDB. PNG is intermediate only.
+
 **Reference Resources:**
 - Prototype: `C:\Users\User\Desktop\PixelMilk\App Prototype\`
 - Gemini Recipes: `C:\Users\User\Desktop\PixelMilk\Resources and Guides\generative-ai-main\gemini\nano-banana\`
@@ -236,24 +239,24 @@ git commit -m "chore: initial project scaffolding"
 
 ```
 src/
-├── components/
-│   ├── shared/           # Reusable UI components
-│   ├── layout/           # App shell, tabs, sidebar
-│   ├── canvas/           # Drawing canvas components
-│   ├── character/        # Character tab components
-│   ├── tile/             # Tile tab components
-│   ├── object/           # Object tab components
-│   ├── texture/          # Texture tab components
-│   ├── compose/          # Compose tab components
-│   └── library/          # Library tab components
-├── services/
-│   ├── gemini/           # All Gemini API interactions
-│   └── storage/          # IndexedDB operations
-├── stores/               # Zustand state stores
-├── hooks/                # Custom React hooks
-├── types/                # TypeScript interfaces
-├── utils/                # Helper functions
-└── styles/               # Global styles
+????????? components/
+???   ????????? shared/           # Reusable UI components
+???   ????????? layout/           # App shell, tabs, sidebar
+???   ????????? canvas/           # Drawing canvas components
+???   ????????? character/        # Character tab components
+???   ????????? tile/             # Tile tab components
+???   ????????? object/           # Object tab components
+???   ????????? texture/          # Texture tab components
+???   ????????? compose/          # Compose tab components
+???   ????????? library/          # Library tab components
+????????? services/
+???   ????????? gemini/           # All Gemini API interactions
+???   ????????? storage/          # IndexedDB operations
+????????? stores/               # Zustand state stores
+????????? hooks/                # Custom React hooks
+????????? types/                # TypeScript interfaces
+????????? utils/                # Helper functions
+????????? styles/               # Global styles
 ```
 
 Run: Create each directory
@@ -336,7 +339,7 @@ export interface StyleParameters {
   outlineStyle: 'black' | 'colored' | 'selective' | 'lineless';
   shadingStyle: 'flat' | 'basic' | 'detailed';
   detailLevel: 'low' | 'medium' | 'high';
-  canvasSize: 16 | 32 | 64 | 128;
+  canvasSize: 16 | 32 | 64 | 128 | 256;
   paletteMode: 'auto' | 'nes' | 'gameboy' | 'pico8' | 'custom';
   viewType: 'standard' | 'isometric';
 }
@@ -946,8 +949,7 @@ export function getModelForTask(task: TaskType, quality: QualityMode = 'draft'):
       return quality === 'final' ? IMAGE_QUALITY : IMAGE_FAST;
 
     // Text tasks
-    case 'text-analysis':
-      return TEXT_QUALITY;
+    case 'text-analysis':\n      return TEXT_FAST;
 
     default:
       return IMAGE_FAST;
@@ -1120,7 +1122,7 @@ export async function generateStructuredContent<T>(
   const schemaMap = {
     pixelData: pixelDataSchema,
     characterIdentity: characterIdentitySchema,
-    promptSuggestion: pixelDataSchema, // TODO: use correct schema
+    promptSuggestion: promptSuggestionSchema,
   };
 
   const response = await client.models.generateContent({
@@ -1787,7 +1789,7 @@ export function AppShell({ children }: AppShellProps) {
     <div style={mainStyle}>
       <header style={headerStyle}>
         <div style={logoStyle}>
-          <span>🥛</span>
+          <span>????</span>
           <span>PixelMilk</span>
         </div>
         
@@ -1878,14 +1880,14 @@ git commit -m "feat: add app layout shell with tab navigation"
 ## Phase 1 Complete
 
 At this point you have:
-- ✅ Project scaffolded with Vite + React + TypeScript
-- ✅ Terminal aesthetic styling system
-- ✅ Shared UI components (Button, Input, Select, Panel, Tooltip)
-- ✅ Gemini service layer with model routing
-- ✅ IndexedDB storage for assets and settings
-- ✅ Zustand state management
-- ✅ App shell with tab navigation
-- ✅ API key management
+- ??? Project scaffolded with Vite + React + TypeScript
+- ??? Terminal aesthetic styling system
+- ??? Shared UI components (Button, Input, Select, Panel, Tooltip)
+- ??? Gemini service layer with model routing
+- ??? IndexedDB storage for assets and settings
+- ??? Zustand state management
+- ??? App shell with tab navigation
+- ??? API key management
 
 ---
 
@@ -1896,7 +1898,7 @@ Phase 2 will be documented in a separate plan file once Phase 1 is verified work
 Key features for Phase 2:
 - Character description input
 - Style parameter controls
-- Sprite generation (text→sprite)
+- Sprite generation (text???sprite)
 - Sprite display canvas with zoom/pan
 - Basic sprite editing
 - Export functionality
@@ -1912,3 +1914,6 @@ Key features for Phase 2:
 **2. Parallel Session (separate)** - Open new session with executing-plans, batch execution with checkpoints
 
 **Which approach?**
+
+
+

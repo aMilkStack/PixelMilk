@@ -1,4 +1,5 @@
 import { getDB } from './db';
+import type { StyleParameters } from '../../types';
 
 const SETTINGS_STORAGE_PREFIX = 'pixelmilk_settings_';
 const API_KEY_SETTING = 'gemini_api_key';
@@ -135,4 +136,18 @@ export async function setSetting<T>(key: string, value: T): Promise<void> {
     console.error('Failed to set setting:', error);
     throw new Error('Failed to save setting to storage');
   }
+}
+
+/**
+ * Get default style parameters
+ */
+export async function getDefaultStyleParams(): Promise<StyleParameters> {
+  return getSetting<StyleParameters>('defaultStyle', {
+    outlineStyle: 'black',
+    shadingStyle: 'basic',
+    detailLevel: 'medium',
+    canvasSize: 128,
+    paletteMode: 'auto',
+    viewType: 'standard',
+  });
 }

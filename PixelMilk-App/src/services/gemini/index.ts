@@ -4,15 +4,13 @@
  * Provides centralized access to Gemini-related utilities and configuration.
  */
 
-export {
-  generateCharacterIdentity,
-  generateSouthSpriteData,
-  generateRotatedSpriteData,
-} from './geminiService';
+export { initializeClient, getClient, isClientInitialized, validateApiKey } from './client';
+export { generateContent, generateStructuredContent, generateImage, editImage } from './client';
+export { getModelForTask, getConfigForTask } from './modelRouter';
+export * from './schemas';
 
 export {
-  getModelForTask,
-  getConfigForTask,
-  isValidTaskType,
-  isValidQualityMode,
-} from './modelRouter';
+  generateCharacterIdentity,
+  generateSprite,
+  generateRotatedSprite,
+} from './geminiService';

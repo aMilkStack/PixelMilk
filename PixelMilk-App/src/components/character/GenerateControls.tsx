@@ -1,6 +1,9 @@
 import React from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, RotateCcw, Check } from 'lucide-react';
 import { Button } from '../shared/Button';
+
+type SaveStatus = 'idle' | 'saving' | 'success' | 'error';
+type FailedGeneration = 'identity' | 'sprite' | null;
 
 interface GenerateControlsProps {
   hasIdentity: boolean;
@@ -11,8 +14,12 @@ interface GenerateControlsProps {
   onGenerateIdentity: () => void;
   onGenerateSprite: () => void;
   onSaveToLibrary: () => void;
+  onLoadFromLibrary: () => void;
   onClear: () => void;
   disabled?: boolean;
+  saveStatus?: SaveStatus;
+  lastFailedGeneration?: FailedGeneration;
+  onRetry?: () => void;
 }
 
 const colors = {
@@ -32,10 +39,17 @@ export const GenerateControls: React.FC<GenerateControlsProps> = ({
   onGenerateIdentity,
   onGenerateSprite,
   onSaveToLibrary,
+  onLoadFromLibrary,
   onClear,
   disabled = false,
+  saveStatus = 'idle',
+  lastFailedGeneration = null,
+  onRetry,
 }) => {
   const isAnyGenerating = isGeneratingIdentity || isGeneratingSprite;
+  const isSaving = saveStatus === 'saving';
+  const showSuccess = saveStatus === 'success';
+  const canRetry = error && lastFailedGeneration && onRetry && !isAnyGenerating;
 
   const containerStyle: React.CSSProperties = {
     display: 'flex',
@@ -85,6 +99,50 @@ export const GenerateControls: React.FC<GenerateControlsProps> = ({
     flexShrink: 0,
   };
 
+  const errorContentStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    flex: 1,
+  };
+
+  const errorRowStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '12px',
+  };
+
+  const successStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px',
+    backgroundColor: colors.mint + '15',
+    border: `2px solid ${colors.mint}`,
+    fontFamily: 'monospace',
+    fontSize: '13px',
+    color: colors.mint,
+  };
+
+  const successIconStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '20px',
+    height: '20px',
+    backgroundColor: colors.mint,
+    color: colors.bgPrimary,
+    borderRadius: '50%',
+    flexShrink: 0,
+  };
+
+  const retryLabelStyle: React.CSSProperties = {
+    fontSize: '11px',
+    color: colors.cream,
+    opacity: 0.7,
+  };
+
   return (
     <div style={containerStyle}>
       <style>{`
@@ -123,9 +181,21 @@ export const GenerateControls: React.FC<GenerateControlsProps> = ({
         <Button
           variant="secondary"
           onClick={onSaveToLibrary}
-          disabled={!hasSprite || disabled || isAnyGenerating}
+          disabled={!hasSprite || disabled || isAnyGenerating || isSaving}
         >
-          Save to Library
+          <span style={buttonContentStyle}>
+            {isSaving && <Loader2 size={16} style={spinnerStyle} />}
+            {isSaving ? 'Saving...' : 'Save to Library'}
+          </span>
+        </Button>
+
+        {/* Load from Library */}
+        <Button
+          variant="secondary"
+          onClick={onLoadFromLibrary}
+          disabled={isAnyGenerating || isSaving}
+        >
+          Load from Library
         </Button>
 
         {/* Clear */}
@@ -138,11 +208,42 @@ export const GenerateControls: React.FC<GenerateControlsProps> = ({
         </Button>
       </div>
 
-      {/* Error Display */}
-      {error && (
+      {/* Success Display */}
+      {showSuccess && (
+        <div style={successStyle} role="status">
+          <span style={successIconStyle}>
+            <Check size={14} strokeWidth={3} />
+          </span>
+          <span>Saved to library successfully!</span>
+        </div>
+      )}
+
+      {/* Error Display with Retry */}
+      {error && !showSuccess && (
         <div style={errorStyle} role="alert">
           <span style={errorIconStyle}>!</span>
-          <span>{error}</span>
+          <div style={errorContentStyle}>
+            <div style={errorRowStyle}>
+              <span>{error}</span>
+              {canRetry && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onRetry}
+                >
+                  <span style={buttonContentStyle}>
+                    <RotateCcw size={14} />
+                    Retry {lastFailedGeneration === 'identity' ? 'Identity' : 'Sprite'}
+                  </span>
+                </Button>
+              )}
+            </div>
+            {canRetry && (
+              <span style={retryLabelStyle}>
+                Click retry to attempt {lastFailedGeneration} generation again
+              </span>
+            )}
+          </div>
         </div>
       )}
     </div>

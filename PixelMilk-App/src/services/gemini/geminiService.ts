@@ -1,226 +1,535 @@
-import { GoogleGenAI, Schema, Type } from "@google/genai";
-import { CharacterIdentity, Direction, PixelData, StyleParameters } from "../../types";
-import { validateAndSnapPixelData } from "../../utils/paletteGovernor";
+import { Modality, ThinkingLevel } from "@google/genai";
+import { CharacterIdentity, Direction, StyleParameters, QualityMode } from "../../types";
+import { getClient } from "./client";
+import { getConfigForTask } from "./modelRouter";
+import { characterIdentitySchema } from "./schemas";
+import { normalizeIdentity } from "../../utils/normalizeIdentity";
+import { buildTechniquePrompt, getSystemInstruction, getProhibitionsPrompt } from "../../data/pixelArtTechniques";
+import { prepareCanvasForGemini } from "../../utils/imageUtils";
 
-const getAI = (apiKey: string) => new GoogleGenAI({ apiKey });
+/**
+ * Maps our string-based thinkingLevel to SDK enum values
+ */
+function mapThinkingLevel(level: 'minimal' | 'low' | 'medium' | 'high'): ThinkingLevel {
+  const mapping: Record<string, ThinkingLevel> = {
+    minimal: ThinkingLevel.MINIMAL,
+    low: ThinkingLevel.LOW,
+    medium: ThinkingLevel.MEDIUM,
+    high: ThinkingLevel.HIGH,
+  };
+  return mapping[level] ?? ThinkingLevel.LOW;
+}
 
-// Using Pro for complex reasoning and structured JSON output
-const MODEL_NAME = "gemini-3-pro-preview";
+/**
+ * Determines if an error is retryable (transient) or permanent
+ * Returns true for transient errors (429, 5xx, network errors)
+ * Returns false for permanent errors (401, 403, 400, etc.)
+ */
+const isRetryableError = (error: unknown): boolean => {
+  if (!error) return false;
 
-// Helper for schema definition
-const pixelDataSchema: Schema = {
-  type: Type.OBJECT,
-  properties: {
-    name: { type: Type.STRING },
-    width: { type: Type.INTEGER },
-    height: { type: Type.INTEGER },
-    palette: {
-      type: Type.ARRAY,
-      items: { type: Type.STRING, description: "Hex code #RRGGBB" }
-    },
-    pixels: {
-      type: Type.ARRAY,
-      items: { type: Type.STRING, description: "Hex code #RRGGBB or 'transparent'" }
-    },
-    normalMap: {
-      type: Type.ARRAY,
-      items: { type: Type.STRING, description: "Hex code #RRGGBB" }
-    }
-  },
-  required: ["name", "width", "height", "palette", "pixels", "normalMap"]
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  const errorStr = errorMessage.toLowerCase();
+
+  // Check for HTTP status codes in error message
+  // Permanent errors - don't retry
+  if (errorStr.includes('401') || errorStr.includes('unauthorized')) return false;
+  if (errorStr.includes('403') || errorStr.includes('forbidden')) return false;
+  if (errorStr.includes('400') || errorStr.includes('bad request')) return false;
+  if (errorStr.includes('404') || errorStr.includes('not found')) return false;
+  if (errorStr.includes('invalid api key') || errorStr.includes('api key')) return false;
+
+  // Transient errors - retry with backoff
+  if (errorStr.includes('429') || errorStr.includes('rate limit') || errorStr.includes('quota')) return true;
+  if (errorStr.includes('500') || errorStr.includes('502') || errorStr.includes('503') || errorStr.includes('504')) return true;
+  if (errorStr.includes('internal server error') || errorStr.includes('service unavailable')) return true;
+  if (errorStr.includes('timeout') || errorStr.includes('network') || errorStr.includes('econnreset')) return true;
+  if (errorStr.includes('enotfound') || errorStr.includes('econnrefused')) return true;
+
+  // Default: assume retryable for unknown errors
+  return true;
 };
 
+/**
+ * Calculate exponential backoff delay
+ * attempt 0 = 1000ms, attempt 1 = 2000ms, attempt 2 = 4000ms
+ */
+const getBackoffDelay = (attempt: number): number => {
+  return Math.min(1000 * Math.pow(2, attempt), 8000);
+};
+
+/**
+ * Validates that the parsed JSON has the expected structure for a CharacterIdentity
+ * Returns true if valid, throws descriptive error if invalid
+ */
+const validateIdentityJson = (raw: unknown): raw is Record<string, unknown> => {
+  if (raw === null || raw === undefined) {
+    throw new Error("Parsed JSON is null or undefined");
+  }
+
+  if (typeof raw !== 'object') {
+    throw new Error(`Expected object, got ${typeof raw}`);
+  }
+
+  const obj = raw as Record<string, unknown>;
+
+  // Check required top-level fields exist
+  const requiredFields = ['name', 'description'];
+  for (const field of requiredFields) {
+    if (!(field in obj)) {
+      throw new Error(`Missing required field: ${field}`);
+    }
+  }
+
+  // Validate name is a non-empty string
+  if (typeof obj.name !== 'string' || obj.name.trim().length === 0) {
+    throw new Error("'name' must be a non-empty string");
+  }
+
+  // Validate description is a string
+  if (typeof obj.description !== 'string') {
+    throw new Error("'description' must be a string");
+  }
+
+  // Validate colourPalette structure if present
+  if ('colourPalette' in obj && obj.colourPalette !== null) {
+    if (typeof obj.colourPalette !== 'object') {
+      throw new Error("'colourPalette' must be an object");
+    }
+  }
+
+  // Validate physicalDescription structure if present
+  if ('physicalDescription' in obj && obj.physicalDescription !== null) {
+    if (typeof obj.physicalDescription !== 'object') {
+      throw new Error("'physicalDescription' must be an object");
+    }
+  }
+
+  // Validate distinctiveFeatures is an array if present
+  if ('distinctiveFeatures' in obj && obj.distinctiveFeatures !== null) {
+    if (!Array.isArray(obj.distinctiveFeatures)) {
+      throw new Error("'distinctiveFeatures' must be an array");
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Master Pixel Artist System Instruction (NotebookLM)
+ *
+ * Uses expert-framed persona with narrative context instead of keyword lists.
+ * The "Thinking" model works best with descriptive, philosophy-driven instructions.
+ */
+const SPRITE_SYSTEM_PROMPT = `${getSystemInstruction()}
+
+OUTPUT FORMAT:
+Your final output will be a single PNG image file with transparent background.
+You will omit any explanatory text, focusing solely on delivering the generated pixel art as the primary response.
+
+${getProhibitionsPrompt()}`;
+
 export const generateCharacterIdentity = async (
-  apiKey: string,
   description: string,
   style: StyleParameters
 ): Promise<CharacterIdentity> => {
-  const ai = getAI(apiKey);
+  const client = getClient();
+  const config = getConfigForTask('text-analysis', 'draft');
+  const now = Date.now();
 
-  const systemPrompt = `You are an expert technical game artist. Your task is to analyze a character description and convert it into a structured "Character Identity Document" JSON for a pixel art generation pipeline.
+  const systemPrompt = `You are an expert technical game artist. Convert character descriptions into structured JSON for a pixel art pipeline.
 
-  The JSON must strictly follow this schema:
+  Output this exact JSON structure:
   {
+    "id": "char-xxxx",
     "name": "string",
-    "physical_description": { "body_type": "string", "height_style": "string", "silhouette": "string" },
-    "colour_palette": { "primary": "hex", "secondary": "hex", "accent": "hex", "skin": "hex", "hair": "hex", "outline": "hex" },
-    "distinctive_features": ["string"],
-    "style_parameters": {
-       "outline_style": "${style.outlineStyle}",
-       "shading_style": "${style.shadingStyle}",
-       "detail_level": "${style.detailLevel}",
-       "canvas_size": ${style.canvasSize}
+    "description": "original description",
+    "physicalDescription": { "bodyType": "string", "heightStyle": "string", "silhouette": "string" },
+    "colourPalette": { "primary": "#hex", "secondary": "#hex", "accent": "#hex", "skin": "#hex", "hair": "#hex", "outline": "#hex" },
+    "distinctiveFeatures": ["feature1", "feature2"],
+    "styleParameters": {
+       "outlineStyle": "${style.outlineStyle}",
+       "shadingStyle": "${style.shadingStyle}",
+       "detailLevel": "${style.detailLevel}",
+       "canvasSize": ${style.canvasSize},
+       "paletteMode": "${style.paletteMode}",
+       "viewType": "${style.viewType}"
     },
-    "angle_specific_notes": { "north": "string", "east": "string", "west": "string", "south": "string" }
+    "angleNotes": { "S": "hint", "N": "hint", "E": "hint", "W": "hint" },
+    "createdAt": ${now},
+    "updatedAt": ${now}
   }
+
+  ABSOLUTELY CRITICAL - angleNotes RULES:
+  - MAXIMUM 20 characters per hint
+  - Write 2-3 words ONLY, then STOP IMMEDIATELY
+  - NEVER repeat words
+  - Examples: "eyes front", "side curve", "back smooth", "tail left"
+  - If you write more than 20 characters, the system BREAKS
   `;
 
-  const response = await ai.models.generateContent({
-    model: MODEL_NAME,
-    contents: `Character Description: ${description}`,
-    config: {
-      systemInstruction: systemPrompt,
-      responseMimeType: "application/json",
-    },
+  let lastError: Error | null = null;
+  let text = '';
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const response = await client.models.generateContent({
+        model: config.model,
+        contents: `Character Description: ${description}`,
+        config: {
+          systemInstruction: systemPrompt,
+          temperature: config.temperature,
+          maxOutputTokens: 8192,
+          responseMimeType: "application/json",
+          responseSchema: characterIdentitySchema,
+          ...(config.thinkingLevel && {
+            thinkingConfig: { thinkingLevel: mapThinkingLevel(config.thinkingLevel) },
+          }),
+        },
+      });
+
+      text = response.text ?? '';
+      if (text) break;
+
+      throw new Error("No response from model");
+    } catch (e) {
+      console.warn(`Identity generation attempt ${attempt + 1} failed:`, e);
+      lastError = e instanceof Error ? e : new Error(String(e));
+
+      // Don't retry permanent errors (auth failures, bad requests)
+      if (!isRetryableError(e)) {
+        console.error("Permanent error detected, not retrying:", e);
+        break;
+      }
+
+      if (attempt < 2) {
+        const delay = getBackoffDelay(attempt);
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  if (!text) {
+    throw lastError || new Error("Failed to generate identity after multiple attempts");
+  }
+
+  // Pre-process: fix runaway angleNotes that break JSON parsing
+  // This regex finds angleNotes values and truncates them to 30 chars
+  let cleanedText = text;
+  const angleNotesPattern = /"(S|N|E|W)":\s*"([^"]{30,})"/g;
+  cleanedText = cleanedText.replace(angleNotesPattern, (match, dir, value) => {
+    // Truncate to 30 chars and close the string properly
+    const truncated = value.substring(0, 30).replace(/\s+$/, '');
+    return `"${dir}": "${truncated}"`;
   });
 
-  const text = response.text;
-  if (!text) throw new Error("No response from model");
+  // Also fix if JSON got cut off mid-angleNotes (common failure mode)
+  // Look for unclosed strings in angleNotes section
+  if (cleanedText.includes('"angleNotes"') && !cleanedText.trim().endsWith('}')) {
+    // Try to close the JSON properly
+    const lastBrace = cleanedText.lastIndexOf('}');
+    if (lastBrace > 0) {
+      cleanedText = cleanedText.substring(0, lastBrace + 1);
+    }
+  }
 
   try {
-    return JSON.parse(text) as CharacterIdentity;
+    const raw: unknown = JSON.parse(cleanedText);
+
+    // Validate the parsed JSON structure before using it
+    validateIdentityJson(raw);
+
+    return normalizeIdentity(raw as Record<string, unknown>, style, now);
   } catch (e) {
     // Try to extract JSON from markdown code blocks
-    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    const jsonMatch = cleanedText.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[1].trim()) as CharacterIdentity;
+      const raw: unknown = JSON.parse(jsonMatch[1].trim());
+
+      // Validate the parsed JSON structure before using it
+      validateIdentityJson(raw);
+
+      return normalizeIdentity(raw as Record<string, unknown>, style, now);
     }
-    throw new Error("Failed to generate valid identity JSON");
+    console.error("Failed to parse identity response:", cleanedText);
+    throw new Error(`Failed to generate valid identity JSON: ${e instanceof Error ? e.message : cleanedText.substring(0, 200)}`);
   }
 };
 
 /**
- * Generates the initial South (Front) sprite data
+ * Generates a sprite PNG for a given direction
+ * Returns base64 encoded PNG data
  */
-export const generateSouthSpriteData = async (
-  apiKey: string,
-  identity: CharacterIdentity
-): Promise<PixelData> => {
-  const ai = getAI(apiKey);
-  const size = identity.style_parameters.canvasSize;
+export const generateSprite = async (
+  identity: CharacterIdentity,
+  direction: Direction = 'S',
+  quality: QualityMode = 'draft',
+  lockedPalette?: string[]
+): Promise<string> => {
+  const client = getClient();
+  const config = getConfigForTask(
+    quality === 'final' ? 'sprite-final' : 'sprite-draft',
+    quality
+  );
+  const size = identity.styleParameters.canvasSize;
 
-  let paletteInstruction = "";
-  if (identity.style_parameters.paletteMode === 'auto') {
-     paletteInstruction = "Select appropriate colors. Include at least one highlight, midtone, and shadow per major element.";
-  } else {
-     paletteInstruction = `Start with these base colors but expand if needed for shading: ${JSON.stringify(identity.colour_palette)}`;
+  const paletteColors = identity.colourPalette;
+  const paletteStr = `Primary: ${paletteColors.primary}, Secondary: ${paletteColors.secondary}, Accent: ${paletteColors.accent}, Skin: ${paletteColors.skin}, Hair: ${paletteColors.hair}, Outline: ${paletteColors.outline}`;
+
+  const directionDescriptions: Record<Direction, string> = {
+    S: 'SOUTH (Front View) - Character facing the viewer',
+    N: 'NORTH (Back View) - Character facing away',
+    E: 'EAST (Right Profile) - Character facing right',
+    W: 'WEST (Left Profile) - Character facing left',
+    SE: 'SOUTHEAST (Front-Right 3/4 View)',
+    SW: 'SOUTHWEST (Front-Left 3/4 View)',
+    NE: 'NORTHEAST (Back-Right 3/4 View)',
+    NW: 'NORTHWEST (Back-Left 3/4 View)',
+  };
+
+  // Note: We no longer pass locked palettes to Gemini - it causes background dithering issues
+  // Palette enforcement happens in post-processing via validateAndSnapPixelData
+  const paletteInstruction = `COLOR PALETTE SUGGESTION: ${paletteStr}`;
+
+  // Composition guidance based on canvas size
+  // 128x128 = compact gameplay sprite, 256x256 = portrait/character creation (full body)
+  const compositionGuide = size >= 256
+    ? 'FULL BODY portrait - show character from head to feet, vertically centered'
+    : 'Compact gameplay sprite - character fills frame, may crop at knees/feet';
+
+  // Build technique-specific instructions from pixel art reference
+  const techniquePrompt = buildTechniquePrompt(
+    identity.styleParameters.outlineStyle,
+    identity.styleParameters.shadingStyle,
+    size
+  );
+
+  const prompt = `Generate a ${size}x${size} pixel art sprite of this character:
+
+CHARACTER: ${identity.name}
+DESCRIPTION: ${identity.description}
+BODY TYPE: ${identity.physicalDescription.bodyType}
+SILHOUETTE: ${identity.physicalDescription.silhouette}
+DISTINCTIVE FEATURES: ${identity.distinctiveFeatures.join(', ')}
+
+STYLE:
+- Outline: ${identity.styleParameters.outlineStyle}
+- Shading: ${identity.styleParameters.shadingStyle}
+- Detail Level: ${identity.styleParameters.detailLevel}
+- View Type: ${identity.styleParameters.viewType}
+
+VIEW: ${directionDescriptions[direction]}
+${identity.angleNotes[direction] ? `ANGLE NOTES: ${identity.angleNotes[direction]}` : ''}
+
+${paletteInstruction}
+
+BACKGROUND: Solid pure white (#FFFFFF)
+
+COMPOSITION: ${compositionGuide}
+
+CRITICAL REQUIREMENTS:
+- Output must be exactly ${size}x${size} pixels
+- True pixel art with clean, crisp pixels
+- No anti-aliasing on edges
+- Horizontally centered
+- SOLID WHITE BACKGROUND (#FFFFFF) IS MANDATORY
+- Fill ALL background pixels with pure white (#FFFFFF)
+- Do NOT draw a checkerboard pattern
+- Do NOT use any grey, off-white, or transparent background
+- Only the character sprite should have non-white pixels
+
+${techniquePrompt}`;
+
+  let lastError;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const response = await client.models.generateContent({
+        model: config.model,
+        contents: prompt,
+        config: {
+          responseModalities: [Modality.IMAGE],
+          temperature: config.temperature,
+          systemInstruction: SPRITE_SYSTEM_PROMPT,
+          ...(config.thinkingLevel && {
+            thinkingConfig: { thinkingLevel: mapThinkingLevel(config.thinkingLevel) },
+          }),
+        },
+      });
+
+      const parts = response.candidates?.[0]?.content?.parts ?? [];
+      const imagePart = parts.find((part) => part.inlineData);
+
+      if (imagePart?.inlineData?.data) {
+        return imagePart.inlineData.data;
+      }
+
+      throw new Error("No image data in response");
+    } catch (e) {
+      console.warn(`Sprite generation attempt ${attempt + 1} failed:`, e);
+      lastError = e;
+
+      // Don't retry permanent errors (auth failures, bad requests)
+      if (!isRetryableError(e)) {
+        console.error("Permanent error detected, not retrying:", e);
+        break;
+      }
+
+      if (attempt < 2) {
+        const delay = getBackoffDelay(attempt);
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
   }
 
-  const prompt = `
-  You are a pixel art data generator. Output ONLY valid JSON matching the schema.
-
-  CHARACTER: ${identity.description || identity.name}
-  CANVAS: ${size}x${size} pixels (${size * size} total pixels)
-  STYLE: ${identity.style_parameters.outlineStyle}, ${identity.style_parameters.shadingStyle} shading, ${identity.style_parameters.detailLevel} detail.
-  VIEW: South (Standard Front View)
-  TYPE: ${identity.style_parameters.viewType}
-
-  PALETTE INSTRUCTION: ${paletteInstruction}
-
-  Output a JSON object with:
-  - "name": Character name
-  - "width": ${size}
-  - "height": ${size}
-  - "palette": Array of hex codes actually used.
-  - "pixels": Array of exactly ${size * size} values. Row-major order (top-left to bottom-right). Each value is either a hex code from the palette OR "transparent".
-  - "normalMap": Array of exactly ${size * size} hex codes encoding surface normals. Use #808080 for flat, R channel for X normal, G for Y normal, B for Z depth.
-
-  CRITICAL:
-  - Output ONLY the JSON object. No markdown.
-  - pixels array must be EXACTLY ${size * size} items.
-  - "transparent" for background.
-  `;
-
-  const response = await ai.models.generateContent({
-    model: MODEL_NAME,
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: pixelDataSchema
-    }
-  });
-
-  const text = response.text;
-  if (!text) throw new Error("No data returned");
-
-  try {
-    const data = JSON.parse(text) as PixelData;
-    return validateAndSnapPixelData(data);
-  } catch (e) {
-    // Try to extract JSON from markdown code blocks
-    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) {
-      const data = JSON.parse(jsonMatch[1].trim()) as PixelData;
-      return validateAndSnapPixelData(data);
-    }
-    throw new Error("Failed to parse sprite data JSON");
-  }
+  throw lastError || new Error("Failed to generate sprite after multiple attempts");
 };
 
 /**
- * Generates a rotated view using the 3D Reference
+ * Generates a rotated view sprite using reference image
+ * Returns base64 encoded PNG data
  */
-export const generateRotatedSpriteData = async (
-  apiKey: string,
+export const generateRotatedSprite = async (
   identity: CharacterIdentity,
   direction: Direction,
   referenceImageBase64: string,
-  lockedPalette: string[]
-): Promise<PixelData> => {
-  const ai = getAI(apiKey);
-  const size = identity.style_parameters.canvasSize;
+  quality: QualityMode = 'final',
+  lockedPalette?: string[]
+): Promise<string> => {
+  const client = getClient();
+  const config = getConfigForTask('sprite-final', quality);
+  const size = identity.styleParameters.canvasSize;
 
-  let anglePrompt = "";
-  if (direction === 'N') anglePrompt = `TARGET: NORTH (Back View). Visible: ${identity.angle_specific_notes.north}`;
-  else if (direction === 'E') anglePrompt = `TARGET: EAST (Right Profile). Visible: ${identity.angle_specific_notes.east}`;
-  else if (direction === 'W') anglePrompt = `TARGET: WEST (Left Profile). Visible: ${identity.angle_specific_notes.west}`;
-  else anglePrompt = `TARGET: ${direction} View.`;
+  let directionDesc = "";
+  const visibilityNotes = identity.angleNotes[direction] || "";
 
-  const prompt = `
-  You are a pixel art data generator. Output ONLY valid JSON.
+  switch (direction) {
+    case 'N':
+      directionDesc = "NORTH (Back View)";
+      break;
+    case 'E':
+      directionDesc = "EAST (Right Profile)";
+      break;
+    case 'W':
+      directionDesc = "WEST (Left Profile)";
+      break;
+    case 'S':
+      directionDesc = "SOUTH (Front View)";
+      break;
+    case 'NE':
+      directionDesc = "NORTHEAST (Back-Right 3/4 View)";
+      break;
+    case 'NW':
+      directionDesc = "NORTHWEST (Back-Left 3/4 View)";
+      break;
+    case 'SE':
+      directionDesc = "SOUTHEAST (Front-Right 3/4 View)";
+      break;
+    case 'SW':
+      directionDesc = "SOUTHWEST (Front-Left 3/4 View)";
+      break;
+    default:
+      directionDesc = `${direction} View`;
+  }
 
-  CHARACTER: ${identity.name}
-  CANVAS: ${size}x${size}
-  VIEW: ${direction}
-  TYPE: ${identity.style_parameters.viewType}
+  const paletteColors = identity.colourPalette;
+  const paletteStr = `Primary: ${paletteColors.primary}, Secondary: ${paletteColors.secondary}, Accent: ${paletteColors.accent}, Skin: ${paletteColors.skin}, Hair: ${paletteColors.hair}, Outline: ${paletteColors.outline}`;
 
-  REFERENCE IMAGE: Attached is a 3D low-poly reference. Match its silhouette and positioning EXACTLY.
+  // Note: Like generateSprite, we don't strictly enforce palette here - Gemini dithers backgrounds
+  // Palette enforcement happens in post-processing via validateAndSnapPixelData
+  const paletteInstruction = `COLOR PALETTE SUGGESTION: ${paletteStr}`;
 
-  STYLE LOCK (match exactly):
-  - Palette: Use ONLY these colors: ${JSON.stringify(lockedPalette)}
-  - Outline: ${identity.style_parameters.outlineStyle}
-  - Shading: ${identity.style_parameters.shadingStyle}
+  // Build technique-specific instructions from pixel art reference
+  const techniquePrompt = buildTechniquePrompt(
+    identity.styleParameters.outlineStyle,
+    identity.styleParameters.shadingStyle,
+    size
+  );
 
-  IDENTITY LOCK:
-  - Body type: ${identity.physical_description.body_type}
-  - Features: ${identity.distinctive_features.join(', ')}
+  // NotebookLM best practice: Label reference images with semantic context
+  const prompt = `Generate a ${size}x${size} pixel art sprite - ${directionDesc}
 
-  Output JSON with:
-  - "name": "${identity.name}"
-  - "width": ${size}
-  - "height": ${size}
-  - "palette": The locked palette array provided above.
-  - "pixels": Array of ${size * size} pixels.
-  - "normalMap": Array of ${size * size} normal map pixels.
+IMAGE 1: Reference sprite showing this character from the front view. Use this as your identity reference.
 
-  CRITICAL: Use ONLY colors from the locked palette. "transparent" for background.
-  `;
+CHARACTER: ${identity.name}
+DISTINCTIVE FEATURES: ${identity.distinctiveFeatures.join(', ')}
+VISIBLE FROM THIS ANGLE: ${visibilityNotes}
 
-  const parts = [
-    { text: prompt },
-    {
-      inlineData: {
-        mimeType: "image/png",
-        data: referenceImageBase64.replace(/^data:image\/\w+;base64,/, "")
+STYLE LOCK (must match Image 1 exactly):
+- Outline: ${identity.styleParameters.outlineStyle}
+- Shading: ${identity.styleParameters.shadingStyle}
+- Color Palette: ${paletteInstruction}
+
+CRITICAL REQUIREMENTS:
+- Match the character from Image 1 EXACTLY
+- Same proportions, art style, and level of detail as Image 1
+- ${size}x${size} pixels, no anti-aliasing
+- SOLID WHITE BACKGROUND (#FFFFFF) IS MANDATORY
+- Fill ALL background pixels with pure white (#FFFFFF)
+- Do NOT draw a checkerboard pattern
+
+${techniquePrompt}`;
+
+  // CRITICAL (NotebookLM): Add white background to reference image before sending to Gemini
+  // Transparent backgrounds cause generation errors in the Nano Banana family
+  let preparedImage: string;
+  try {
+    preparedImage = await prepareCanvasForGemini(referenceImageBase64);
+  } catch (prepError) {
+    console.error("Failed to prepare image for Gemini:", prepError);
+    throw new Error(`Image preparation failed: ${prepError instanceof Error ? prepError.message : String(prepError)}`);
+  }
+
+  let lastError;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const response = await client.models.generateContent({
+        model: config.model,
+        contents: {
+          parts: [
+            {
+              inlineData: {
+                mimeType: "image/png",
+                data: preparedImage,
+              },
+            },
+            { text: prompt },
+          ],
+        },
+        config: {
+          responseModalities: [Modality.IMAGE],
+          temperature: config.temperature,
+          systemInstruction: SPRITE_SYSTEM_PROMPT,
+          ...(config.thinkingLevel && {
+            thinkingConfig: { thinkingLevel: mapThinkingLevel(config.thinkingLevel) },
+          }),
+        },
+      });
+
+      const part = response.candidates?.[0]?.content?.parts?.[0];
+      if (part && 'inlineData' in part && part.inlineData?.data) {
+        return part.inlineData.data;
+      }
+
+      throw new Error("No image data in response");
+    } catch (e) {
+      console.warn(`Rotated sprite generation attempt ${attempt + 1} failed:`, e);
+      lastError = e;
+
+      // Don't retry permanent errors (auth failures, bad requests)
+      if (!isRetryableError(e)) {
+        console.error("Permanent error detected, not retrying:", e);
+        break;
+      }
+
+      if (attempt < 2) {
+        const delay = getBackoffDelay(attempt);
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
-  ];
+  }
 
-  const response = await ai.models.generateContent({
-    model: MODEL_NAME,
-    contents: { parts },
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: pixelDataSchema
-    }
-  });
-
-  const text = response.text;
-  if (!text) throw new Error("No data returned");
-
-  const data = JSON.parse(text) as PixelData;
-
-  // Enforce the locked palette strictly
-  data.palette = lockedPalette;
-  return validateAndSnapPixelData(data);
+  throw lastError || new Error("Failed to generate rotated sprite after multiple attempts");
 };
