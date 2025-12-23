@@ -1,11 +1,13 @@
 import { Modality, ThinkingLevel } from "@google/genai";
-import { CharacterIdentity, Direction, StyleParameters, QualityMode } from "../../types";
-import { getClient } from "./client";
+import type { Chat } from "@google/genai";
+import { CharacterIdentity, Direction, StyleParameters, QualityMode, SpriteData } from "../../types";
+import { getClient, createSpriteSession, getSpriteSession, sendSpriteMessage } from "./client";
 import { getConfigForTask } from "./modelRouter";
 import { characterIdentitySchema } from "./schemas";
 import { normalizeIdentity } from "../../utils/normalizeIdentity";
 import { buildTechniquePrompt, getSystemInstruction, getProhibitionsPrompt } from "../../data/pixelArtTechniques";
 import { prepareCanvasForGemini } from "../../utils/imageUtils";
+import { getLospecColors } from "../../data/lospecPalettes";
 
 /**
  * Maps our string-based thinkingLevel to SDK enum values
@@ -56,6 +58,40 @@ const isRetryableError = (error: unknown): boolean => {
  */
 const getBackoffDelay = (attempt: number): number => {
   return Math.min(1000 * Math.pow(2, attempt), 8000);
+};
+
+/**
+ * Builds the palette instruction for Gemini based on paletteMode setting
+ * - If 'auto': Uses the character's identity colours (6 semantic colours)
+ * - If 'lospec_xxx': Uses the specific Lospec palette colours
+ */
+const buildPalettePrompt = (identity: CharacterIdentity): string => {
+  const { paletteMode } = identity.styleParameters;
+  const identityPalette = identity.colourPalette;
+
+  // Always include identity colours for semantic meaning
+  const semanticColors = `Character colours - Primary: ${identityPalette.primary}, Secondary: ${identityPalette.secondary}, Accent: ${identityPalette.accent}, Skin: ${identityPalette.skin}, Hair: ${identityPalette.hair}, Outline: ${identityPalette.outline}`;
+
+  // Check if using a Lospec palette
+  if (paletteMode && paletteMode.startsWith('lospec_')) {
+    const lospecColors = getLospecColors(paletteMode);
+    if (lospecColors && lospecColors.length > 0) {
+      const colorList = lospecColors.join(', ');
+      return `COLOR PALETTE CONSTRAINT:
+You MUST use ONLY colours from this palette: ${colorList}
+Total available colours: ${lospecColors.length}
+
+${semanticColors}
+
+Match the character's semantic colours to the closest available palette colours.
+Do NOT use any colours outside this palette.`;
+    }
+  }
+
+  // Default: auto mode - use identity colours freely
+  return `COLOR PALETTE: ${semanticColors}
+
+Use these colours and natural variations/shades derived from them.`;
 };
 
 /**
@@ -139,34 +175,57 @@ export const generateCharacterIdentity = async (
 
   const systemPrompt = `You are an expert technical game artist. Convert character descriptions into structured JSON for a pixel art pipeline.
 
-  Output this exact JSON structure:
-  {
-    "id": "char-xxxx",
-    "name": "string",
-    "description": "original description",
-    "physicalDescription": { "bodyType": "string", "heightStyle": "string", "silhouette": "string" },
-    "colourPalette": { "primary": "#hex", "secondary": "#hex", "accent": "#hex", "skin": "#hex", "hair": "#hex", "outline": "#hex" },
-    "distinctiveFeatures": ["feature1", "feature2"],
-    "styleParameters": {
-       "outlineStyle": "${style.outlineStyle}",
-       "shadingStyle": "${style.shadingStyle}",
-       "detailLevel": "${style.detailLevel}",
-       "canvasSize": ${style.canvasSize},
-       "paletteMode": "${style.paletteMode}",
-       "viewType": "${style.viewType}"
-    },
-    "angleNotes": { "S": "hint", "N": "hint", "E": "hint", "W": "hint" },
-    "createdAt": ${now},
-    "updatedAt": ${now}
-  }
+CRITICAL OUTPUT RULES:
+- Return ONLY valid JSON
+- Do NOT wrap output in markdown code blocks
+- Do NOT include any text before or after the JSON
+- The response must start with { and end with }
 
-  ABSOLUTELY CRITICAL - angleNotes RULES:
-  - MAXIMUM 20 characters per hint
-  - Write 2-3 words ONLY, then STOP IMMEDIATELY
-  - NEVER repeat words
-  - Examples: "eyes front", "side curve", "back smooth", "tail left"
-  - If you write more than 20 characters, the system BREAKS
-  `;
+Output this exact JSON structure:
+{
+  "id": "char-${now}",
+  "name": "Character Name",
+  "description": "original description verbatim",
+  "physicalDescription": {
+    "bodyType": "slim/average/muscular/round",
+    "heightStyle": "short/medium/tall/chibi",
+    "silhouette": "distinctive outline description"
+  },
+  "colourPalette": {
+    "primary": "#hex",
+    "secondary": "#hex",
+    "accent": "#hex",
+    "skin": "#hex",
+    "hair": "#hex",
+    "outline": "#hex"
+  },
+  "distinctiveFeatures": ["feature1", "feature2", "feature3"],
+  "styleParameters": {
+    "outlineStyle": "${style.outlineStyle}",
+    "shadingStyle": "${style.shadingStyle}",
+    "detailLevel": "${style.detailLevel}",
+    "canvasSize": ${style.canvasSize},
+    "paletteMode": "${style.paletteMode}",
+    "viewType": "${style.viewType}"
+  },
+  "angleNotes": {
+    "S": "2-3 word front hint",
+    "N": "2-3 word back hint",
+    "E": "2-3 word right hint",
+    "W": "2-3 word left hint",
+    "SE": "2-3 word front-right hint",
+    "SW": "2-3 word front-left hint",
+    "NE": "2-3 word back-right hint",
+    "NW": "2-3 word back-left hint"
+  },
+  "createdAt": ${now},
+  "updatedAt": ${now}
+}
+
+ANGLE NOTES RULES:
+- Maximum 25 characters per hint
+- 2-3 words only (e.g. "face visible", "cape behind", "sword right")
+- Describe what's visible from that angle`;
 
   let lastError: Error | null = null;
   let text = '';
@@ -214,23 +273,14 @@ export const generateCharacterIdentity = async (
     throw lastError || new Error("Failed to generate identity after multiple attempts");
   }
 
-  // Pre-process: fix runaway angleNotes that break JSON parsing
-  // This regex finds angleNotes values and truncates them to 30 chars
-  let cleanedText = text;
-  const angleNotesPattern = /"(S|N|E|W)":\s*"([^"]{30,})"/g;
-  cleanedText = cleanedText.replace(angleNotesPattern, (match, dir, value) => {
-    // Truncate to 30 chars and close the string properly
-    const truncated = value.substring(0, 30).replace(/\s+$/, '');
-    return `"${dir}": "${truncated}"`;
-  });
+  // Clean the response - remove any accidental markdown wrapping
+  let cleanedText = text.trim();
 
-  // Also fix if JSON got cut off mid-angleNotes (common failure mode)
-  // Look for unclosed strings in angleNotes section
-  if (cleanedText.includes('"angleNotes"') && !cleanedText.trim().endsWith('}')) {
-    // Try to close the JSON properly
-    const lastBrace = cleanedText.lastIndexOf('}');
-    if (lastBrace > 0) {
-      cleanedText = cleanedText.substring(0, lastBrace + 1);
+  // Remove markdown code blocks if present (fallback for non-compliant responses)
+  if (cleanedText.startsWith('```')) {
+    const jsonMatch = cleanedText.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      cleanedText = jsonMatch[1].trim();
     }
   }
 
@@ -242,23 +292,28 @@ export const generateCharacterIdentity = async (
 
     return normalizeIdentity(raw as Record<string, unknown>, style, now);
   } catch (e) {
-    // Try to extract JSON from markdown code blocks
-    const jsonMatch = cleanedText.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) {
-      const raw: unknown = JSON.parse(jsonMatch[1].trim());
-
-      // Validate the parsed JSON structure before using it
-      validateIdentityJson(raw);
-
-      return normalizeIdentity(raw as Record<string, unknown>, style, now);
-    }
-    console.error("Failed to parse identity response:", cleanedText);
-    throw new Error(`Failed to generate valid identity JSON: ${e instanceof Error ? e.message : cleanedText.substring(0, 200)}`);
+    console.error("Failed to parse identity response:", cleanedText.substring(0, 500));
+    throw new Error(`Failed to generate valid identity JSON: ${e instanceof Error ? e.message : 'Parse error'}`);
   }
 };
 
 /**
- * Generates a sprite PNG for a given direction
+ * Direction descriptions for prompts
+ */
+const DIRECTION_DESCRIPTIONS: Record<Direction, string> = {
+  S: 'SOUTH (Front View) - Character facing the viewer',
+  N: 'NORTH (Back View) - Character facing away',
+  E: 'EAST (Right Profile) - Character facing right',
+  W: 'WEST (Left Profile) - Character facing left',
+  SE: 'SOUTHEAST (Front-Right 3/4 View)',
+  SW: 'SOUTHWEST (Front-Left 3/4 View)',
+  NE: 'NORTHEAST (Back-Right 3/4 View)',
+  NW: 'NORTHWEST (Back-Left 3/4 View)',
+};
+
+/**
+ * Generates the initial sprite using a chat session
+ * This establishes the "Character DNA" for subsequent angle generations
  * Returns base64 encoded PNG data
  */
 export const generateSprite = async (
@@ -267,43 +322,34 @@ export const generateSprite = async (
   quality: QualityMode = 'draft',
   lockedPalette?: string[]
 ): Promise<string> => {
-  const client = getClient();
   const config = getConfigForTask(
     quality === 'final' ? 'sprite-final' : 'sprite-draft',
     quality
   );
   const size = identity.styleParameters.canvasSize;
 
-  const paletteColors = identity.colourPalette;
-  const paletteStr = `Primary: ${paletteColors.primary}, Secondary: ${paletteColors.secondary}, Accent: ${paletteColors.accent}, Skin: ${paletteColors.skin}, Hair: ${paletteColors.hair}, Outline: ${paletteColors.outline}`;
-
-  const directionDescriptions: Record<Direction, string> = {
-    S: 'SOUTH (Front View) - Character facing the viewer',
-    N: 'NORTH (Back View) - Character facing away',
-    E: 'EAST (Right Profile) - Character facing right',
-    W: 'WEST (Left Profile) - Character facing left',
-    SE: 'SOUTHEAST (Front-Right 3/4 View)',
-    SW: 'SOUTHWEST (Front-Left 3/4 View)',
-    NE: 'NORTHEAST (Back-Right 3/4 View)',
-    NW: 'NORTHWEST (Back-Left 3/4 View)',
-  };
-
-  // Note: We no longer pass locked palettes to Gemini - it causes background dithering issues
-  // Palette enforcement happens in post-processing via validateAndSnapPixelData
-  const paletteInstruction = `COLOR PALETTE SUGGESTION: ${paletteStr}`;
+  // Build palette prompt based on paletteMode (auto or lospec_xxx)
+  const palettePrompt = buildPalettePrompt(identity);
 
   // Composition guidance based on canvas size
-  // 128x128 = compact gameplay sprite, 256x256 = portrait/character creation (full body)
   const compositionGuide = size >= 256
     ? 'FULL BODY portrait - show character from head to feet, vertically centered'
     : 'Compact gameplay sprite - character fills frame, may crop at knees/feet';
 
-  // Build technique-specific instructions from pixel art reference
+  // Build technique-specific instructions
   const techniquePrompt = buildTechniquePrompt(
     identity.styleParameters.outlineStyle,
     identity.styleParameters.shadingStyle,
     size
   );
+
+  // Create or get existing chat session for this character
+  // Session persists thought signatures across generation calls
+  let chat = getSpriteSession(identity.id);
+  if (!chat) {
+    chat = createSpriteSession(identity.id, config.model, SPRITE_SYSTEM_PROMPT);
+    console.log(`Created new sprite session for character: ${identity.id}`);
+  }
 
   const prompt = `Generate a ${size}x${size} pixel art sprite of this character:
 
@@ -319,10 +365,10 @@ STYLE:
 - Detail Level: ${identity.styleParameters.detailLevel}
 - View Type: ${identity.styleParameters.viewType}
 
-VIEW: ${directionDescriptions[direction]}
+VIEW: ${DIRECTION_DESCRIPTIONS[direction]}
 ${identity.angleNotes[direction] ? `ANGLE NOTES: ${identity.angleNotes[direction]}` : ''}
 
-${paletteInstruction}
+${palettePrompt}
 
 BACKGROUND: Solid pure white (#FFFFFF)
 
@@ -336,40 +382,21 @@ CRITICAL REQUIREMENTS:
 - SOLID WHITE BACKGROUND (#FFFFFF) IS MANDATORY
 - Fill ALL background pixels with pure white (#FFFFFF)
 - Do NOT draw a checkerboard pattern
-- Do NOT use any grey, off-white, or transparent background
 - Only the character sprite should have non-white pixels
 
-${techniquePrompt}`;
+${techniquePrompt}
+
+This sprite will be used as the MASTER REFERENCE for all other angles. Ensure the character's identity is clearly established.`;
 
   let lastError;
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const response = await client.models.generateContent({
-        model: config.model,
-        contents: prompt,
-        config: {
-          responseModalities: [Modality.IMAGE],
-          temperature: config.temperature,
-          systemInstruction: SPRITE_SYSTEM_PROMPT,
-          ...(config.thinkingLevel && {
-            thinkingConfig: { thinkingLevel: mapThinkingLevel(config.thinkingLevel) },
-          }),
-        },
-      });
-
-      const parts = response.candidates?.[0]?.content?.parts ?? [];
-      const imagePart = parts.find((part) => part.inlineData);
-
-      if (imagePart?.inlineData?.data) {
-        return imagePart.inlineData.data;
-      }
-
-      throw new Error("No image data in response");
+      const result = await sendSpriteMessage(chat, prompt);
+      return result.imageData;
     } catch (e) {
       console.warn(`Sprite generation attempt ${attempt + 1} failed:`, e);
       lastError = e;
 
-      // Don't retry permanent errors (auth failures, bad requests)
       if (!isRetryableError(e)) {
         console.error("Permanent error detected, not retrying:", e);
         break;
@@ -387,137 +414,129 @@ ${techniquePrompt}`;
 };
 
 /**
- * Generates a rotated view sprite using reference image
+ * Reference image with direction label for reference stacking
+ */
+export interface ReferenceImage {
+  direction: Direction;
+  base64Data: string;
+}
+
+/**
+ * Generates a rotated view sprite using reference stacking
+ * Uses chat session for thought signature preservation
+ * Accepts array of ALL existing sprites for maximum consistency
  * Returns base64 encoded PNG data
  */
 export const generateRotatedSprite = async (
   identity: CharacterIdentity,
   direction: Direction,
-  referenceImageBase64: string,
+  referenceImages: ReferenceImage[],
   quality: QualityMode = 'final',
   lockedPalette?: string[]
 ): Promise<string> => {
-  const client = getClient();
-  const config = getConfigForTask('sprite-final', quality);
+  // Use isRotation=true for lower temperature (0.8) for consistency
+  const config = getConfigForTask('sprite-final', quality, { isRotation: true });
   const size = identity.styleParameters.canvasSize;
-
-  let directionDesc = "";
   const visibilityNotes = identity.angleNotes[direction] || "";
 
-  switch (direction) {
-    case 'N':
-      directionDesc = "NORTH (Back View)";
-      break;
-    case 'E':
-      directionDesc = "EAST (Right Profile)";
-      break;
-    case 'W':
-      directionDesc = "WEST (Left Profile)";
-      break;
-    case 'S':
-      directionDesc = "SOUTH (Front View)";
-      break;
-    case 'NE':
-      directionDesc = "NORTHEAST (Back-Right 3/4 View)";
-      break;
-    case 'NW':
-      directionDesc = "NORTHWEST (Back-Left 3/4 View)";
-      break;
-    case 'SE':
-      directionDesc = "SOUTHEAST (Front-Right 3/4 View)";
-      break;
-    case 'SW':
-      directionDesc = "SOUTHWEST (Front-Left 3/4 View)";
-      break;
-    default:
-      directionDesc = `${direction} View`;
-  }
+  // Build palette prompt based on paletteMode (auto or lospec_xxx)
+  const palettePrompt = buildPalettePrompt(identity);
 
-  const paletteColors = identity.colourPalette;
-  const paletteStr = `Primary: ${paletteColors.primary}, Secondary: ${paletteColors.secondary}, Accent: ${paletteColors.accent}, Skin: ${paletteColors.skin}, Hair: ${paletteColors.hair}, Outline: ${paletteColors.outline}`;
-
-  // Note: Like generateSprite, we don't strictly enforce palette here - Gemini dithers backgrounds
-  // Palette enforcement happens in post-processing via validateAndSnapPixelData
-  const paletteInstruction = `COLOR PALETTE SUGGESTION: ${paletteStr}`;
-
-  // Build technique-specific instructions from pixel art reference
+  // Build technique-specific instructions
   const techniquePrompt = buildTechniquePrompt(
     identity.styleParameters.outlineStyle,
     identity.styleParameters.shadingStyle,
     size
   );
 
-  // NotebookLM best practice: Label reference images with semantic context
-  const prompt = `Generate a ${size}x${size} pixel art sprite - ${directionDesc}
+  // Get existing chat session for this character
+  // Must be created by generateSprite first
+  let chat = getSpriteSession(identity.id);
+  if (!chat) {
+    // Fallback: create session if it doesn't exist (shouldn't happen in normal flow)
+    console.warn(`No existing session for ${identity.id}, creating new one`);
+    chat = createSpriteSession(identity.id, config.model, SPRITE_SYSTEM_PROMPT);
+  }
 
-IMAGE 1: Reference sprite showing this character from the front view. Use this as your identity reference.
+  // Build reference stacking labels (NotebookLM best practice)
+  // Image 1 is always the master reference (usually South/front view)
+  const referenceLabels: string[] = [];
+  const masterRef = referenceImages.find(r => r.direction === 'S') || referenceImages[0];
+
+  referenceLabels.push(`IMAGE 1 (MASTER): ${DIRECTION_DESCRIPTIONS[masterRef.direction]} - This is the PRIMARY identity reference. The new sprite MUST be 100% identical to this character.`);
+
+  // Add other references for additional context
+  let imageIndex = 2;
+  for (const ref of referenceImages) {
+    if (ref.direction !== masterRef.direction) {
+      referenceLabels.push(`IMAGE ${imageIndex}: ${DIRECTION_DESCRIPTIONS[ref.direction]} - Shows ${ref.direction} angle details.`);
+      imageIndex++;
+    }
+  }
+
+  // Build prompt with strong identity enforcement
+  const prompt = `Generate a ${size}x${size} pixel art sprite - ${DIRECTION_DESCRIPTIONS[direction]}
+
+REFERENCE IMAGES:
+${referenceLabels.join('\n')}
+
+TARGET: Generate the ${direction} view (${DIRECTION_DESCRIPTIONS[direction]})
+
+CHARACTER IDENTITY LOCK:
+The character in the new sprite MUST be 100% identical to Image 1.
+- Same proportions and body shape
+- Same outline style (${identity.styleParameters.outlineStyle})
+- Same shading style (${identity.styleParameters.shadingStyle})
+- Same level of detail and pixel density
+
+${palettePrompt}
 
 CHARACTER: ${identity.name}
 DISTINCTIVE FEATURES: ${identity.distinctiveFeatures.join(', ')}
-VISIBLE FROM THIS ANGLE: ${visibilityNotes}
-
-STYLE LOCK (must match Image 1 exactly):
-- Outline: ${identity.styleParameters.outlineStyle}
-- Shading: ${identity.styleParameters.shadingStyle}
-- Color Palette: ${paletteInstruction}
+${visibilityNotes ? `VISIBLE FROM ${direction}: ${visibilityNotes}` : ''}
 
 CRITICAL REQUIREMENTS:
-- Match the character from Image 1 EXACTLY
-- Same proportions, art style, and level of detail as Image 1
+- The character MUST be the SAME CHARACTER as in Image 1, just rotated
+- Match proportions EXACTLY - same head size, body width, limb length
 - ${size}x${size} pixels, no anti-aliasing
 - SOLID WHITE BACKGROUND (#FFFFFF) IS MANDATORY
 - Fill ALL background pixels with pure white (#FFFFFF)
-- Do NOT draw a checkerboard pattern
 
 ${techniquePrompt}`;
 
-  // CRITICAL (NotebookLM): Add white background to reference image before sending to Gemini
-  // Transparent backgrounds cause generation errors in the Nano Banana family
-  let preparedImage: string;
+  // Prepare all reference images with white backgrounds
+  const preparedImages: Array<{ data: string; mimeType: string }> = [];
+
+  // Master reference first
   try {
-    preparedImage = await prepareCanvasForGemini(referenceImageBase64);
+    const preparedMaster = await prepareCanvasForGemini(masterRef.base64Data);
+    preparedImages.push({ data: preparedMaster, mimeType: 'image/png' });
   } catch (prepError) {
-    console.error("Failed to prepare image for Gemini:", prepError);
-    throw new Error(`Image preparation failed: ${prepError instanceof Error ? prepError.message : String(prepError)}`);
+    console.error("Failed to prepare master reference:", prepError);
+    throw new Error(`Master image preparation failed: ${prepError instanceof Error ? prepError.message : String(prepError)}`);
+  }
+
+  // Add other references
+  for (const ref of referenceImages) {
+    if (ref.direction !== masterRef.direction) {
+      try {
+        const prepared = await prepareCanvasForGemini(ref.base64Data);
+        preparedImages.push({ data: prepared, mimeType: 'image/png' });
+      } catch (prepError) {
+        console.warn(`Failed to prepare ${ref.direction} reference, skipping:`, prepError);
+      }
+    }
   }
 
   let lastError;
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const response = await client.models.generateContent({
-        model: config.model,
-        contents: {
-          parts: [
-            {
-              inlineData: {
-                mimeType: "image/png",
-                data: preparedImage,
-              },
-            },
-            { text: prompt },
-          ],
-        },
-        config: {
-          responseModalities: [Modality.IMAGE],
-          temperature: config.temperature,
-          systemInstruction: SPRITE_SYSTEM_PROMPT,
-          ...(config.thinkingLevel && {
-            thinkingConfig: { thinkingLevel: mapThinkingLevel(config.thinkingLevel) },
-          }),
-        },
-      });
-
-      const part = response.candidates?.[0]?.content?.parts?.[0];
-      if (part && 'inlineData' in part && part.inlineData?.data) {
-        return part.inlineData.data;
-      }
-
-      throw new Error("No image data in response");
+      const result = await sendSpriteMessage(chat, prompt, preparedImages);
+      return result.imageData;
     } catch (e) {
       console.warn(`Rotated sprite generation attempt ${attempt + 1} failed:`, e);
       lastError = e;
 
-      // Don't retry permanent errors (auth failures, bad requests)
       if (!isRetryableError(e)) {
         console.error("Permanent error detected, not retrying:", e);
         break;
@@ -532,4 +551,22 @@ ${techniquePrompt}`;
   }
 
   throw lastError || new Error("Failed to generate rotated sprite after multiple attempts");
+};
+
+/**
+ * Legacy single-reference version for backwards compatibility
+ * Wraps the new reference stacking version
+ */
+export const generateRotatedSpriteLegacy = async (
+  identity: CharacterIdentity,
+  direction: Direction,
+  referenceImageBase64: string,
+  quality: QualityMode = 'final',
+  lockedPalette?: string[]
+): Promise<string> => {
+  // Convert single reference to array format
+  const referenceImages: ReferenceImage[] = [
+    { direction: 'S', base64Data: referenceImageBase64 }
+  ];
+  return generateRotatedSprite(identity, direction, referenceImages, quality, lockedPalette);
 };

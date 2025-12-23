@@ -88,7 +88,7 @@ export async function renderPixelDataToDataUrl(
     canvas.width = data.width;
     canvas.height = data.height;
     const ctx = canvas.getContext('2d');
-    
+
     if (!ctx) {
       resolve('');
       return;
@@ -100,7 +100,7 @@ export async function renderPixelDataToDataUrl(
       ctx.fillStyle = background;
       ctx.fillRect(0, 0, data.width, data.height);
     }
-    
+
     data.pixels.forEach((color, i) => {
       if (color === 'transparent') return;
       const x = i % data.width;
@@ -111,4 +111,17 @@ export async function renderPixelDataToDataUrl(
 
     resolve(canvas.toDataURL('image/png'));
   });
+}
+
+/**
+ * Utility to convert PixelData to base64 PNG data for Gemini API
+ * Returns just the base64 data without the data URL prefix
+ */
+export async function renderPixelDataToBase64(
+  data: PixelData,
+  background?: string | null
+): Promise<string> {
+  const dataUrl = await renderPixelDataToDataUrl(data, background);
+  // Strip the "data:image/png;base64," prefix
+  return dataUrl.replace(/^data:image\/png;base64,/, '');
 }

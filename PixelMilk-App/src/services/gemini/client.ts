@@ -1,4 +1,5 @@
 import { GoogleGenAI, Modality, ThinkingLevel, PartMediaResolutionLevel } from '@google/genai';
+import type { Chat, Content, Part, GenerateContentResponse } from '@google/genai';
 import type { GeminiConfig } from '../../types';
 import {
   characterIdentitySchema,
@@ -415,4 +416,170 @@ export async function editImage(
       mimeType: imagePart.inlineData.mimeType,
     };
   }, 'editImage');
+}
+
+// ============================================
+// Chat Session Management for Multi-Turn Generation
+// ============================================
+// Using the SDK's chat feature automatically handles thought signatures
+// (encrypted context) between turns, preserving model reasoning.
+
+/** Active chat sessions, keyed by character ID */
+const activeSessions = new Map<string, Chat>();
+
+/**
+ * Creates a new chat session for multi-turn sprite generation.
+ * The chat preserves thought signatures between turns automatically.
+ */
+export function createSpriteSession(
+  characterId: string,
+  model: string,
+  systemInstruction?: string
+): Chat {
+  const client = getClient();
+
+  // Close any existing session for this character
+  if (activeSessions.has(characterId)) {
+    activeSessions.delete(characterId);
+  }
+
+  const chat = client.chats.create({
+    model,
+    config: {
+      responseModalities: [Modality.IMAGE],
+      ...(systemInstruction && { systemInstruction }),
+    },
+  });
+
+  activeSessions.set(characterId, chat);
+  return chat;
+}
+
+/**
+ * Gets an existing chat session for a character.
+ */
+export function getSpriteSession(characterId: string): Chat | null {
+  return activeSessions.get(characterId) ?? null;
+}
+
+/**
+ * Clears the chat session for a character.
+ */
+export function clearSpriteSession(characterId: string): void {
+  activeSessions.delete(characterId);
+}
+
+/**
+ * Clears all active chat sessions.
+ */
+export function clearAllSpriteSessions(): void {
+  activeSessions.clear();
+}
+
+/**
+ * Sends a message to an existing chat session with reference images.
+ * Automatically handles thought signatures.
+ */
+export async function sendSpriteMessage(
+  chat: Chat,
+  prompt: string,
+  referenceImages?: Array<{ data: string; mimeType: string }>
+): Promise<{ imageData: string; mimeType: string }> {
+  return withRateLimitRetry(async () => {
+    // Build message parts: text prompt + any reference images
+    const parts: Part[] = [];
+
+    // Add reference images first (labelled in prompt)
+    if (referenceImages && referenceImages.length > 0) {
+      for (const img of referenceImages) {
+        parts.push({
+          inlineData: {
+            mimeType: img.mimeType,
+            data: img.data,
+          },
+        });
+      }
+    }
+
+    // Add text prompt
+    parts.push({ text: prompt });
+
+    // sendMessage takes { message: parts } format
+    const response: GenerateContentResponse = await chat.sendMessage({ message: parts });
+
+    // Extract image from response
+    const candidates = response.candidates;
+    if (!candidates || candidates.length === 0) {
+      const promptFeedback = response.promptFeedback;
+      if (promptFeedback?.blockReason) {
+        throw new Error(`Content blocked: ${promptFeedback.blockReason}`);
+      }
+      throw new Error('No response from model');
+    }
+
+    const candidate = candidates[0];
+    const finishReason = candidate.finishReason;
+
+    if (finishReason === 'SAFETY') {
+      throw new Error('Image generation blocked by safety filter');
+    }
+
+    const responseParts = candidate.content?.parts ?? [];
+    const imagePart = responseParts.find((part) => part.inlineData);
+
+    if (!imagePart?.inlineData) {
+      const textPart = responseParts.find((part) => part.text);
+      if (textPart?.text) {
+        throw new Error(`Model refused: ${textPart.text.slice(0, 100)}`);
+      }
+      throw new Error('No image in response');
+    }
+
+    return {
+      imageData: imagePart.inlineData.data,
+      mimeType: imagePart.inlineData.mimeType,
+    };
+  }, 'sendSpriteMessage');
+}
+
+/**
+ * Serialises a chat session's history for persistence.
+ * Note: Thought signatures are included in the history automatically.
+ */
+export function serializeChatHistory(chat: Chat): Content[] {
+  // The SDK's chat object maintains history internally
+  // We can access it via the getHistory method if available,
+  // or we need to track it ourselves
+  // For now, return empty - we'll implement persistence separately
+  return [];
+}
+
+/**
+ * Creates a chat session from serialised history.
+ * Used when restoring a session from IndexedDB.
+ */
+export function restoreSpriteSession(
+  characterId: string,
+  model: string,
+  history: Content[],
+  systemInstruction?: string
+): Chat {
+  const client = getClient();
+
+  // Close any existing session
+  if (activeSessions.has(characterId)) {
+    activeSessions.delete(characterId);
+  }
+
+  const chat = client.chats.create({
+    model,
+    history,
+    config: {
+      responseModalities: [Modality.IMAGE],
+      ...(systemInstruction && { systemInstruction }),
+    },
+  });
+
+  activeSessions.set(characterId, chat);
+  return chat;
 }

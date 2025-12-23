@@ -64,16 +64,40 @@ export function getModelForTask(task: TaskType, _quality: QualityMode = 'draft')
   }
 }
 
-export function getConfigForTask(task: TaskType, quality: QualityMode = 'draft'): GeminiConfig {
+/**
+ * Options for getConfigForTask
+ */
+export interface ConfigOptions {
+  /** Whether this is a rotation/angle generation (uses lower temperature for consistency) */
+  isRotation?: boolean;
+}
+
+export function getConfigForTask(
+  task: TaskType,
+  quality: QualityMode = 'draft',
+  options: ConfigOptions = {}
+): GeminiConfig {
+  const { isRotation = false } = options;
   const model = getModelForTask(task, quality);
   const isImageModel = model === IMAGE_GENERATION_MODEL || model === IMAGE_EDITING_MODEL;
   const isProModel = model === IMAGE_GENERATION_MODEL;
 
+  // Temperature strategy (NotebookLM best practice):
+  // - 1.0 for initial generation (creative exploration)
+  // - 0.8 for rotations/angles (consistency with reference)
+  // - 0.3 for text/JSON (deterministic structured output)
+  let temperature: number;
+  if (task === 'text-analysis') {
+    temperature = 0.3;
+  } else if (isRotation) {
+    temperature = 0.8; // Lower for consistency with reference images
+  } else {
+    temperature = 1.0; // Default for Gemini 3 (Google recommended)
+  }
+
   const config: GeminiConfig = {
     model,
-    // Low temperature for text/JSON tasks to prevent repetitive generation
-    // Higher temperature for image tasks for creative variation
-    temperature: task === 'text-analysis' ? 0.3 : 1.0,
+    temperature,
   };
 
   // Add thinkingLevel for text models (3 Flash Preview supports it)

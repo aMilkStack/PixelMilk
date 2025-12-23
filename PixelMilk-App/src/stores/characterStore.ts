@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { Asset, CharacterIdentity, Direction, SpriteData, StyleParameters } from '../types';
+import { clearSpriteSession, clearAllSpriteSessions, getSpriteSession } from '../services/gemini/client';
 
 interface CharacterState {
   // Current working character
@@ -17,11 +18,15 @@ interface CharacterState {
   isGeneratingSprite: boolean;
   error: string | null;
 
+  // Session state (actual Chat objects stored in client.ts)
+  hasActiveSession: boolean;
+
   // Actions
   setDescription: (desc: string) => void;
   setStyleParams: (params: Partial<StyleParameters>) => void;
   setIdentity: (identity: CharacterIdentity | null) => void;
   addSprite: (direction: Direction, sprite: SpriteData) => void;
+  updateSprite: (direction: Direction, sprite: SpriteData) => void;
   lockPalette: (palette: string[]) => void;
   unlockPalette: () => void;
   setCurrentDirection: (direction: Direction) => void;
@@ -30,6 +35,12 @@ interface CharacterState {
   setError: (error: string | null) => void;
   clearCharacter: () => void;
   loadCharacter: (asset: Asset) => void;
+
+  // Session actions
+  setHasActiveSession: (hasSession: boolean) => void;
+  clearSession: () => void;
+  clearAllSessions: () => void;
+  checkSessionStatus: () => void;
 }
 
 const defaultStyleParams: StyleParameters = {
@@ -41,7 +52,7 @@ const defaultStyleParams: StyleParameters = {
   viewType: 'standard',
 };
 
-export const useCharacterStore = create<CharacterState>((set) => ({
+export const useCharacterStore = create<CharacterState>((set, get) => ({
   currentIdentity: null,
   currentSprites: new Map(),
   lockedPalette: null,
@@ -51,6 +62,7 @@ export const useCharacterStore = create<CharacterState>((set) => ({
   isGeneratingIdentity: false,
   isGeneratingSprite: false,
   error: null,
+  hasActiveSession: false,
 
   setDescription: (description) => set({ description }),
 
@@ -74,6 +86,13 @@ export const useCharacterStore = create<CharacterState>((set) => ({
       return { currentSprites: nextSprites };
     }),
 
+  updateSprite: (direction, sprite) =>
+    set((state) => {
+      const nextSprites = new Map(state.currentSprites);
+      nextSprites.set(direction, sprite);
+      return { currentSprites: nextSprites };
+    }),
+
   lockPalette: (palette) => set({ lockedPalette: palette }),
 
   unlockPalette: () => set({ lockedPalette: null }),
@@ -86,7 +105,13 @@ export const useCharacterStore = create<CharacterState>((set) => ({
 
   setError: (error) => set({ error }),
 
-  clearCharacter: () =>
+  clearCharacter: () => {
+    // Clear the chat session for this character
+    const identity = get().currentIdentity;
+    if (identity) {
+      clearSpriteSession(identity.id);
+    }
+
     set({
       currentIdentity: null,
       currentSprites: new Map(),
@@ -97,12 +122,20 @@ export const useCharacterStore = create<CharacterState>((set) => ({
       isGeneratingIdentity: false,
       isGeneratingSprite: false,
       error: null,
-    }),
+      hasActiveSession: false,
+    });
+  },
 
   loadCharacter: (asset: Asset) => {
     if (asset.type !== 'character' || !asset.identity) {
       console.warn('[characterStore] Cannot load non-character asset');
       return;
+    }
+
+    // Clear any existing session for the previous character
+    const currentIdentity = get().currentIdentity;
+    if (currentIdentity) {
+      clearSpriteSession(currentIdentity.id);
     }
 
     // Reconstruct sprites map from the array
@@ -127,6 +160,33 @@ export const useCharacterStore = create<CharacterState>((set) => ({
       isGeneratingIdentity: false,
       isGeneratingSprite: false,
       error: null,
+      hasActiveSession: false, // New character, no session yet
     });
+  },
+
+  // Session management actions
+  setHasActiveSession: (hasSession) => set({ hasActiveSession: hasSession }),
+
+  clearSession: () => {
+    const identity = get().currentIdentity;
+    if (identity) {
+      clearSpriteSession(identity.id);
+      set({ hasActiveSession: false });
+    }
+  },
+
+  clearAllSessions: () => {
+    clearAllSpriteSessions();
+    set({ hasActiveSession: false });
+  },
+
+  checkSessionStatus: () => {
+    const identity = get().currentIdentity;
+    if (identity) {
+      const session = getSpriteSession(identity.id);
+      set({ hasActiveSession: session !== null });
+    } else {
+      set({ hasActiveSession: false });
+    }
   },
 }));

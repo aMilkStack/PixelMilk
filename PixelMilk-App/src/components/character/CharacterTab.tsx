@@ -7,10 +7,15 @@ import { PaletteDisplay } from './PaletteDisplay';
 import { SpriteCanvas } from '../canvas';
 import { Button } from '../shared/Button';
 import { useAppStore, useCanvasStore, useCharacterStore } from '../../stores';
-import { generateCharacterIdentity, generateSprite } from '../../services/gemini';
+import {
+  generateCharacterIdentity,
+  generateSprite,
+  generateRotatedSprite,
+} from '../../services/gemini';
+import type { ReferenceImage } from '../../services/gemini';
 import { saveAsset, generateAssetId, getAssetsByType } from '../../services/storage';
 import { pngToPixelArray, removeCheckerboardBackground } from '../../utils/imageUtils';
-import { renderPixelDataToDataUrl, validateAndSnapPixelData } from '../../utils/paletteGovernor';
+import { renderPixelDataToDataUrl, validateAndSnapPixelData, renderPixelDataToBase64 } from '../../utils/paletteGovernor';
 import { getLospecColors } from '../../data/lospecPalettes';
 import type { Asset, Direction, SpriteData } from '../../types';
 
@@ -418,6 +423,11 @@ const useIsMobile = () => {
 type SaveStatus = 'idle' | 'saving' | 'success' | 'error';
 type FailedGeneration = 'identity' | 'sprite' | null;
 
+// Cardinal directions in generation order (South first, then rotate clockwise)
+const CARDINAL_DIRECTIONS: Direction[] = ['S', 'E', 'N', 'W'];
+// Delay between auto-generating each direction (ms) to avoid rate limiting
+const DIRECTION_GENERATION_DELAY = 1500;
+
 /**
  * Handles API errors from Gemini SDK with structured error property checking.
  * Updates app state appropriately based on error type.
@@ -464,6 +474,8 @@ export const CharacterTab: React.FC = () => {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [lastFailedGeneration, setLastFailedGeneration] = useState<FailedGeneration>(null);
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+  const [generatingDirection, setGeneratingDirection] = useState<Direction | null>(null);
+  const [autoGenerationProgress, setAutoGenerationProgress] = useState<string | null>(null);
 
   const { apiKey, openApiKeyModal, setApiKeyStatus } = useAppStore();
   const { zoom, setZoom } = useCanvasStore();
@@ -478,6 +490,7 @@ export const CharacterTab: React.FC = () => {
     isGeneratingIdentity,
     isGeneratingSprite,
     error,
+    hasActiveSession,
     setDescription,
     setStyleParams,
     setIdentity,
@@ -489,6 +502,7 @@ export const CharacterTab: React.FC = () => {
     setError,
     clearCharacter,
     loadCharacter,
+    setHasActiveSession,
   } = useCharacterStore();
 
   const identity = currentIdentity;
@@ -542,6 +556,7 @@ export const CharacterTab: React.FC = () => {
   };
 
   // Handle Generate Sprite
+  // Uses reference stacking for consistent multi-angle generation
   const handleGenerateSprite = async () => {
     if (!apiKey) {
       openApiKeyModal();
@@ -564,9 +579,43 @@ export const CharacterTab: React.FC = () => {
       const lospecColors = paletteMode.startsWith('lospec_') ? getLospecColors(paletteMode) : undefined;
       const effectivePalette = lockedPalette ?? lospecColors ?? undefined;
 
-      // DON'T pass palette to Gemini - it causes it to dither the background with palette colors
-      // Instead: generate freely, then snap to palette in post-processing
-      const rawImageBase64 = await generateSprite(identity, currentDirection, 'final');
+      let rawImageBase64: string;
+
+      // Check if we have existing sprites to use as references
+      const hasExistingSprites = currentSprites.size > 0;
+
+      if (!hasExistingSprites) {
+        // First sprite - use generateSprite (creates new session)
+        rawImageBase64 = await generateSprite(identity, currentDirection, 'final');
+        // Mark session as active after first successful generation
+        setHasActiveSession(true);
+      } else {
+        // Subsequent sprites - use reference stacking for consistency
+        // Build reference images from all existing sprites
+        const referenceImages: ReferenceImage[] = [];
+
+        for (const [direction, sprite] of currentSprites.entries()) {
+          try {
+            // Render sprite to base64 with white background for Gemini
+            const base64Data = await renderPixelDataToBase64(sprite, '#FFFFFF');
+            referenceImages.push({ direction, base64Data });
+          } catch (refErr) {
+            console.warn(`Failed to render ${direction} sprite for reference:`, refErr);
+          }
+        }
+
+        if (referenceImages.length === 0) {
+          throw new Error('Failed to prepare reference images');
+        }
+
+        // Generate using reference stacking
+        rawImageBase64 = await generateRotatedSprite(
+          identity,
+          currentDirection,
+          referenceImages,
+          'final'
+        );
+      }
 
       // Post-process: remove any checkerboard "transparency" pattern Gemini may have drawn
       const imageBase64 = await removeCheckerboardBackground(rawImageBase64);
@@ -898,7 +947,7 @@ export const CharacterTab: React.FC = () => {
               </div>
 
               <div style={backgroundControlsStyle}>
-                <span>Background</span>
+                <span>Display Background</span>
                 <div style={backgroundButtonsStyle}>
                   <Button
                     variant={background === 'transparent' ? 'primary' : 'secondary'}

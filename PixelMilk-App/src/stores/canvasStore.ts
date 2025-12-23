@@ -12,6 +12,14 @@ interface CanvasStore extends CanvasState {
   setSelectedColor: (color: string) => void;
   resetCanvas: () => void;
   loadPersistedState: () => Promise<void>;
+
+  // Hotspot actions
+  setHotspot: (x: number | null, y: number | null) => void;
+  setHotspotRadius: (radius: number) => void;
+  clearHotspot: () => void;
+
+  // Drawing state actions
+  setIsDrawing: (isDrawing: boolean) => void;
 }
 
 const initialState: CanvasState = {
@@ -21,6 +29,14 @@ const initialState: CanvasState = {
   tool: 'draw',
   brushSize: 1,
   selectedColor: '#8bd0ba',
+
+  // Hotspot state
+  hotspotX: null,
+  hotspotY: null,
+  hotspotRadius: 4, // Default radius of 4 pixels
+
+  // Drawing state
+  isDrawing: false,
 };
 
 export const useCanvasStore = create<CanvasStore>((set) => ({
@@ -48,4 +64,12 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
       console.error('Failed to load persisted canvas state:', err);
     }
   },
+
+  // Hotspot actions
+  setHotspot: (x, y) => set({ hotspotX: x, hotspotY: y }),
+  setHotspotRadius: (radius) => set({ hotspotRadius: Math.max(1, Math.min(8, radius)) }),
+  clearHotspot: () => set({ hotspotX: null, hotspotY: null }),
+
+  // Drawing state actions
+  setIsDrawing: (isDrawing) => set({ isDrawing }),
 }));

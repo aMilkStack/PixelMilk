@@ -6,6 +6,14 @@
 
 export { initializeClient, getClient, isClientInitialized, validateApiKey } from './client';
 export { generateContent, generateStructuredContent, generateImage, editImage } from './client';
+export {
+  createSpriteSession,
+  getSpriteSession,
+  clearSpriteSession,
+  clearAllSpriteSessions,
+  sendSpriteMessage,
+  restoreSpriteSession,
+} from './client';
 export { getModelForTask, getConfigForTask } from './modelRouter';
 export * from './schemas';
 
@@ -13,4 +21,10 @@ export {
   generateCharacterIdentity,
   generateSprite,
   generateRotatedSprite,
+  generateRotatedSpriteLegacy,
 } from './geminiService';
+
+export { applyHotspotEdit } from './editing';
+
+// Re-export types for consumers
+export type { ReferenceImage } from './geminiService';

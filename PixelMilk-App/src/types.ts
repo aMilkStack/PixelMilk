@@ -75,6 +75,14 @@ export interface CanvasState {
   tool: ToolMode;
   brushSize: number;
   selectedColor: string;
+
+  // Hotspot selection for AI-powered region editing
+  hotspotX: number | null;
+  hotspotY: number | null;
+  hotspotRadius: number;
+
+  // Drawing state
+  isDrawing: boolean;
 }
 
 export interface GenerationStatus {

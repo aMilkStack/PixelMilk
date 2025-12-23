@@ -22,9 +22,11 @@
 
   /* Accent & UI Colors */
   --color-accent: #a0e8d0;    /* Bright mint for highlights */
+  --color-accent-red: #EF3648; /* Red accent - hearts, icons, emphasis */
   --color-border: #1a4a4a;    /* Subtle borders */
   --color-error: #ff6b6b;     /* Errors */
   --color-success: #8bd0ba;   /* Success - same as primary */
+  --color-cream: #d8c8b8;     /* Beige/cream for secondary accents */
 
   /* ============================================
    * TYPOGRAPHY
