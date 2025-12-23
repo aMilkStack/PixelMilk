@@ -555,8 +555,82 @@ export const CharacterTab: React.FC = () => {
     }
   };
 
-  // Handle Generate Sprite
-  // Uses reference stacking for consistent multi-angle generation
+  // Helper: Generate a single direction sprite
+  // Returns the locked palette (only set on first sprite)
+  const generateSingleDirection = async (
+    direction: Direction,
+    existingSprites: Map<Direction, SpriteData>,
+    currentLockedPalette: string[] | null
+  ): Promise<{ sprite: SpriteData; palette: string[] }> => {
+    if (!identity) throw new Error('No identity');
+
+    const size = identity.styleParameters.canvasSize;
+    const paletteMode = styleParams.paletteMode;
+    const lospecColors = paletteMode.startsWith('lospec_') ? getLospecColors(paletteMode) : undefined;
+    const effectivePalette = currentLockedPalette ?? lospecColors ?? undefined;
+
+    let rawImageBase64: string;
+
+    if (existingSprites.size === 0) {
+      // First sprite - use generateSprite (creates new session)
+      rawImageBase64 = await generateSprite(identity, direction, 'final');
+      setHasActiveSession(true);
+    } else {
+      // Subsequent sprites - use reference stacking for consistency
+      const referenceImages: ReferenceImage[] = [];
+
+      for (const [dir, sprite] of existingSprites.entries()) {
+        try {
+          const base64Data = await renderPixelDataToBase64(sprite, '#FFFFFF');
+          referenceImages.push({ direction: dir, base64Data });
+        } catch (refErr) {
+          console.warn(`Failed to render ${dir} sprite for reference:`, refErr);
+        }
+      }
+
+      if (referenceImages.length === 0) {
+        throw new Error('Failed to prepare reference images');
+      }
+
+      rawImageBase64 = await generateRotatedSprite(
+        identity,
+        direction,
+        referenceImages,
+        'final'
+      );
+    }
+
+    // Post-process: remove checkerboard "transparency" pattern
+    const imageBase64 = await removeCheckerboardBackground(rawImageBase64);
+
+    const { pixels, palette } = await pngToPixelArray(imageBase64, size, size);
+    const pixelData = validateAndSnapPixelData(
+      {
+        name: identity.name,
+        width: size,
+        height: size,
+        palette,
+        pixels,
+      },
+      effectivePalette
+    );
+
+    const sprite: SpriteData = {
+      id: `sprite-${direction}-${Date.now()}`,
+      direction,
+      createdAt: Date.now(),
+      ...pixelData,
+    };
+
+    // Determine which palette to lock
+    const paletteToLock = lospecColors && lospecColors.length > 0
+      ? lospecColors
+      : pixelData.palette;
+
+    return { sprite, palette: paletteToLock };
+  };
+
+  // Handle Generate Sprite - auto-generates all 4 cardinal directions
   const handleGenerateSprite = async () => {
     if (!apiKey) {
       openApiKeyModal();
@@ -568,98 +642,94 @@ export const CharacterTab: React.FC = () => {
       return;
     }
 
+    // If we already have sprites, just generate the current direction
+    if (currentSprites.size > 0) {
+      setError(null);
+      setGeneratingSprite(true);
+      setGeneratingDirection(currentDirection);
+      setAutoGenerationProgress(`Generating ${currentDirection}...`);
+
+      try {
+        const { sprite, palette } = await generateSingleDirection(
+          currentDirection,
+          currentSprites,
+          lockedPalette
+        );
+        addSprite(currentDirection, sprite);
+        setLastFailedGeneration(null);
+      } catch (err) {
+        setLastFailedGeneration('sprite');
+        handleApiError({
+          err,
+          fallbackMessage: `Failed to generate ${currentDirection} sprite`,
+          setError,
+          setApiKeyStatus,
+          openApiKeyModal,
+        });
+      } finally {
+        setGeneratingSprite(false);
+        setGeneratingDirection(null);
+        setAutoGenerationProgress(null);
+      }
+      return;
+    }
+
+    // First time - auto-generate all 4 cardinal directions
     setError(null);
     setGeneratingSprite(true);
 
+    // Build sprites map locally to track progress
+    const newSprites = new Map<Direction, SpriteData>();
+    let currentPalette: string[] | null = null;
+
     try {
-      const size = identity.styleParameters.canvasSize;
+      for (let i = 0; i < CARDINAL_DIRECTIONS.length; i++) {
+        const direction = CARDINAL_DIRECTIONS[i];
 
-      // Check if a lospec palette is selected (use current styleParams, not identity's frozen copy)
-      const paletteMode = styleParams.paletteMode;
-      const lospecColors = paletteMode.startsWith('lospec_') ? getLospecColors(paletteMode) : undefined;
-      const effectivePalette = lockedPalette ?? lospecColors ?? undefined;
+        // Update progress
+        setGeneratingDirection(direction);
+        setAutoGenerationProgress(`Generating ${direction} (${i + 1}/${CARDINAL_DIRECTIONS.length})...`);
+        setCurrentDirection(direction);
 
-      let rawImageBase64: string;
-
-      // Check if we have existing sprites to use as references
-      const hasExistingSprites = currentSprites.size > 0;
-
-      if (!hasExistingSprites) {
-        // First sprite - use generateSprite (creates new session)
-        rawImageBase64 = await generateSprite(identity, currentDirection, 'final');
-        // Mark session as active after first successful generation
-        setHasActiveSession(true);
-      } else {
-        // Subsequent sprites - use reference stacking for consistency
-        // Build reference images from all existing sprites
-        const referenceImages: ReferenceImage[] = [];
-
-        for (const [direction, sprite] of currentSprites.entries()) {
-          try {
-            // Render sprite to base64 with white background for Gemini
-            const base64Data = await renderPixelDataToBase64(sprite, '#FFFFFF');
-            referenceImages.push({ direction, base64Data });
-          } catch (refErr) {
-            console.warn(`Failed to render ${direction} sprite for reference:`, refErr);
-          }
+        // Add delay between generations to avoid rate limiting (skip first)
+        if (i > 0) {
+          await new Promise(resolve => setTimeout(resolve, DIRECTION_GENERATION_DELAY));
         }
 
-        if (referenceImages.length === 0) {
-          throw new Error('Failed to prepare reference images');
-        }
-
-        // Generate using reference stacking
-        rawImageBase64 = await generateRotatedSprite(
-          identity,
-          currentDirection,
-          referenceImages,
-          'final'
+        const { sprite, palette } = await generateSingleDirection(
+          direction,
+          newSprites,
+          currentPalette
         );
-      }
 
-      // Post-process: remove any checkerboard "transparency" pattern Gemini may have drawn
-      const imageBase64 = await removeCheckerboardBackground(rawImageBase64);
-
-      const { pixels, palette } = await pngToPixelArray(imageBase64, size, size);
-      const pixelData = validateAndSnapPixelData(
-        {
-          name: identity.name,
-          width: size,
-          height: size,
-          palette,
-          pixels,
-        },
-        effectivePalette
-      );
-
-      const sprite: SpriteData = {
-        id: `sprite-${Date.now()}`,
-        direction: currentDirection,
-        createdAt: Date.now(),
-        ...pixelData,
-      };
-
-      addSprite(currentDirection, sprite);
-      setLastFailedGeneration(null);
-      // Lock palette if not already locked
-      if (!lockedPalette) {
-        if (lospecColors && lospecColors.length > 0) {
-          lockPalette(lospecColors);  // Lock the Lospec palette
-        } else {
-          lockPalette(pixelData.palette);  // Lock auto-extracted palette
+        // Lock palette after first sprite
+        if (i === 0 && !lockedPalette) {
+          lockPalette(palette);
+          currentPalette = palette;
         }
+
+        newSprites.set(direction, sprite);
+        addSprite(direction, sprite);
       }
+
+      setLastFailedGeneration(null);
+      setAutoGenerationProgress('All directions complete!');
+
+      // Auto-dismiss success message
+      setTimeout(() => setAutoGenerationProgress(null), 2000);
+
     } catch (err) {
       setLastFailedGeneration('sprite');
       handleApiError({
         err,
-        fallbackMessage: 'Failed to generate sprite',
+        fallbackMessage: 'Failed to generate sprites',
         setError,
         setApiKeyStatus,
         openApiKeyModal,
       });
     } finally {
       setGeneratingSprite(false);
+      setGeneratingDirection(null);
     }
   };
 
@@ -885,7 +955,19 @@ export const CharacterTab: React.FC = () => {
       <div style={centerColumnStyle}>
         {/* Sprite Canvas */}
         <div style={sectionStyle}>
-          <div style={sectionTitleStyle}>Sprite Canvas</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={sectionTitleStyle}>Sprite Canvas</div>
+            {autoGenerationProgress && (
+              <span style={{
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                color: colors.mint,
+                animation: 'terminal-blink 1s step-end infinite',
+              }}>
+                {autoGenerationProgress}
+              </span>
+            )}
+          </div>
           <div style={canvasWrapperStyle}>
             <SpriteCanvas sprite={currentSprite} showGrid background={background} isLoading={isGeneratingSprite} />
             <div style={controlsStackStyle}>
