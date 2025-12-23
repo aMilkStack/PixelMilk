@@ -1,4 +1,5 @@
 import { rgbToHex, hexToRgb } from './paletteGovernor';
+import { snapToGrid } from './pixelSnapper';
 
 /**
  * Prepares an image for Gemini API by adding a white background.
@@ -80,19 +81,26 @@ export async function pngToPixelArray(
     });
   }
 
-  const canvas = document.createElement('canvas');
-  canvas.width = targetWidth;
-  canvas.height = targetHeight;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) {
+  // Step 1: Draw full-size image to get raw ImageData
+  const sourceCanvas = document.createElement('canvas');
+  sourceCanvas.width = image.width;
+  sourceCanvas.height = image.height;
+  const sourceCtx = sourceCanvas.getContext('2d');
+  if (!sourceCtx) {
     throw new Error('Canvas context not available');
   }
+  sourceCtx.drawImage(image, 0, 0);
+  const sourceImageData = sourceCtx.getImageData(0, 0, image.width, image.height);
 
-  ctx.imageSmoothingEnabled = false;
-  ctx.clearRect(0, 0, targetWidth, targetHeight);
-  ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
+  // Step 2: Apply pixel snapper to clean up off-grid pixels
+  // This uses color voting to determine the correct color for each target pixel
+  const snappedImageData = snapToGrid(sourceImageData, {
+    targetSize: targetWidth,
+    colorTolerance: 20,
+  });
 
-  const data = ctx.getImageData(0, 0, targetWidth, targetHeight).data;
+  // Step 3: Extract pixels from snapped data
+  const data = snappedImageData.data;
   const pixels: string[] = [];
   const paletteSet = new Set<string>();
 
@@ -102,7 +110,7 @@ export async function pngToPixelArray(
     const b = data[i + 2];
     const a = data[i + 3];
 
-    if (a === 0) {
+    if (a === 0 || a < 128) {
       pixels.push('transparent');
       continue;
     }
