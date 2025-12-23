@@ -434,7 +434,8 @@ const activeSessions = new Map<string, Chat>();
 export function createSpriteSession(
   characterId: string,
   model: string,
-  systemInstruction?: string
+  systemInstruction?: string,
+  temperature: number = 1.0
 ): Chat {
   const client = getClient();
 
@@ -446,6 +447,7 @@ export function createSpriteSession(
   const chat = client.chats.create({
     model,
     config: {
+      temperature,
       responseModalities: [Modality.IMAGE],
       ...(systemInstruction && { systemInstruction }),
     },

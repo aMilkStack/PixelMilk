@@ -347,7 +347,7 @@ export const generateSprite = async (
   // Session persists thought signatures across generation calls
   let chat = getSpriteSession(identity.id);
   if (!chat) {
-    chat = createSpriteSession(identity.id, config.model, SPRITE_SYSTEM_PROMPT);
+    chat = createSpriteSession(identity.id, config.model, SPRITE_SYSTEM_PROMPT, config.temperature);
     console.log(`Created new sprite session for character: ${identity.id}`);
   }
 
@@ -461,7 +461,7 @@ export const generateRotatedSprite = async (
   if (!chat) {
     // Fallback: create session if it doesn't exist (shouldn't happen in normal flow)
     console.warn(`No existing session for ${identity.id}, creating new one`);
-    chat = createSpriteSession(identity.id, config.model, SPRITE_SYSTEM_PROMPT);
+    chat = createSpriteSession(identity.id, config.model, SPRITE_SYSTEM_PROMPT, config.temperature);
   }
 
   // Build reference stacking labels (NotebookLM best practice)
