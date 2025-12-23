@@ -1,10 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cat:*)",
-      "Bash(npx tsc:*)",
-      "Bash(npm run build:*)",
-      "Bash(npm run dev:*)"
+      "Bash(\"C:\\\\Program Files\\\\nodejs\\\\node.exe\" \"C:\\\\Users\\\\User\\\\Documents\\\\MilkStack\\\\Projects\\\\Software\\\\PixelMilk\\\\PixelMilk-App\\\\node_modules\\\\typescript\\\\bin\\\\tsc\" --noEmit -p \"C:\\\\Users\\\\User\\\\Documents\\\\MilkStack\\\\Projects\\\\Software\\\\PixelMilk\\\\PixelMilk-App\")",
+      "Bash(git commit:*)",
+      "Bash(git add:*)"
     ]
   }
 }
