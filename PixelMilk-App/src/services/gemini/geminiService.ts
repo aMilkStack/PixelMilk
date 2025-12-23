@@ -333,8 +333,8 @@ export const generateSprite = async (
 
   // Composition guidance based on canvas size
   const compositionGuide = size >= 256
-    ? 'FULL BODY portrait - show character from head to feet, vertically centered'
-    : 'Compact gameplay sprite - character fills frame, may crop at knees/feet';
+    ? 'FULL BODY portrait - show ONE character from head to feet, vertically centered'
+    : 'Single compact gameplay sprite - ONE character fills frame, may crop at knees/feet';
 
   // Build technique-specific instructions
   const techniquePrompt = buildTechniquePrompt(
@@ -351,7 +351,13 @@ export const generateSprite = async (
     console.log(`Created new sprite session for character: ${identity.id}`);
   }
 
-  const prompt = `Generate a ${size}x${size} pixel art sprite of this character:
+  const prompt = `Generate a SINGLE ${size}x${size} pixel art sprite of this character.
+
+OUTPUT CONSTRAINTS (CRITICAL):
+- Return ONLY ONE character frame
+- NO sprite sheets, NO multi-view grids, NO character sheets
+- NO multiple poses or angles in the same image
+- ONE sprite, ONE pose, ONE direction
 
 CHARACTER: ${identity.name}
 DESCRIPTION: ${identity.description}
@@ -365,28 +371,28 @@ STYLE:
 - Detail Level: ${identity.styleParameters.detailLevel}
 - View Type: ${identity.styleParameters.viewType}
 
-VIEW: ${DIRECTION_DESCRIPTIONS[direction]}
+VIEWPOINT: ${DIRECTION_DESCRIPTIONS[direction]}
 ${identity.angleNotes[direction] ? `ANGLE NOTES: ${identity.angleNotes[direction]}` : ''}
 
 ${palettePrompt}
 
-BACKGROUND: Solid pure white (#FFFFFF)
+COMPOSITION:
+- ${compositionGuide}
+- Character CENTERED in the frame
+- SOLID WHITE BACKGROUND (#FFFFFF)
 
-COMPOSITION: ${compositionGuide}
-
-CRITICAL REQUIREMENTS:
-- Output must be exactly ${size}x${size} pixels
+TECHNICAL REQUIREMENTS:
+- Exactly ${size}x${size} pixels
 - True pixel art with clean, crisp pixels
 - No anti-aliasing on edges
-- Horizontally centered
-- SOLID WHITE BACKGROUND (#FFFFFF) IS MANDATORY
 - Fill ALL background pixels with pure white (#FFFFFF)
 - Do NOT draw a checkerboard pattern
-- Only the character sprite should have non-white pixels
 
 ${techniquePrompt}
 
-This sprite will be used as the MASTER REFERENCE for all other angles. Ensure the character's identity is clearly established.`;
+This sprite will be used as the MASTER REFERENCE for all other angles. Ensure the character's identity is clearly established.
+
+FINAL REMINDER: Output exactly ONE sprite facing ${direction}. No sprite sheets.`;
 
   let lastError;
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -475,7 +481,13 @@ export const generateRotatedSprite = async (
   }
 
   // Build prompt with strong identity enforcement
-  const prompt = `Generate a ${size}x${size} pixel art sprite - ${DIRECTION_DESCRIPTIONS[direction]}
+  const prompt = `Generate a SINGLE ${size}x${size} pixel art sprite - ${DIRECTION_DESCRIPTIONS[direction]}
+
+OUTPUT CONSTRAINTS (CRITICAL):
+- Return ONLY ONE character frame
+- NO sprite sheets, NO multi-view grids, NO character sheets
+- NO multiple poses or angles in the same image
+- ONE sprite, ONE pose, ONE direction
 
 REFERENCE IMAGES:
 ${referenceLabels.join('\n')}
@@ -489,6 +501,12 @@ The character in the new sprite MUST be 100% identical to Image 1.
 - Same shading style (${identity.styleParameters.shadingStyle})
 - Same level of detail and pixel density
 
+SCALE CONSISTENCY (CRITICAL):
+- The character MUST occupy the EXACT same amount of canvas space as Image 1
+- Match the zoom level EXACTLY - if Image 1 shows head-to-feet, this view shows head-to-feet
+- The character's height in pixels must be IDENTICAL to Image 1
+- Do NOT zoom out or zoom in relative to the reference - maintain identical framing
+
 ${palettePrompt}
 
 CHARACTER: ${identity.name}
@@ -498,11 +516,15 @@ ${visibilityNotes ? `VISIBLE FROM ${direction}: ${visibilityNotes}` : ''}
 CRITICAL REQUIREMENTS:
 - The character MUST be the SAME CHARACTER as in Image 1, just rotated
 - Match proportions EXACTLY - same head size, body width, limb length
+- SAME SCALE - character height in pixels must match Image 1 exactly
 - ${size}x${size} pixels, no anti-aliasing
 - SOLID WHITE BACKGROUND (#FFFFFF) IS MANDATORY
 - Fill ALL background pixels with pure white (#FFFFFF)
+- Character CENTERED in the frame at the SAME vertical position as Image 1
 
-${techniquePrompt}`;
+${techniquePrompt}
+
+FINAL REMINDER: Output exactly ONE sprite facing ${direction}. Same scale as Image 1. No sprite sheets.`;
 
   // Prepare all reference images with white backgrounds
   const preparedImages: Array<{ data: string; mimeType: string }> = [];

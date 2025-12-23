@@ -81,6 +81,9 @@ export const STRICT_PROHIBITIONS = [
   'NO palette violations - never exceed specified color count',
   'NO straight color ramps - all ramps must hue-shift',
   'NO noisy textures - no rendering every detail (e.g., every brick)',
+  'NO sprite sheets - output exactly ONE character frame per generation',
+  'NO multi-view grids or character sheets - single pose, single direction only',
+  'NO multiple versions or angles in the same image - one sprite only',
 ] as const;
 
 // ============================================
