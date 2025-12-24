@@ -399,6 +399,7 @@ function removeBackgroundByChromaKey(
  * @param targetWidth - Target width in pixels
  * @param targetHeight - Target height in pixels
  * @param chromaKey - Hex colour to remove as background, e.g. "#FF00FF"
+ * @param tolerance - Euclidean distance tolerance for chromaKey matching (default 10)
  * @param parsedMask - Optional ParsedMask (unused, kept for API compat)
  */
 export async function pngToPixelArray(
@@ -406,6 +407,7 @@ export async function pngToPixelArray(
   targetWidth: number,
   targetHeight: number,
   chromaKey: string,
+  tolerance?: number,
   parsedMask?: ParsedMask
 ): Promise<{ pixels: string[]; palette: string[] }> {
   const { src, revoke } = resolveImageSrc(imageData);
@@ -452,11 +454,13 @@ export async function pngToPixelArray(
   // Removes ALL pixels matching chromaKey, including interior gaps
   // (between legs, under arms, inside handles, etc.)
   // SAFE because each palette has a unique chromaKey not in the sprite
+  // Tolerance comes from per-palette distance calculation (chromakeys.json)
   removeBackgroundByChromaKey(
     snappedImageData.data,
     snappedImageData.width,
     snappedImageData.height,
-    chromaKey
+    chromaKey,
+    tolerance
   );
 
   // Step 4: Extract pixels from processed data

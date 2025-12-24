@@ -36,8 +36,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
     container: {
       display: 'flex',
       flexDirection: 'column',
-      minHeight: '100vh',
+      height: '100vh',
       backgroundColor: 'var(--color-bg-primary)',
+      overflow: 'hidden',
     },
     header: {
       display: 'flex',

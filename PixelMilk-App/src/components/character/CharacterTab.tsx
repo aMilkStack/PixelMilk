@@ -17,9 +17,8 @@ import {
 import type { ReferenceImage } from '../../services/gemini';
 import { saveAsset, generateAssetId, getAssetsByType } from '../../services/storage';
 import { pngToPixelArray, removeCheckerboardBackground, flipSpriteHorizontally, parseSegmentationMask, DEFAULT_CHROMA_KEY, type ParsedMask } from '../../utils/imageUtils';
-import { getChromaKey } from '../../services/paletteData';
 import { renderPixelDataToDataUrl, validateAndSnapPixelData, renderPixelDataToBase64 } from '../../utils/paletteGovernor';
-import { getLospecColors } from '../../data/lospecPalettes';
+import { getLospecColors, getChromaKeyWithDistance } from '../../data/lospecPalettes';
 import type { Asset, Direction, SpriteData } from '../../types';
 
 const colors = {
@@ -625,18 +624,19 @@ export const CharacterTab: React.FC = () => {
 
     const size = identity.styleParameters.canvasSize;
     const paletteMode = styleParams.paletteMode;
-    const lospecColors = paletteMode.startsWith('lospec_') ? getLospecColors(paletteMode) : undefined;
-    const effectivePalette = currentLockedPalette ?? lospecColors ?? undefined;
+    const paletteColors = paletteMode && paletteMode !== 'auto' ? getLospecColors(paletteMode) : undefined;
+    const effectivePalette = currentLockedPalette ?? paletteColors ?? undefined;
 
-    // Get palette-specific chromaKey for background removal
-    // Extract palette name from paletteMode (e.g., "lospec_sweetie-16" -> "sweetie16")
+    // Get palette-specific chromaKey and tolerance for background removal
     let chromaKey = DEFAULT_CHROMA_KEY;
-    if (paletteMode.startsWith('lospec_')) {
-      const paletteName = paletteMode.replace('lospec_', '').replace(/-/g, '');
-      const paletteChromaKey = await getChromaKey(paletteName);
-      if (paletteChromaKey) {
-        chromaKey = paletteChromaKey;
-        console.log(`[CharacterTab] Using chromaKey ${chromaKey} for palette ${paletteName}`);
+    let chromaTolerance: number | undefined;
+    if (paletteMode && paletteMode !== 'auto') {
+      const chromaData = getChromaKeyWithDistance(paletteMode);
+      if (chromaData) {
+        chromaKey = chromaData.chromaKey;
+        // Use half the distance as tolerance - safe margin against eating sprite colours
+        chromaTolerance = chromaData.distance / 2;
+        console.log(`[CharacterTab] Using chromaKey ${chromaKey} with tolerance ${chromaTolerance.toFixed(1)} for palette ${paletteMode}`);
       }
     }
 
@@ -691,7 +691,7 @@ export const CharacterTab: React.FC = () => {
       console.warn('[CharacterTab] Segmentation mask failed, using color-only extraction:', maskError);
     }
 
-    const { pixels, palette } = await pngToPixelArray(imageBase64, size, size, chromaKey, segmentationMask);
+    const { pixels, palette } = await pngToPixelArray(imageBase64, size, size, chromaKey, chromaTolerance, segmentationMask);
     const pixelData = validateAndSnapPixelData(
       {
         name: identity.name,
@@ -711,8 +711,8 @@ export const CharacterTab: React.FC = () => {
     };
 
     // Determine which palette to lock
-    const paletteToLock = lospecColors && lospecColors.length > 0
-      ? lospecColors
+    const paletteToLock = paletteColors && paletteColors.length > 0
+      ? paletteColors
       : pixelData.palette;
 
     return { sprite, palette: paletteToLock };
@@ -1228,9 +1228,9 @@ export const CharacterTab: React.FC = () => {
           identity={identity}
           isLoading={isGeneratingIdentity}
           lockedPalette={
-            // Show Lospec colors immediately when selected, or locked palette after sprite gen
+            // Show palette colors immediately when selected, or locked palette after sprite gen
             lockedPalette ??
-            (styleParams.paletteMode.startsWith('lospec_')
+            (styleParams.paletteMode && styleParams.paletteMode !== 'auto'
               ? getLospecColors(styleParams.paletteMode) ?? null
               : null)
           }
