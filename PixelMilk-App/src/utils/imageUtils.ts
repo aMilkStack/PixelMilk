@@ -322,9 +322,14 @@ function floodFillBackgroundRemoval(
 
 /**
  * Default tolerance for chroma key background removal.
- * 30 catches JPEG/PNG compression artifacts while being safe for distinct palettes.
+ *
+ * With cleaned prompts (no "transparent background" poison tokens), Gemini
+ * generates much more consistent backgrounds. Reduced from 30 to 10.
+ *
+ * Lower tolerance = safer for palettes with colours near the chromaKey.
+ * If issues arise, can be bumped back up, but start conservative.
  */
-const CHROMA_KEY_TOLERANCE = 30;
+const CHROMA_KEY_TOLERANCE = 10;
 
 /**
  * Removes ALL pixels matching the chromaKey colour globally.
@@ -491,7 +496,15 @@ const CHECKERBOARD_TOLERANCE = 25;
 
 /**
  * Common checkerboard colors that Gemini uses to represent "transparency"
- * These need to be detected and converted to actual transparency
+ * These need to be detected and converted to actual transparency.
+ *
+ * CRITICAL: WHITE is NOT included because:
+ * 1. White is a valid sprite colour (eyes, teeth, highlights)
+ * 2. We use per-palette chromaKey background removal which is colour-safe
+ * 3. Including white here caused white eyeballs to disappear
+ *
+ * The chromaKey system (removeBackgroundByChromaKey) handles all background
+ * removal. This checkerboard detection is a legacy fallback for edge cases.
  */
 const CHECKERBOARD_COLORS = [
   // Pink/magenta checkerboard variants
@@ -502,11 +515,11 @@ const CHECKERBOARD_COLORS = [
   { r: 255, g: 200, b: 200 }, // Light salmon pink
   { r: 248, g: 187, b: 208 }, // Soft pink
   { r: 219, g: 112, b: 147 }, // Pale violet red
-  // Gray checkerboard variants
+  // Gray checkerboard variants (but NOT pure white)
   { r: 192, g: 192, b: 192 }, // Light gray
   { r: 128, g: 128, b: 128 }, // Medium gray
   { r: 204, g: 204, b: 204 }, // Lighter gray
-  { r: 255, g: 255, b: 255 }, // White (when part of checker)
+  // WHITE REMOVED - valid sprite colour for eyes, teeth, highlights
 ];
 
 /**

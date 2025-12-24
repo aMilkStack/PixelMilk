@@ -156,14 +156,46 @@ const validateIdentityJson = (raw: unknown): raw is Record<string, unknown> => {
  *
  * Uses expert-framed persona with narrative context instead of keyword lists.
  * The "Thinking" model works best with descriptive, philosophy-driven instructions.
+ *
+ * CRITICAL: Never mention "transparent background" - this causes the model to
+ * ignore chromaKey instructions (Poison Token problem from Gemini consultation).
  */
 const SPRITE_SYSTEM_PROMPT = `${getSystemInstruction()}
 
 OUTPUT FORMAT:
-Your final output will be a single PNG image file with transparent background.
+Your final output will be a single PNG image file.
+You will generate sprites on a SOLID, FLAT background using the exact colour specified in the prompt.
+NEVER use transparency, checkerboard patterns, or white backgrounds.
 You will omit any explanatory text, focusing solely on delivering the generated pixel art as the primary response.
 
 ${getProhibitionsPrompt()}`;
+
+/**
+ * Sanitizes user input to remove background-related keywords that could
+ * conflict with chromaKey generation (Poison Token prevention).
+ *
+ * These phrases trigger conflicting behavior in Gemini, causing it to
+ * ignore the explicit chromaKey colour instruction.
+ */
+function sanitizeDescription(description: string): string {
+  return description
+    .replace(/transparent\s*background/gi, '')
+    .replace(/white\s*background/gi, '')
+    .replace(/no\s*background/gi, '')
+    .replace(/clear\s*background/gi, '')
+    .replace(/blank\s*background/gi, '')
+    .replace(/on\s*transparency/gi, '')
+    .trim();
+}
+
+/**
+ * Builds the lighting directive to prevent atmospheric bleed.
+ * Gemini sometimes reflects the chromaKey colour onto the sprite surface.
+ * This directive enforces neutral lighting.
+ */
+function buildLightingDirective(chromaKey: string): string {
+  return `LIGHTING: Neutral studio lighting from above-left. The ${chromaKey} background colour must NOT reflect onto or tint the sprite in any way. The sprite is illuminated by clean white light only.`;
+}
 
 export const generateCharacterIdentity = async (
   description: string,
@@ -364,10 +396,13 @@ export const generateSprite = async (
     console.log(`Created new sprite session for character: ${identity.id}`);
   }
 
+  // Sanitize description to remove poison tokens
+  const cleanDescription = sanitizeDescription(identity.description);
+
   const prompt = `Generate a ${size}x${size} pixel art sprite of this character:
 
 CHARACTER: ${identity.name}
-DESCRIPTION: ${identity.description}
+DESCRIPTION: ${cleanDescription}
 BODY TYPE: ${identity.physicalDescription.bodyType}
 SILHOUETTE: ${identity.physicalDescription.silhouette}
 DISTINCTIVE FEATURES: ${identity.distinctiveFeatures.join(', ')}
@@ -383,7 +418,10 @@ ${identity.angleNotes[direction] ? `ANGLE NOTES: ${identity.angleNotes[direction
 
 ${palettePrompt}
 
-BACKGROUND: Solid ${chromaKey} background - this exact colour will be removed for transparency, do NOT use it anywhere in the sprite itself
+BACKGROUND: Generate this sprite on a SOLID, FLAT ${chromaKey} background.
+This exact colour will be removed in post-processing - do NOT use ${chromaKey} anywhere in the sprite itself.
+
+${buildLightingDirective(chromaKey)}
 
 COMPOSITION: ${compositionGuide}
 
@@ -392,11 +430,11 @@ CRITICAL REQUIREMENTS:
 - True pixel art with clean, crisp pixels
 - No anti-aliasing on edges
 - Horizontally centered
-- SOLID ${chromaKey} BACKGROUND IS MANDATORY
-- Fill ALL background pixels with ${chromaKey}
-- Do NOT draw a checkerboard pattern
+- SOLID ${chromaKey} BACKGROUND IS MANDATORY - fill ALL background pixels with this exact colour
+- Do NOT draw a checkerboard pattern or any pattern in the background
 - Do NOT use transparency - use solid ${chromaKey} for all background areas
 - Do NOT use the background colour (${chromaKey}) anywhere in the sprite itself
+- White and near-white colours are ALLOWED in the sprite (eyes, teeth, highlights) - only ${chromaKey} is forbidden
 
 ${techniquePrompt}`;
 
@@ -505,15 +543,20 @@ STYLE LOCK (must match Image 1 exactly):
 - Shading: ${identity.styleParameters.shadingStyle}
 - Color Palette: ${palettePrompt}
 
+BACKGROUND: Generate this sprite on a SOLID, FLAT ${chromaKey} background.
+This exact colour will be removed in post-processing - do NOT use ${chromaKey} anywhere in the sprite itself.
+
+${buildLightingDirective(chromaKey)}
+
 CRITICAL REQUIREMENTS:
 - Match the character from Image 1 EXACTLY
 - Same proportions, art style, and level of detail as Image 1
 - ${size}x${size} pixels, no anti-aliasing
-- SOLID ${chromaKey} BACKGROUND IS MANDATORY
-- Fill ALL background pixels with ${chromaKey}
-- Do NOT draw a checkerboard pattern
+- SOLID ${chromaKey} BACKGROUND IS MANDATORY - fill ALL background pixels with this exact colour
+- Do NOT draw a checkerboard pattern or any pattern in the background
 - Do NOT use transparency - use solid ${chromaKey} for all background areas
 - Do NOT use the background colour (${chromaKey}) anywhere in the sprite itself
+- White and near-white colours are ALLOWED in the sprite (eyes, teeth, highlights) - only ${chromaKey} is forbidden
 
 ${techniquePrompt}`;
 
@@ -618,6 +661,7 @@ export const optimizePrompt = async (
   }
 
   // Art Director persona with one-shot example (NotebookLM specification)
+  // CRITICAL: Do NOT mention backgrounds - chromaKey is handled separately by the generation pipeline
   const systemPrompt = `You are an Art Director with an IQ of 160, specializing in pixel art game assets. Your role is to transform basic character descriptions into rich, narrative prompts optimized for Gemini 3 Pro Image generation.
 
 TRANSFORMATION RULES:
@@ -626,11 +670,20 @@ TRANSFORMATION RULES:
 3. Add physics/light interaction (how light plays on surfaces, reflections, shadows)
 4. Specify texture details (metal grain, fabric weave, organic patterns)
 5. Keep the user's core concept intact - enhance, don't replace
+6. REMOVE any background-related terms from user input (transparent, white, clear background)
 
 MANDATORY INJECTIONS:
 - Always describe ONE singular character
-- Specify centered composition on solid white background
+- Specify centered composition
 - Include deliberate pixel art aesthetic notes
+- Do NOT mention backgrounds at all - the generation pipeline handles this separately
+
+FORBIDDEN TERMS (never include these):
+- "transparent background"
+- "white background"
+- "solid background"
+- "no background"
+- "clear background"
 
 ONE-SHOT EXAMPLE:
 Before: "forest robot"
@@ -638,7 +691,7 @@ After: "A weathered automaton constructed from moss-covered salvaged metal parts
 
 OUTPUT FORMAT:
 Return a JSON object with:
-- "optimizedPrompt": The enhanced narrative description (150-400 words)
+- "optimizedPrompt": The enhanced narrative description (150-400 words, NO background mentions)
 - "explanation": Brief note on what you enhanced (1-2 sentences)`;
 
   const userMessage = `Transform this character description into a Gemini-optimized narrative for a ${canvasSize}x${canvasSize} pixel art sprite:
