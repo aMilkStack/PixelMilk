@@ -1,5 +1,8 @@
 import { PixelData } from "../types";
 
+// Maximum colors for auto palette mode
+const MAX_AUTO_PALETTE_COLORS = 64;
+
 export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
@@ -13,6 +16,78 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } {
 
 export function rgbToHex(r: number, g: number, b: number): string {
   return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+}
+
+/**
+ * Color distance using weighted Euclidean (human perception weighted)
+ */
+function colorDistance(c1: { r: number; g: number; b: number }, c2: { r: number; g: number; b: number }): number {
+  // Weighted for human perception - red and blue less sensitive than green
+  const rMean = (c1.r + c2.r) / 2;
+  const dR = c1.r - c2.r;
+  const dG = c1.g - c2.g;
+  const dB = c1.b - c2.b;
+  return Math.sqrt(
+    (2 + rMean / 256) * dR * dR +
+    4 * dG * dG +
+    (2 + (255 - rMean) / 256) * dB * dB
+  );
+}
+
+/**
+ * Reduces a palette to maxColors using popularity + similarity merging
+ * Keeps the most frequently used colors and merges similar ones
+ */
+export function quantizePalette(
+  pixels: string[],
+  maxColors: number = MAX_AUTO_PALETTE_COLORS
+): string[] {
+  // Count color frequencies
+  const colorCounts = new Map<string, number>();
+  for (const pixel of pixels) {
+    if (pixel === 'transparent') continue;
+    colorCounts.set(pixel, (colorCounts.get(pixel) || 0) + 1);
+  }
+
+  // If already under limit, return unique colors sorted by frequency
+  if (colorCounts.size <= maxColors) {
+    return Array.from(colorCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([color]) => color);
+  }
+
+  // Sort by frequency (most used first)
+  const sortedColors = Array.from(colorCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([color]) => color);
+
+  // Start with most popular colors
+  const palette: string[] = sortedColors.slice(0, Math.floor(maxColors * 0.7));
+  const remaining = sortedColors.slice(Math.floor(maxColors * 0.7));
+
+  // Add remaining colors only if they're different enough from existing palette
+  const MIN_DISTANCE = 30; // Threshold for "different enough"
+
+  for (const color of remaining) {
+    if (palette.length >= maxColors) break;
+
+    const colorRgb = hexToRgb(color);
+    let isDifferent = true;
+
+    for (const existing of palette) {
+      const existingRgb = hexToRgb(existing);
+      if (colorDistance(colorRgb, existingRgb) < MIN_DISTANCE) {
+        isDifferent = false;
+        break;
+      }
+    }
+
+    if (isDifferent) {
+      palette.push(color);
+    }
+  }
+
+  return palette;
 }
 
 /**
@@ -47,10 +122,10 @@ export function snapColor(color: string, palette: string[]): string {
 
 /**
  * Validates and fixes PixelData to ensure strictly adhered palette usage.
+ * For auto mode (no lockedPalette), reduces colors to MAX_AUTO_PALETTE_COLORS.
  */
 export function validateAndSnapPixelData(data: PixelData, lockedPalette?: string[]): PixelData {
   const { width, height, pixels } = data;
-  const palette = lockedPalette ?? data.palette;
   const expectedLength = width * height;
 
   // 1. Validate Length
@@ -66,7 +141,18 @@ export function validateAndSnapPixelData(data: PixelData, lockedPalette?: string
     }
   }
 
-  // 2. Snap Colors
+  // 2. Determine palette
+  let palette: string[];
+  if (lockedPalette && lockedPalette.length > 0) {
+    // Lospec or manually locked palette - use as-is
+    palette = lockedPalette;
+  } else {
+    // Auto mode - quantize to max colors
+    palette = quantizePalette(validPixels, MAX_AUTO_PALETTE_COLORS);
+    console.log(`Auto palette: ${data.palette.length} colors → ${palette.length} colors (max ${MAX_AUTO_PALETTE_COLORS})`);
+  }
+
+  // 3. Snap Colors to the palette
   const snappedPixels = validPixels.map((p) => snapColor(p, palette));
 
   return {

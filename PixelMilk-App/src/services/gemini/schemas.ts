@@ -77,13 +77,13 @@ export const characterIdentitySchema: Schema = {
     },
     angleNotes: {
       type: Type.OBJECT,
-      description: 'Brief visibility hints (under 50 chars each) for 4 cardinal directions',
+      description: 'Direction-specific visibility notes for asymmetric features (1-2 sentences each). Only 3 needed - W is flipped from E.',
       properties: {
-        S: { type: Type.STRING, description: 'Front view hint, e.g. "face and chest visible"' },
-        N: { type: Type.STRING, description: 'Back view hint, e.g. "cape flows behind"' },
-        E: { type: Type.STRING, description: 'Right profile hint, e.g. "sword on right hip"' },
-        W: { type: Type.STRING, description: 'Left profile hint, e.g. "shield on left arm"' },
+        S: { type: Type.STRING, description: 'Front view - what features are prominent from the front' },
+        N: { type: Type.STRING, description: 'Back view - what features are visible from behind' },
+        E: { type: Type.STRING, description: 'Side profile - what is visible from the side (used for both E and W via flip)' },
       },
+      required: ['S', 'N', 'E'],
     },
   },
   required: [

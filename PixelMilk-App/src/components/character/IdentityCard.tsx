@@ -6,9 +6,10 @@ import { ChevronDown, ChevronUp, Palette, User, Tag } from 'lucide-react';
 export interface IdentityCardProps {
   identity: CharacterIdentity | null;
   isLoading?: boolean;
+  lockedPalette?: string[] | null;
 }
 
-export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading = false }) => {
+export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading = false, lockedPalette }) => {
   const [notesExpanded, setNotesExpanded] = useState(false);
 
   // Loading skeleton state
@@ -84,35 +85,55 @@ export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading 
         <div>
           <h3 className="text-xs uppercase tracking-widest text-[#d8c8b8] mb-3 flex items-center gap-2">
             <Palette className="w-4 h-4" />
-            Color Palette
+            {lockedPalette && lockedPalette.length > 0 ? 'Locked Palette' : 'Color Palette'}
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {(['primary', 'secondary', 'accent', 'skin', 'hair', 'outline'] as const).map((colorKey) => {
-              const colorValue = colourPalette[colorKey];
-              if (!colorValue) return null;
 
-              return (
+          {/* Show locked palette if available, otherwise show semantic colors */}
+          {lockedPalette && lockedPalette.length > 0 ? (
+            <div className="flex flex-wrap gap-1">
+              {lockedPalette.slice(0, 32).map((color, index) => (
                 <div
-                  key={colorKey}
-                  className="flex items-center gap-2 p-2 border border-[#8bd0ba]/30 bg-[#021a1a]/50 hover:border-[#8bd0ba]/60 transition-colors"
-                >
+                  key={index}
+                  className="w-6 h-6 border border-[#d8c8b8]/30 hover:border-[#8bd0ba] transition-colors cursor-pointer"
+                  style={{ backgroundColor: color }}
+                  title={color}
+                />
+              ))}
+              {lockedPalette.length > 32 && (
+                <span className="text-[10px] text-[#8bd0ba]/60 self-center ml-2">
+                  +{lockedPalette.length - 32} more
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {(['primary', 'secondary', 'accent', 'skin', 'hair', 'outline'] as const).map((colorKey) => {
+                const colorValue = colourPalette[colorKey];
+                if (!colorValue) return null;
+
+                return (
                   <div
-                    className="w-8 h-8 border border-[#d8c8b8]/30 flex-shrink-0"
-                    style={{ backgroundColor: colorValue }}
-                    title={colorValue}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] text-[#8bd0ba] uppercase tracking-wide truncate">
-                      {colorKey}
-                    </p>
-                    <p className="text-[10px] text-[#d8c8b8] font-mono truncate">
-                      {colorValue}
-                    </p>
+                    key={colorKey}
+                    className="flex items-center gap-2 p-2 border border-[#8bd0ba]/30 bg-[#021a1a]/50 hover:border-[#8bd0ba]/60 transition-colors"
+                  >
+                    <div
+                      className="w-8 h-8 border border-[#d8c8b8]/30 flex-shrink-0"
+                      style={{ backgroundColor: colorValue }}
+                      title={colorValue}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] text-[#8bd0ba] uppercase tracking-wide truncate">
+                        {colorKey}
+                      </p>
+                      <p className="text-[10px] text-[#d8c8b8] font-mono truncate">
+                        {colorValue}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Physical Description Summary */}

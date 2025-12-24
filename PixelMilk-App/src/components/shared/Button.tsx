@@ -99,7 +99,7 @@ export const Button: React.FC<ButtonProps> = ({
     fontWeight: 'bold',
     textTransform: 'uppercase',
     letterSpacing: '0.1em',
-    cursor: disabled ? 'not-allowed' : 'pointer',
+    cursor: disabled ? 'not-allowed' : 'var(--cursor-pointer)',
     transition: 'all 0.15s ease',
     opacity: disabled ? 0.5 : 1,
     outline: 'none',

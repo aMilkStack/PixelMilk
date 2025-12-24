@@ -64,7 +64,7 @@ export const TabBar: React.FC = () => {
       color: 'var(--color-text-secondary)',
       fontFamily: 'var(--font-mono)',
       fontSize: 'var(--font-size-base)',
-      cursor: 'pointer',
+      cursor: 'var(--cursor-pointer)',
       transition: 'all 0.15s ease',
       textTransform: 'uppercase',
       letterSpacing: '0.05em',
@@ -74,7 +74,7 @@ export const TabBar: React.FC = () => {
     },
     tabActive: {
       color: 'var(--color-text-primary)',
-      borderBottomColor: 'var(--color-accent)',
+      borderBottomColor: 'var(--color-accent-red)',
       backgroundColor: 'var(--color-bg-secondary)',
     },
     tabHover: {

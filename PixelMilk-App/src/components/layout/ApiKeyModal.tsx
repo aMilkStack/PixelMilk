@@ -89,7 +89,7 @@ const baseStyles: Record<string, React.CSSProperties> = {
     background: 'none',
     border: 'none',
     color: 'var(--color-text-secondary)',
-    cursor: 'pointer',
+    cursor: 'var(--cursor-pointer)',
     padding: 'var(--space-xs)',
   },
   description: {

@@ -197,10 +197,11 @@ export async function validateApiKey(apiKey: string): Promise<boolean> {
     // Make a minimal request to validate the key
     // Using a very short prompt with minimal tokens
     const response = await testClient.models.generateContent({
-      model: 'gemini-2.0-flash-lite',
+      model: 'gemini-3-flash-preview',
       contents: 'Say "ok"',
       config: {
         maxOutputTokens: 5,
+        temperature: 1.0, // Gemini 3 requires temperature 1.0
       },
     });
     // If we get any response, the key is valid
@@ -487,6 +488,9 @@ export async function sendSpriteMessage(
   prompt: string,
   referenceImages?: Array<{ data: string; mimeType: string }>
 ): Promise<{ imageData: string; mimeType: string }> {
+  const startTime = performance.now();
+  console.log(`[Gemini] Starting sprite generation (${referenceImages?.length || 0} reference images)...`);
+
   return withRateLimitRetry(async () => {
     // Build message parts: text prompt + any reference images
     const parts: Part[] = [];
@@ -506,8 +510,14 @@ export async function sendSpriteMessage(
     // Add text prompt
     parts.push({ text: prompt });
 
+    console.log(`[Gemini] Sending request to API...`);
+    const apiStartTime = performance.now();
+
     // sendMessage takes { message: parts } format
     const response: GenerateContentResponse = await chat.sendMessage({ message: parts });
+
+    const apiTime = ((performance.now() - apiStartTime) / 1000).toFixed(2);
+    console.log(`[Gemini] API response received in ${apiTime}s`);
 
     // Extract image from response
     const candidates = response.candidates;
@@ -537,11 +547,69 @@ export async function sendSpriteMessage(
       throw new Error('No image in response');
     }
 
+    const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+    console.log(`[Gemini] Sprite generated in ${elapsed}s`);
+
     return {
       imageData: imagePart.inlineData.data,
       mimeType: imagePart.inlineData.mimeType,
     };
   }, 'sendSpriteMessage');
+}
+
+/**
+ * Generates a segmentation/contour mask for an image.
+ * Returns a base64-encoded PNG probability map where pixel values
+ * represent AI confidence that the pixel belongs to the subject.
+ *
+ * Used for dual-check background removal: only remove pixels that are
+ * BOTH white (by color) AND identified as background (by semantic mask).
+ */
+export async function generateSegmentationMask(
+  imageBase64: string,
+  mimeType: string = 'image/png'
+): Promise<{ maskData: string; mimeType: string }> {
+  const client = getClient();
+
+  return withRateLimitRetry(async () => {
+    const response = await client.models.generateContent({
+      model: 'gemini-3-pro-image-preview',
+      contents: {
+        parts: [
+          {
+            text: 'Segment the character in this image and return its contour mask. Ensure the mask respects the 1:1 pixel edges of the sprite art. Return ONLY the mask image.',
+          },
+          {
+            inlineData: {
+              mimeType,
+              data: imageBase64.replace(/^data:image\/\w+;base64,/, ''),
+            },
+          },
+        ],
+      },
+      config: {
+        responseModalities: [Modality.IMAGE],
+      },
+    });
+
+    const candidates = response.candidates;
+    if (!candidates || candidates.length === 0) {
+      throw new Error('No segmentation mask returned from model');
+    }
+
+    const candidate = candidates[0];
+    const parts = candidate.content?.parts ?? [];
+    const imagePart = parts.find((part) => part.inlineData);
+
+    if (!imagePart?.inlineData) {
+      throw new Error('No mask image in response');
+    }
+
+    return {
+      maskData: imagePart.inlineData.data,
+      mimeType: imagePart.inlineData.mimeType,
+    };
+  }, 'generateSegmentationMask');
 }
 
 /**

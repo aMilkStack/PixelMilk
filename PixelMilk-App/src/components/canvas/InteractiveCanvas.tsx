@@ -335,11 +335,11 @@ export const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       case 'erase':
       case 'fill':
       case 'eyedropper':
-        return 'crosshair';
+        return 'var(--cursor-crosshair)';
       case 'hotspot':
-        return 'pointer';
+        return 'var(--cursor-pointer)';
       default:
-        return 'default';
+        return 'var(--cursor-default)';
     }
   };
 

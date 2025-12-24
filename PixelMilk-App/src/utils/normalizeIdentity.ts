@@ -40,14 +40,14 @@ export function normalizeIdentity(
     distinctiveFeatures: getStringArray(raw, ['distinctiveFeatures', 'distinctive_features']) || [],
 
     angleNotes: {
-      S: getString(raw, ['angleNotes.S', 'angle_notes.S', 'angleNotes.s', 'angle_notes.s']),
-      N: getString(raw, ['angleNotes.N', 'angle_notes.N', 'angleNotes.n', 'angle_notes.n']),
-      E: getString(raw, ['angleNotes.E', 'angle_notes.E', 'angleNotes.e', 'angle_notes.e']),
-      W: getString(raw, ['angleNotes.W', 'angle_notes.W', 'angleNotes.w', 'angle_notes.w']),
-      SE: getString(raw, ['angleNotes.SE', 'angle_notes.SE', 'angleNotes.se', 'angle_notes.se']),
-      SW: getString(raw, ['angleNotes.SW', 'angle_notes.SW', 'angleNotes.sw', 'angle_notes.sw']),
-      NE: getString(raw, ['angleNotes.NE', 'angle_notes.NE', 'angleNotes.ne', 'angle_notes.ne']),
-      NW: getString(raw, ['angleNotes.NW', 'angle_notes.NW', 'angleNotes.nw', 'angle_notes.nw']),
+      S: truncateAngleNote(getString(raw, ['angleNotes.S', 'angle_notes.S', 'angleNotes.s', 'angle_notes.s'])),
+      N: truncateAngleNote(getString(raw, ['angleNotes.N', 'angle_notes.N', 'angleNotes.n', 'angle_notes.n'])),
+      E: truncateAngleNote(getString(raw, ['angleNotes.E', 'angle_notes.E', 'angleNotes.e', 'angle_notes.e'])),
+      W: truncateAngleNote(getString(raw, ['angleNotes.W', 'angle_notes.W', 'angleNotes.w', 'angle_notes.w'])),
+      SE: truncateAngleNote(getString(raw, ['angleNotes.SE', 'angle_notes.SE', 'angleNotes.se', 'angle_notes.se'])),
+      SW: truncateAngleNote(getString(raw, ['angleNotes.SW', 'angle_notes.SW', 'angleNotes.sw', 'angle_notes.sw'])),
+      NE: truncateAngleNote(getString(raw, ['angleNotes.NE', 'angle_notes.NE', 'angleNotes.ne', 'angle_notes.ne'])),
+      NW: truncateAngleNote(getString(raw, ['angleNotes.NW', 'angle_notes.NW', 'angleNotes.nw', 'angle_notes.nw'])),
     },
 
     styleParameters: style,
@@ -93,6 +93,38 @@ function getStringArray(obj: RawIdentity, paths: string[]): string[] | undefined
     }
   }
   return undefined;
+}
+
+/**
+ * Truncates angle notes to prevent runaway text from Gemini.
+ * NotebookLM recommends 10-2,000 chars for detailed narrative descriptions.
+ * Max 500 chars per angle note, cuts at word boundary.
+ * Also detects runaway repetition patterns (e.g., "view view view...").
+ */
+function truncateAngleNote(note: string | undefined): string | undefined {
+  if (!note) return undefined;
+
+  // Detect runaway repetition (same word repeated 3+ times)
+  const words = note.split(/\s+/);
+  if (words.length >= 3) {
+    const firstWord = words[0].toLowerCase();
+    const repeatedCount = words.filter(w => w.toLowerCase() === firstWord).length;
+    if (repeatedCount >= 3 && repeatedCount > words.length * 0.5) {
+      // More than half the words are the same - likely runaway
+      return undefined;
+    }
+  }
+
+  if (note.length <= 500) return note;
+
+  // Try to cut at a word boundary
+  const truncated = note.slice(0, 500);
+  const lastSpace = truncated.lastIndexOf(' ');
+
+  if (lastSpace > 400) {
+    return truncated.slice(0, lastSpace);
+  }
+  return truncated;
 }
 
 /**

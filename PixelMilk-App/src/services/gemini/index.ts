@@ -5,7 +5,7 @@
  */
 
 export { initializeClient, getClient, isClientInitialized, validateApiKey } from './client';
-export { generateContent, generateStructuredContent, generateImage, editImage } from './client';
+export { generateContent, generateStructuredContent, generateImage, editImage, generateSegmentationMask } from './client';
 export {
   createSpriteSession,
   getSpriteSession,
@@ -22,9 +22,10 @@ export {
   generateSprite,
   generateRotatedSprite,
   generateRotatedSpriteLegacy,
+  optimizePrompt,
 } from './geminiService';
 
 export { applyHotspotEdit } from './editing';
 
 // Re-export types for consumers
-export type { ReferenceImage } from './geminiService';
+export type { ReferenceImage, OptimizedPromptResult } from './geminiService';

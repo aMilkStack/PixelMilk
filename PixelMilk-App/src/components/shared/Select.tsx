@@ -66,7 +66,7 @@ export const Select: React.FC<SelectProps> = ({
     fontFamily: 'monospace',
     fontSize: '14px',
     outline: 'none',
-    cursor: disabled ? 'not-allowed' : 'pointer',
+    cursor: disabled ? 'not-allowed' : 'var(--cursor-pointer)',
     transition: 'all 0.15s ease',
     opacity: disabled ? 0.5 : 1,
     appearance: 'none',

@@ -73,7 +73,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
-      overflow: 'hidden',
+      overflowX: 'hidden',
+      overflowY: 'auto',
     },
     content: {
       flex: 1,

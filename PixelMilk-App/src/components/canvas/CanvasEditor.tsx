@@ -189,7 +189,7 @@ export const CanvasEditor: React.FC<CanvasEditorProps> = ({
     border: `1px solid ${colors.mint}40`,
     backgroundColor: 'transparent',
     color: enabled ? colors.mint : colors.mint + '40',
-    cursor: enabled ? 'pointer' : 'not-allowed',
+    cursor: enabled ? 'var(--cursor-pointer)' : 'not-allowed',
     opacity: enabled ? 1 : 0.5,
   });
 

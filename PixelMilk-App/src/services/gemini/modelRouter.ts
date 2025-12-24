@@ -27,15 +27,15 @@ const IMAGE_GENERATION_MODEL: GeminiModel = 'gemini-3-pro-image-preview';
 /** Flash Image - for EDITING ONLY (fast iteration, inpainting, hotspot edits) */
 const IMAGE_EDITING_MODEL: GeminiModel = 'gemini-2.5-flash-image';
 
-/** Text models - Flash Preview for structured output */
+/** Text models - Flash for structured JSON output */
 const TEXT_MODEL: GeminiModel = 'gemini-3-flash-preview';
 
 /** All valid model identifiers - keep in sync with GeminiModel type in types.ts */
 const VALID_MODELS: readonly GeminiModel[] = [
-  'gemini-2.5-flash-image',
+  'gemini-3-pro-preview',
   'gemini-3-pro-image-preview',
-  'gemini-2.5-flash',
   'gemini-3-flash-preview',
+  'gemini-2.5-flash-image',
 ] as const;
 
 export function getModelForTask(task: TaskType, _quality: QualityMode = 'draft'): GeminiModel {
@@ -83,12 +83,11 @@ export function getConfigForTask(
   const isProModel = model === IMAGE_GENERATION_MODEL;
 
   // Temperature strategy (NotebookLM best practice):
-  // - 1.0 for initial generation (creative exploration)
+  // - 1.0 for Gemini 3 models (required for structured output to avoid truncation)
   // - 0.8 for rotations/angles (consistency with reference)
-  // - 0.3 for text/JSON (deterministic structured output)
   let temperature: number;
   if (task === 'text-analysis') {
-    temperature = 0.3;
+    temperature = 1.0; // NotebookLM: Gemini 3 needs 1.0 for structured JSON
   } else if (isRotation) {
     temperature = 0.8; // Lower for consistency with reference images
   } else {

@@ -61,7 +61,7 @@ export const Input: React.FC<InputProps> = ({
     outline: 'none',
     transition: 'all 0.15s ease',
     opacity: disabled ? 0.5 : 1,
-    cursor: disabled ? 'not-allowed' : 'text',
+    cursor: disabled ? 'not-allowed' : 'var(--cursor-text)',
     boxShadow: isFocused && !disabled
       ? `0 0 0 2px ${error ? colors.danger : colors.mint}40, 0 0 12px ${error ? colors.danger : colors.mint}30`
       : 'none',

@@ -11,8 +11,8 @@ export interface StyleSelectorProps {
 
 // Canvas size options - 128/256 active, smaller sizes coming soon
 const canvasSizeOptions: SelectOption[] = [
-  { value: '128', label: '128x128 (Gameplay)' },
-  { value: '256', label: '256x256 (Portrait)' },
+  { value: '128', label: '128x128' },
+  { value: '256', label: '256x256' },
   { value: '16', label: '16x16 (Coming Soon)', disabled: true },
   { value: '32', label: '32x32 (Coming Soon)', disabled: true },
   { value: '64', label: '64x64 (Coming Soon)', disabled: true },
@@ -105,7 +105,7 @@ export const StyleSelector: React.FC<StyleSelectorProps> = ({
     fontWeight: 'bold',
     textTransform: 'uppercase',
     letterSpacing: '0.15em',
-    cursor: disabled ? 'not-allowed' : 'pointer',
+    cursor: disabled ? 'not-allowed' : 'var(--cursor-pointer)',
     transition: 'all var(--transition-fast)',
     opacity: disabled ? 0.5 : 1,
     borderRadius: 'var(--border-radius)', // 0px - terminal aesthetic

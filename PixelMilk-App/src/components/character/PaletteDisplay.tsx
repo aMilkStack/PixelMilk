@@ -78,7 +78,7 @@ export const PaletteDisplay: React.FC = () => {
     border: `1px solid ${colors.mint}40`,
     backgroundColor: 'transparent',
     color: colors.cream,
-    cursor: 'pointer',
+    cursor: 'var(--cursor-pointer)',
     transition: 'all 0.15s ease',
   };
 
@@ -93,7 +93,7 @@ export const PaletteDisplay: React.FC = () => {
     height: '28px',
     backgroundColor: color,
     border: selectedColor === color ? `2px solid ${colors.mint}` : `1px solid ${colors.cream}40`,
-    cursor: 'pointer',
+    cursor: 'var(--cursor-pointer)',
     outline: 'none',
     padding: 0,
   });

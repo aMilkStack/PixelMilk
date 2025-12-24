@@ -111,10 +111,10 @@ export type TaskType =
 export type QualityMode = 'draft' | 'final';
 
 export type GeminiModel =
-  | 'gemini-2.5-flash-image'
+  | 'gemini-3-pro-preview'
   | 'gemini-3-pro-image-preview'
-  | 'gemini-2.5-flash'
-  | 'gemini-3-flash-preview';
+  | 'gemini-3-flash-preview'
+  | 'gemini-2.5-flash-image';
 
 export interface GeminiConfig {
   model: GeminiModel;

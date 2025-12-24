@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { Wand2, Loader2 } from 'lucide-react';
 
 interface DescriptionInputProps {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
   error?: string;
+  onEnhance?: () => void;
+  isEnhancing?: boolean;
 }
 
 const MIN_CHARS = 10;
@@ -24,6 +27,8 @@ export const DescriptionInput: React.FC<DescriptionInputProps> = ({
   onChange,
   disabled = false,
   error,
+  onEnhance,
+  isEnhancing = false,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [internalError, setInternalError] = useState<string>('');
@@ -77,7 +82,7 @@ export const DescriptionInput: React.FC<DescriptionInputProps> = ({
     resize: 'vertical',
     transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
     opacity: disabled ? 0.6 : 1,
-    cursor: disabled ? 'not-allowed' : 'text',
+    cursor: disabled ? 'not-allowed' : 'var(--cursor-text)',
     boxShadow: isFocused && !disabled
       ? `0 0 0 2px ${colors.mint}40, 0 0 12px ${colors.mint}30`
       : 'none',
@@ -102,24 +107,71 @@ export const DescriptionInput: React.FC<DescriptionInputProps> = ({
     color: colors.error,
   };
 
+  const canEnhance = onEnhance && characterCount >= MIN_CHARS && characterCount <= MAX_CHARS && !disabled && !isEnhancing;
+
+  const textareaWrapperStyle: React.CSSProperties = {
+    position: 'relative',
+  };
+
+  const wandButtonStyle: React.CSSProperties = {
+    position: 'absolute',
+    bottom: '8px',
+    right: '8px',
+    width: '28px',
+    height: '28px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: canEnhance ? colors.mint + '20' : 'transparent',
+    border: `1px solid ${canEnhance ? colors.mint + '60' : colors.mint + '30'}`,
+    color: canEnhance ? colors.mint : colors.cream + '40',
+    cursor: canEnhance ? 'var(--cursor-pointer)' : 'not-allowed',
+    transition: 'all 0.15s ease',
+    opacity: onEnhance ? 1 : 0,
+  };
+
+  const handleWandClick = () => {
+    if (canEnhance && onEnhance) {
+      onEnhance();
+    }
+  };
+
   return (
     <div style={containerStyle}>
       <label style={labelStyle} htmlFor="character-description">
         Character Description
       </label>
 
-      <textarea
-        id="character-description"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        placeholder="A brave knight with silver armor and a red cape, wielding a glowing sword..."
-        style={textareaStyle}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        aria-invalid={!!displayError}
-        aria-describedby={displayError ? 'description-error' : 'description-counter'}
-      />
+      <div style={textareaWrapperStyle}>
+        <textarea
+          id="character-description"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled || isEnhancing}
+          placeholder="A weathered forest guardian who protects ancient groves. Their bark-like skin is mottled green and brown, with glowing amber eyes. Mushrooms grow along their shoulders, and they carry a gnarled staff wrapped in vines..."
+          style={textareaStyle}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          aria-invalid={!!displayError}
+          aria-describedby={displayError ? 'description-error' : 'description-counter'}
+        />
+        {onEnhance && (
+          <button
+            type="button"
+            style={wandButtonStyle}
+            onClick={handleWandClick}
+            disabled={!canEnhance}
+            title={canEnhance ? 'Enhance prompt with AI' : 'Enter valid description to enhance'}
+            aria-label="Enhance prompt"
+          >
+            {isEnhancing ? (
+              <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+            ) : (
+              <Wand2 size={14} />
+            )}
+          </button>
+        )}
+      </div>
 
       <div style={counterStyle}>
         <span id="description-counter">
@@ -135,6 +187,13 @@ export const DescriptionInput: React.FC<DescriptionInputProps> = ({
           {displayError}
         </div>
       )}
+
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };

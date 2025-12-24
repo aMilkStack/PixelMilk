@@ -1,5 +1,96 @@
 import { rgbToHex, hexToRgb } from './paletteGovernor';
 import { snapToGrid } from './pixelSnapper';
+import type { SpriteData, Direction } from '../types';
+
+/**
+ * Confidence threshold for segmentation mask binarization.
+ * Pixels with value > threshold are considered "subject" (foreground).
+ * Pixels with value <= threshold are considered "background".
+ */
+const MASK_CONFIDENCE_THRESHOLD = 128;
+
+/**
+ * Parses a segmentation mask (base64 PNG) into a boolean array.
+ * True = pixel is part of the subject (foreground)
+ * False = pixel is background
+ *
+ * The mask is a grayscale probability map where pixel values represent
+ * AI confidence that the pixel belongs to the subject.
+ */
+export async function parseSegmentationMask(
+  maskBase64: string,
+  targetWidth: number,
+  targetHeight: number
+): Promise<boolean[]> {
+  const cleanBase64 = maskBase64.replace(/^data:image\/\w+;base64,/, '');
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Canvas context not available'));
+        return;
+      }
+
+      // Draw and resize mask to target dimensions
+      ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+      const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+      const data = imageData.data;
+
+      // Convert to boolean array based on confidence threshold
+      const mask: boolean[] = [];
+      for (let i = 0; i < data.length; i += 4) {
+        // Use grayscale value (average of RGB, or just R for grayscale masks)
+        const confidence = data[i]; // R channel
+        mask.push(confidence > MASK_CONFIDENCE_THRESHOLD);
+      }
+
+      resolve(mask);
+    };
+
+    img.onerror = () => {
+      reject(new Error('Failed to load segmentation mask'));
+    };
+
+    img.src = `data:image/png;base64,${cleanBase64}`;
+  });
+}
+
+/**
+ * Horizontally flips a sprite's pixel data.
+ * Used to generate W from E (symmetric characters save an API call).
+ *
+ * @param sprite - The source sprite data (e.g., East facing)
+ * @param newDirection - The direction for the flipped sprite (e.g., 'W')
+ * @returns A new SpriteData with horizontally flipped pixels
+ */
+export function flipSpriteHorizontally(sprite: SpriteData, newDirection: Direction): SpriteData {
+  const { width, height, pixels } = sprite;
+  const flippedPixels: string[] = new Array(pixels.length);
+
+  // Flip each row horizontally
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const sourceIndex = y * width + x;
+      const targetIndex = y * width + (width - 1 - x);
+      flippedPixels[targetIndex] = pixels[sourceIndex];
+    }
+  }
+
+  return {
+    ...sprite,
+    id: `${sprite.id}-flipped`,
+    direction: newDirection,
+    pixels: flippedPixels,
+    createdAt: Date.now(),
+  };
+}
 
 /**
  * Prepares an image for Gemini API by adding a white background.
@@ -61,10 +152,44 @@ function resolveImageSrc(imageData: Blob | string): { src: string; revoke: boole
   return { src: objectUrl, revoke: true };
 }
 
+/**
+ * White background detection using Euclidean distance.
+ * Tolerance of 4 catches near-white drift but preserves #FEFEFE highlights.
+ */
+const WHITE_BG_TOLERANCE = 4;
+
+/**
+ * Returns true for pixels close to pure white (#FFFFFF).
+ * Preserves #FEFEFE (Safe White) and hue-shifted highlights.
+ */
+function isWhiteBackground(r: number, g: number, b: number): boolean {
+  const distance = Math.sqrt(
+    Math.pow(255 - r, 2) +
+    Math.pow(255 - g, 2) +
+    Math.pow(255 - b, 2)
+  );
+  return distance < WHITE_BG_TOLERANCE;
+}
+
+/**
+ * Converts a PNG image to a pixel array with palette extraction.
+ *
+ * Dual-check background removal strategy:
+ * - If segmentationMask is provided, only remove a pixel if BOTH:
+ *   1. It passes the isWhiteBackground() color check (near pure white)
+ *   2. AND the mask says it's background (not foreground)
+ * - This prevents removing #FEFEFE highlights that the AI knows are part of the character
+ *
+ * @param imageData - The source image as Blob or base64 string
+ * @param targetWidth - Target width in pixels
+ * @param targetHeight - Target height in pixels
+ * @param segmentationMask - Optional boolean array from parseSegmentationMask()
+ */
 export async function pngToPixelArray(
   imageData: Blob | string,
   targetWidth: number,
-  targetHeight: number
+  targetHeight: number,
+  segmentationMask?: boolean[]
 ): Promise<{ pixels: string[]; palette: string[] }> {
   const { src, revoke } = resolveImageSrc(imageData);
   const image = new Image();
@@ -99,20 +224,42 @@ export async function pngToPixelArray(
     colorTolerance: 20,
   });
 
-  // Step 3: Extract pixels from snapped data
+  // Step 3: Extract pixels from snapped data with dual-check background removal
   const data = snappedImageData.data;
   const pixels: string[] = [];
   const paletteSet = new Set<string>();
 
   for (let i = 0; i < data.length; i += 4) {
+    const pixelIndex = i / 4;
     const r = data[i];
     const g = data[i + 1];
     const b = data[i + 2];
     const a = data[i + 3];
 
+    // Transparent pixels stay transparent
     if (a === 0 || a < 128) {
       pixels.push('transparent');
       continue;
+    }
+
+    // Dual-check background removal strategy:
+    // Only make transparent if BOTH color check AND mask check pass
+    const isWhite = isWhiteBackground(r, g, b);
+
+    if (segmentationMask && segmentationMask.length === (data.length / 4)) {
+      // Dual-check: must be white AND mask says it's background
+      const isForeground = segmentationMask[pixelIndex];
+      if (isWhite && !isForeground) {
+        pixels.push('transparent');
+        continue;
+      }
+      // If mask says foreground, keep the pixel even if it looks white
+    } else {
+      // No mask: fall back to color-only check
+      if (isWhite) {
+        pixels.push('transparent');
+        continue;
+      }
     }
 
     const hex = rgbToHex(r, g, b);

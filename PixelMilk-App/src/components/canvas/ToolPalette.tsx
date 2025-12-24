@@ -49,7 +49,7 @@ export const ToolPalette: React.FC = () => {
     border: `2px solid ${isActive ? colors.mint : colors.mint + '40'}`,
     backgroundColor: isActive ? colors.mint + '30' : 'transparent',
     color: isActive ? colors.mint : colors.cream,
-    cursor: 'pointer',
+    cursor: 'var(--cursor-pointer)',
     transition: 'all 0.15s ease',
   });
 
@@ -80,7 +80,7 @@ export const ToolPalette: React.FC = () => {
     height: '36px',
     backgroundColor: selectedColor,
     border: `2px solid ${colors.mint}`,
-    cursor: 'pointer',
+    cursor: 'var(--cursor-pointer)',
   };
 
   const sliderStyle: React.CSSProperties = {

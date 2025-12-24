@@ -56,9 +56,15 @@ PixelMilk-App/src/
 
 **1. Multi-Model Router** (`services/gemini/modelRouter.ts`)
 Routes tasks to optimal Gemini models:
-- `gemini-2.5-flash-image` - Fast iteration, tiles, edits
-- `gemini-3-pro-image-preview` - Final quality, complex composition
-- `gemini-2.5-flash` / `gemini-3-flash-preview` - Text analysis
+- `gemini-3-pro-image-preview` - Image generation (primary model)
+- `gemini-2.5-flash-image` - Image EDITING only (fast iteration, inpainting)
+- `gemini-3-flash-preview` - Text/JSON structured output
+- `gemini-3-pro-preview` - Text generation (available but not primary)
+
+**Gemini 3 Requirements:**
+- Temperature must be 1.0 for all Gemini 3 models
+- Thought signatures must be circulated back exactly as received
+- `media_resolution_high` for image analysis tasks
 
 **2. Character Identity System**
 Every character has a structured identity document ensuring consistency:

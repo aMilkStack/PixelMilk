@@ -323,7 +323,7 @@ export const SpriteCanvas: React.FC<SpriteCanvasProps> = ({
         height={CANVAS_SIZE}
         onClick={handleClick}
         style={{
-          cursor: interactive ? 'crosshair' : 'default',
+          cursor: interactive ? 'var(--cursor-crosshair)' : 'var(--cursor-default)',
           imageRendering: 'pixelated',
         }}
       />

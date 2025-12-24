@@ -11,10 +11,12 @@ import {
   generateCharacterIdentity,
   generateSprite,
   generateRotatedSprite,
+  optimizePrompt,
+  generateSegmentationMask,
 } from '../../services/gemini';
 import type { ReferenceImage } from '../../services/gemini';
 import { saveAsset, generateAssetId, getAssetsByType } from '../../services/storage';
-import { pngToPixelArray, removeCheckerboardBackground } from '../../utils/imageUtils';
+import { pngToPixelArray, removeCheckerboardBackground, flipSpriteHorizontally, parseSegmentationMask } from '../../utils/imageUtils';
 import { renderPixelDataToDataUrl, validateAndSnapPixelData, renderPixelDataToBase64 } from '../../utils/paletteGovernor';
 import { getLospecColors } from '../../data/lospecPalettes';
 import type { Asset, Direction, SpriteData } from '../../types';
@@ -70,7 +72,7 @@ const DirectionPicker: React.FC<DirectionPickerProps> = ({
       border: `2px solid ${isSelected ? colors.mint : colors.mint + '40'}`,
       backgroundColor: isSelected ? colors.mint + '20' : 'transparent',
       color: isSelected ? colors.mint : colors.cream,
-      cursor: disabled ? 'not-allowed' : 'pointer',
+      cursor: disabled ? 'not-allowed' : 'var(--cursor-pointer)',
       opacity: disabled ? 0.5 : 1,
       transition: 'all 0.15s ease',
       position: 'relative',
@@ -319,7 +321,7 @@ const CharacterListItem: React.FC<CharacterListItemProps> = ({
     padding: '12px',
     backgroundColor: isHovered ? colors.mint + '10' : colors.bgPrimary,
     border: `1px solid ${isHovered ? colors.mint : colors.mint + '40'}`,
-    cursor: 'pointer',
+    cursor: 'var(--cursor-pointer)',
     transition: 'all 0.15s ease',
   };
 
@@ -424,6 +426,9 @@ type SaveStatus = 'idle' | 'saving' | 'success' | 'error';
 type FailedGeneration = 'identity' | 'sprite' | null;
 
 // Cardinal directions in generation order (South first, then rotate clockwise)
+// Only generate 3 directions - W is flipped from E (NotebookLM: "Symmetry Shortcut")
+const GENERATED_DIRECTIONS: Direction[] = ['S', 'E', 'N'];
+// All 4 directions for UI display
 const CARDINAL_DIRECTIONS: Direction[] = ['S', 'E', 'N', 'W'];
 // Delay between auto-generating each direction (ms) to avoid rate limiting
 const DIRECTION_GENERATION_DELAY = 1500;
@@ -476,6 +481,10 @@ export const CharacterTab: React.FC = () => {
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [generatingDirection, setGeneratingDirection] = useState<Direction | null>(null);
   const [autoGenerationProgress, setAutoGenerationProgress] = useState<string | null>(null);
+  // Prompt Optimizer state
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [optimizedPrompt, setOptimizedPrompt] = useState<string | null>(null);
+  const [optimizeExplanation, setOptimizeExplanation] = useState<string | null>(null);
 
   const { apiKey, openApiKeyModal, setApiKeyStatus } = useAppStore();
   const { zoom, setZoom } = useCanvasStore();
@@ -521,6 +530,55 @@ export const CharacterTab: React.FC = () => {
 
   // Check if description is valid
   const isDescriptionValid = description.length >= 10 && description.length <= 2000;
+
+  // Handle Prompt Optimization (Prompt Wand)
+  const handleOptimizePrompt = async () => {
+    if (!apiKey) {
+      openApiKeyModal();
+      return;
+    }
+
+    if (!isDescriptionValid) {
+      setError('Please enter a valid description (10-2000 characters) to optimize');
+      return;
+    }
+
+    setError(null);
+    setIsOptimizing(true);
+    setOptimizedPrompt(null);
+    setOptimizeExplanation(null);
+
+    try {
+      const result = await optimizePrompt(description, styleParams.canvasSize);
+      setOptimizedPrompt(result.optimizedPrompt);
+      setOptimizeExplanation(result.explanation);
+    } catch (err) {
+      handleApiError({
+        err,
+        fallbackMessage: 'Failed to optimize prompt',
+        setError,
+        setApiKeyStatus,
+        openApiKeyModal,
+      });
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
+
+  // Accept optimized prompt - replaces user description with optimized version
+  const handleAcceptOptimizedPrompt = () => {
+    if (optimizedPrompt) {
+      setDescription(optimizedPrompt);
+      setOptimizedPrompt(null);
+      setOptimizeExplanation(null);
+    }
+  };
+
+  // Dismiss optimized prompt suggestion
+  const handleDismissOptimizedPrompt = () => {
+    setOptimizedPrompt(null);
+    setOptimizeExplanation(null);
+  };
 
   // Handle Generate Identity
   const handleGenerateIdentity = async () => {
@@ -603,7 +661,20 @@ export const CharacterTab: React.FC = () => {
     // Post-process: remove checkerboard "transparency" pattern
     const imageBase64 = await removeCheckerboardBackground(rawImageBase64);
 
-    const { pixels, palette } = await pngToPixelArray(imageBase64, size, size);
+    // Generate segmentation mask for dual-check background removal
+    // This prevents removing white highlights the AI knows are part of the character
+    let segmentationMask: boolean[] | undefined;
+    try {
+      console.log('[CharacterTab] Generating segmentation mask...');
+      const { maskData } = await generateSegmentationMask(imageBase64);
+      segmentationMask = await parseSegmentationMask(maskData, size, size);
+      console.log('[CharacterTab] Segmentation mask generated successfully');
+    } catch (maskError) {
+      // Fall back to color-only extraction if mask generation fails
+      console.warn('[CharacterTab] Segmentation mask failed, using color-only extraction:', maskError);
+    }
+
+    const { pixels, palette } = await pngToPixelArray(imageBase64, size, size, segmentationMask);
     const pixelData = validateAndSnapPixelData(
       {
         name: identity.name,
@@ -683,12 +754,13 @@ export const CharacterTab: React.FC = () => {
     let currentPalette: string[] | null = null;
 
     try {
-      for (let i = 0; i < CARDINAL_DIRECTIONS.length; i++) {
-        const direction = CARDINAL_DIRECTIONS[i];
+      // Generate only 3 directions (S, E, N) - W is flipped from E
+      for (let i = 0; i < GENERATED_DIRECTIONS.length; i++) {
+        const direction = GENERATED_DIRECTIONS[i];
 
-        // Update progress
+        // Update progress (show 4 total since we'll flip E→W)
         setGeneratingDirection(direction);
-        setAutoGenerationProgress(`Generating ${direction} (${i + 1}/${CARDINAL_DIRECTIONS.length})...`);
+        setAutoGenerationProgress(`Generating ${direction} (${i + 1}/4)...`);
         setCurrentDirection(direction);
 
         // Add delay between generations to avoid rate limiting (skip first)
@@ -710,6 +782,18 @@ export const CharacterTab: React.FC = () => {
 
         newSprites.set(direction, sprite);
         addSprite(direction, sprite);
+      }
+
+      // Flip E→W (NotebookLM: "Symmetry Shortcut" saves an API call)
+      const eastSprite = newSprites.get('E');
+      if (eastSprite) {
+        setAutoGenerationProgress('Flipping E→W (4/4)...');
+        setGeneratingDirection('W');
+        setCurrentDirection('W');
+
+        const westSprite = flipSpriteHorizontally(eastSprite, 'W');
+        newSprites.set('W', westSprite);
+        addSprite('W', westSprite);
       }
 
       setLastFailedGeneration(null);
@@ -917,7 +1001,60 @@ export const CharacterTab: React.FC = () => {
             value={description}
             onChange={setDescription}
             disabled={isGeneratingIdentity || isGeneratingSprite}
+            onEnhance={handleOptimizePrompt}
+            isEnhancing={isOptimizing}
           />
+          {/* Optimized Prompt Preview - shown when enhancement is available */}
+          {optimizedPrompt && (
+            <div style={{
+              marginTop: '16px',
+              padding: '12px',
+              backgroundColor: colors.bgPrimary,
+              border: `2px solid ${colors.mint}40`,
+            }}>
+              <div style={{
+                fontFamily: 'monospace',
+                fontSize: '11px',
+                fontWeight: 'bold',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                color: colors.mint,
+                marginBottom: '12px',
+              }}>
+                Enhanced Description
+              </div>
+              <div style={{
+                fontFamily: 'monospace',
+                fontSize: '13px',
+                lineHeight: '1.6',
+                color: colors.cream,
+                maxHeight: '180px',
+                overflowY: 'auto',
+                marginBottom: '12px',
+                padding: '8px',
+                backgroundColor: colors.bgSecondary,
+                border: `1px solid ${colors.mint}20`,
+              }}>
+                {optimizedPrompt}
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleAcceptOptimizedPrompt}
+                >
+                  Accept
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDismissOptimizedPrompt}
+                >
+                  Dismiss
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Style Selector */}
@@ -1070,7 +1207,17 @@ export const CharacterTab: React.FC = () => {
 
       {/* Right Column - Identity */}
       <div style={rightColumnStyle}>
-        <IdentityCard identity={identity} isLoading={isGeneratingIdentity} />
+        <IdentityCard
+          identity={identity}
+          isLoading={isGeneratingIdentity}
+          lockedPalette={
+            // Show Lospec colors immediately when selected, or locked palette after sprite gen
+            lockedPalette ??
+            (styleParams.paletteMode.startsWith('lospec_')
+              ? getLospecColors(styleParams.paletteMode) ?? null
+              : null)
+          }
+        />
       </div>
     </div>
   );
