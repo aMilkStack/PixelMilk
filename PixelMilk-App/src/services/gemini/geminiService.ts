@@ -326,12 +326,16 @@ const DIRECTION_DESCRIPTIONS: Record<Direction, string> = {
  * Generates the initial sprite using a chat session
  * This establishes the "Character DNA" for subsequent angle generations
  * Returns base64 encoded PNG data
+ *
+ * @param chromaKey - Background colour for chroma keying (e.g., "#FF00FF").
+ *                    Defaults to "#202020" if not provided.
  */
 export const generateSprite = async (
   identity: CharacterIdentity,
   direction: Direction = 'S',
   quality: QualityMode = 'draft',
-  lockedPalette?: string[]
+  lockedPalette?: string[],
+  chromaKey: string = '#202020'
 ): Promise<string> => {
   const config = getConfigForTask(
     quality === 'final' ? 'sprite-final' : 'sprite-draft',
@@ -379,7 +383,7 @@ ${identity.angleNotes[direction] ? `ANGLE NOTES: ${identity.angleNotes[direction
 
 ${palettePrompt}
 
-BACKGROUND: Solid dark grey (#202020) - provides contrast for edge detection
+BACKGROUND: Solid ${chromaKey} background - this exact colour will be removed for transparency, do NOT use it anywhere in the sprite itself
 
 COMPOSITION: ${compositionGuide}
 
@@ -388,11 +392,11 @@ CRITICAL REQUIREMENTS:
 - True pixel art with clean, crisp pixels
 - No anti-aliasing on edges
 - Horizontally centered
-- SOLID DARK GREY BACKGROUND (#202020) IS MANDATORY
-- Fill ALL background pixels with dark grey (#202020)
+- SOLID ${chromaKey} BACKGROUND IS MANDATORY
+- Fill ALL background pixels with ${chromaKey}
 - Do NOT draw a checkerboard pattern
-- Do NOT use transparency - use solid #202020 for all background areas
-- White highlights (#FFFFFF, #FEFEFE) are allowed inside the sprite
+- Do NOT use transparency - use solid ${chromaKey} for all background areas
+- Do NOT use the background colour (${chromaKey}) anywhere in the sprite itself
 
 ${techniquePrompt}`;
 
@@ -434,13 +438,17 @@ export interface ReferenceImage {
  * Uses chat session for thought signature preservation
  * Accepts array of ALL existing sprites for maximum consistency
  * Returns base64 encoded PNG data
+ *
+ * @param chromaKey - Background colour for chroma keying (e.g., "#FF00FF").
+ *                    Defaults to "#202020" if not provided.
  */
 export const generateRotatedSprite = async (
   identity: CharacterIdentity,
   direction: Direction,
   referenceImages: ReferenceImage[],
   quality: QualityMode = 'final',
-  lockedPalette?: string[]
+  lockedPalette?: string[],
+  chromaKey: string = '#202020'
 ): Promise<string> => {
   // Use isRotation=true for lower temperature (0.8) for consistency
   const config = getConfigForTask('sprite-final', quality, { isRotation: true });
@@ -501,11 +509,11 @@ CRITICAL REQUIREMENTS:
 - Match the character from Image 1 EXACTLY
 - Same proportions, art style, and level of detail as Image 1
 - ${size}x${size} pixels, no anti-aliasing
-- SOLID DARK GREY BACKGROUND (#202020) IS MANDATORY
-- Fill ALL background pixels with dark grey (#202020)
+- SOLID ${chromaKey} BACKGROUND IS MANDATORY
+- Fill ALL background pixels with ${chromaKey}
 - Do NOT draw a checkerboard pattern
-- Do NOT use transparency - use solid #202020 for all background areas
-- White highlights (#FFFFFF, #FEFEFE) are allowed inside the sprite
+- Do NOT use transparency - use solid ${chromaKey} for all background areas
+- Do NOT use the background colour (${chromaKey}) anywhere in the sprite itself
 
 ${techniquePrompt}`;
 
@@ -567,13 +575,14 @@ export const generateRotatedSpriteLegacy = async (
   direction: Direction,
   referenceImageBase64: string,
   quality: QualityMode = 'final',
-  lockedPalette?: string[]
+  lockedPalette?: string[],
+  chromaKey: string = '#202020'
 ): Promise<string> => {
   // Convert single reference to array format
   const referenceImages: ReferenceImage[] = [
     { direction: 'S', base64Data: referenceImageBase64 }
   ];
-  return generateRotatedSprite(identity, direction, referenceImages, quality, lockedPalette);
+  return generateRotatedSprite(identity, direction, referenceImages, quality, lockedPalette, chromaKey);
 };
 
 /**

@@ -1,0 +1,422 @@
+{
+    "cultoftheeighties":  {
+                              "chromaKey":  "FF00FF",
+                              "distance":  183.75
+                          },
+    "midflight":  {
+                      "chromaKey":  "00FF00",
+                      "distance":  158.03
+                  },
+    "outerspasing":  {
+                         "chromaKey":  "FF0000",
+                         "distance":  208.65
+                     },
+    "cobble":  {
+                   "chromaKey":  "00FFFF",
+                   "distance":  240.18
+               },
+    "joystick":  {
+                     "chromaKey":  "FF00FF",
+                     "distance":  176.22
+                 },
+    "lavender":  {
+                     "chromaKey":  "FFFF00",
+                     "distance":  243.3
+                 },
+    "brussel":  {
+                    "chromaKey":  "0080FF",
+                    "distance":  259.4
+                },
+    "hide":  {
+                 "chromaKey":  "00FFFF",
+                 "distance":  210.85
+             },
+    "felinewine":  {
+                       "chromaKey":  "00FF80",
+                       "distance":  273.81
+                   },
+    "chipotle":  {
+                     "chromaKey":  "00FFFF",
+                     "distance":  360.63
+                 },
+    "slimeboi":  {
+                     "chromaKey":  "FF0000",
+                     "distance":  250.82
+                 },
+    "koldhart":  {
+                     "chromaKey":  "FF00FF",
+                     "distance":  237.87
+                 },
+    "wanted":  {
+                   "chromaKey":  "00FFFF",
+                   "distance":  252.87
+               },
+    "starstruck":  {
+                       "chromaKey":  "FFFF00",
+                       "distance":  266.69
+                   },
+    "purenostalgia":  {
+                          "chromaKey":  "FF00FF",
+                          "distance":  197.8
+                      },
+    "bewitched":  {
+                      "chromaKey":  "FFFF00",
+                      "distance":  259.05
+                  },
+    "lunarpresence":  {
+                          "chromaKey":  "00FFFF",
+                          "distance":  253.35
+                      },
+    "invasion":  {
+                     "chromaKey":  "00FF00",
+                     "distance":  200.68
+                 },
+    "steelreflect":  {
+                         "chromaKey":  "00FFFF",
+                         "distance":  224.95
+                     },
+    "exhale":  {
+                   "chromaKey":  "00FF00",
+                   "distance":  199.84
+               },
+    "fairydust":  {
+                      "chromaKey":  "FF00FF",
+                      "distance":  198.78
+                  },
+    "twistedpunch":  {
+                         "chromaKey":  "FFFF00",
+                         "distance":  245.99
+                     },
+    "hoot":  {
+                 "chromaKey":  "00FF00",
+                 "distance":  161.34
+             },
+    "mead":  {
+                 "chromaKey":  "FF00FF",
+                 "distance":  210.75
+             },
+    "writersblock":  {
+                         "chromaKey":  "00FF00",
+                         "distance":  203.29
+                     },
+    "serpentine":  {
+                       "chromaKey":  "FF00FF",
+                       "distance":  210.16
+                   },
+    "lovecraft":  {
+                      "chromaKey":  "FF00FF",
+                      "distance":  221.36
+                  },
+    "dustyshelvingunit":  {
+                              "chromaKey":  "FF00FF",
+                              "distance":  151.19
+                          },
+    "pastelmemory":  {
+                         "chromaKey":  "00FF00",
+                         "distance":  213.69
+                     },
+    "dnbnovelist":  {
+                        "chromaKey":  "FF00FF",
+                        "distance":  141.3
+                    },
+    "newage":  {
+                   "chromaKey":  "FF00FF",
+                   "distance":  148.41
+               },
+    "toothpaste":  {
+                       "chromaKey":  "FF0000",
+                       "distance":  272.99
+                   },
+    "steadyandsimple":  {
+                            "chromaKey":  "00FF00",
+                            "distance":  199.4
+                        },
+    "similar":  {
+                    "chromaKey":  "FF00FF",
+                    "distance":  161.36
+                },
+    "poisonpillow":  {
+                         "chromaKey":  "FF00FF",
+                         "distance":  195.62
+                     },
+    "superseeker":  {
+                        "chromaKey":  "4000FF",
+                        "distance":  136.6
+                    },
+    "musky":  {
+                  "chromaKey":  "FF00FF",
+                  "distance":  210.01
+              },
+    "lostspirit":  {
+                       "chromaKey":  "00FFFF",
+                       "distance":  229.46
+                   },
+    "icecreamvan":  {
+                        "chromaKey":  "00FF00",
+                        "distance":  249.23
+                    },
+    "coldsummer":  {
+                       "chromaKey":  "00FF00",
+                       "distance":  234.58
+                   },
+    "void":  {
+                 "chromaKey":  "FF0000",
+                 "distance":  224.39
+             },
+    "cliche":  {
+                   "chromaKey":  "FF00FF",
+                   "distance":  206.4
+               },
+    "stardust":  {
+                     "chromaKey":  "00FF00",
+                     "distance":  192.56
+                 },
+    "alphabetsoup":  {
+                         "chromaKey":  "0000FF",
+                         "distance":  147.48
+                     },
+    "cleanbedroom":  {
+                         "chromaKey":  "00FFFF",
+                         "distance":  217.12
+                     },
+    "behindyou":  {
+                      "chromaKey":  "00FF00",
+                      "distance":  185.37
+                  },
+    "calmdevil":  {
+                      "chromaKey":  "00FFFF",
+                      "distance":  249.09
+                  },
+    "yolkfolk":  {
+                     "chromaKey":  "0000FF",
+                     "distance":  316.81
+                 },
+    "leftleftdownright":  {
+                              "chromaKey":  "0000FF",
+                              "distance":  123.9
+                          },
+    "retroposter":  {
+                        "chromaKey":  "00FFFF",
+                        "distance":  258.92
+                    },
+    "simulatedbliss":  {
+                           "chromaKey":  "00FF00",
+                           "distance":  133.06
+                       },
+    "cherrysorbet":  {
+                         "chromaKey":  "0000FF",
+                         "distance":  208.05
+                     },
+    "purplerain":  {
+                       "chromaKey":  "00FF00",
+                       "distance":  229.78
+                   },
+    "neonpassing":  {
+                        "chromaKey":  "FF00FF",
+                        "distance":  162.5
+                    },
+    "fortknox":  {
+                     "chromaKey":  "00FFFF",
+                     "distance":  224.95
+                 },
+    "viewfromtheigloo":  {
+                             "chromaKey":  "FF0040",
+                             "distance":  64
+                         },
+    "mysteryinc":  {
+                       "chromaKey":  "FF00FF",
+                       "distance":  209.77
+                   },
+    "nurture":  {
+                    "chromaKey":  "000000",
+                    "distance":  325.4
+                },
+    "zine":  {
+                 "chromaKey":  "0000FF",
+                 "distance":  228.2
+             },
+    "filteredjoy":  {
+                        "chromaKey":  "FF00FF",
+                        "distance":  208.21
+                    },
+    "warmpainting":  {
+                         "chromaKey":  "FF00FF",
+                         "distance":  209.17
+                     },
+    "neonabyss":  {
+                      "chromaKey":  "FF00FF",
+                      "distance":  255
+                  },
+    "scurvy":  {
+                   "chromaKey":  "00FF00",
+                   "distance":  149.12
+               },
+    "pixelkodak":  {
+                       "chromaKey":  "80FF00",
+                       "distance":  180.19
+                   },
+    "honest":  {
+                   "chromaKey":  "00FF00",
+                   "distance":  208.51
+               },
+    "poisoncandy":  {
+                        "chromaKey":  "FF00FF",
+                        "distance":  246.21
+                    },
+    "iconic":  {
+                   "chromaKey":  "0000FF",
+                   "distance":  177.79
+               },
+    "clearskies":  {
+                       "chromaKey":  "00FF00",
+                       "distance":  172.28
+                   },
+    "leshen":  {
+                   "chromaKey":  "FF00FF",
+                   "distance":  228.82
+               },
+    "tattoo":  {
+                   "chromaKey":  "00FFFF",
+                   "distance":  210.15
+               },
+    "satanicwish":  {
+                        "chromaKey":  "00FFFF",
+                        "distance":  294.51
+                    },
+    "rooted":  {
+                   "chromaKey":  "00FFFF",
+                   "distance":  217.32
+               },
+    "royalrobes":  {
+                       "chromaKey":  "00FFFF",
+                       "distance":  287.53
+                   },
+    "lilith":  {
+                   "chromaKey":  "00FFFF",
+                   "distance":  309.76
+               },
+    "flump":  {
+                  "chromaKey":  "000000",
+                  "distance":  293.98
+              },
+    "yeti":  {
+                 "chromaKey":  "FF00FF",
+                 "distance":  242.33
+             },
+    "beluga":  {
+                   "chromaKey":  "FF4000",
+                   "distance":  259.82
+               },
+    "steampunkscientist":  {
+                               "chromaKey":  "FF00FF",
+                               "distance":  210.19
+                           },
+    "reason":  {
+                   "chromaKey":  "00FF00",
+                   "distance":  234.37
+               },
+    "soft":  {
+                 "chromaKey":  "0000FF",
+                 "distance":  211.72
+             },
+    "catridge":  {
+                     "chromaKey":  "FF00FF",
+                     "distance":  123.15
+                 },
+    "lysergic":  {
+                     "chromaKey":  "FFFFFF",
+                     "distance":  209.06
+                 },
+    "molecular":  {
+                      "chromaKey":  "FF00FF",
+                      "distance":  159.61
+                  },
+    "piratesfortune":  {
+                           "chromaKey":  "00FFFF",
+                           "distance":  262.89
+                       },
+    "realityfordreamers":  {
+                               "chromaKey":  "000000",
+                               "distance":  216.9
+                           },
+    "sensei":  {
+                   "chromaKey":  "00FF00",
+                   "distance":  329.31
+               },
+    "medievalcommon":  {
+                           "chromaKey":  "FF00FF",
+                           "distance":  223.51
+                       },
+    "gingevitis":  {
+                       "chromaKey":  "00FF00",
+                       "distance":  258.44
+                   },
+    "hotline":  {
+                    "chromaKey":  "FF00FF",
+                    "distance":  157.13
+                },
+    "burning":  {
+                    "chromaKey":  "00FFFF",
+                    "distance":  316.18
+                },
+    "levelup":  {
+                    "chromaKey":  "FF00FF",
+                    "distance":  157.13
+                },
+    "bash":  {
+                 "chromaKey":  "FF00FF",
+                 "distance":  246.91
+             },
+    "buffalo":  {
+                    "chromaKey":  "00FFFF",
+                    "distance":  305.63
+                },
+    "calculated":  {
+                       "chromaKey":  "0000FF",
+                       "distance":  254.52
+                   },
+    "marineturbine":  {
+                          "chromaKey":  "FF00FF",
+                          "distance":  331.36
+                      },
+    "clawmachine":  {
+                        "chromaKey":  "FF00FF",
+                        "distance":  182.42
+                    },
+    "oldmachine":  {
+                       "chromaKey":  "00FF00",
+                       "distance":  187.71
+                   },
+    "toastedconcrete":  {
+                            "chromaKey":  "FF00FF",
+                            "distance":  214.79
+                        },
+    "miami":  {
+                  "chromaKey":  "00FFFF",
+                  "distance":  263.75
+              },
+    "barry":  {
+                  "chromaKey":  "FF00FF",
+                  "distance":  256.69
+              },
+    "expandedmemory":  {
+                           "chromaKey":  "8000FF",
+                           "distance":  154.06
+                       },
+    "entityloading":  {
+                          "chromaKey":  "FFFF00",
+                          "distance":  211.62
+                      },
+    "scarecrow":  {
+                      "chromaKey":  "FF00FF",
+                      "distance":  202.55
+                  },
+    "peonyslideshow":  {
+                           "chromaKey":  "00FFFF",
+                           "distance":  255
+                       },
+    "newspaper":  {
+                      "chromaKey":  "FFFF00",
+                      "distance":  217.54
+                  }
+}

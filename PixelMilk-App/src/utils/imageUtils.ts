@@ -3,6 +3,13 @@ import { snapToGrid } from './pixelSnapper';
 import type { SpriteData, Direction } from '../types';
 
 /**
+ * Default chroma key colour for background removal.
+ * This dark grey is used by Gemini when generating sprites.
+ * Exported so callers can use the same value.
+ */
+export const DEFAULT_CHROMA_KEY = '#202020';
+
+/**
  * Confidence threshold for segmentation mask binarization.
  * Pixels with value > threshold are considered "subject" (foreground).
  * Pixels with value <= threshold are considered "background".
@@ -287,6 +294,10 @@ function floodFillTransparency(
  *
  * CRITICAL: Run AFTER snapToGrid so fuzzy edge pixels have been
  * snapped to either background or sprite colors first.
+ *
+ * @deprecated Use removeBackgroundByChromaKey for global keying instead.
+ * Flood fill misses interior gaps (between legs, under arms, etc.).
+ * Kept for reference/fallback.
  */
 function floodFillBackgroundRemoval(
   data: Uint8ClampedArray,
@@ -310,29 +321,86 @@ function floodFillBackgroundRemoval(
 }
 
 /**
+ * Default tolerance for chroma key background removal.
+ * 30 catches JPEG/PNG compression artifacts while being safe for distinct palettes.
+ */
+const CHROMA_KEY_TOLERANCE = 30;
+
+/**
+ * Removes ALL pixels matching the chromaKey colour globally.
+ *
+ * Unlike flood fill, this catches "interior" gaps (between legs, under arms,
+ * inside handles, etc.) because it removes based on colour match, not connectivity.
+ *
+ * SAFE because each palette has a unique chromaKey that won't appear in the sprite.
+ *
+ * @param data - ImageData pixel array (mutated in place)
+ * @param width - Image width
+ * @param height - Image height
+ * @param chromaKey - Hex colour to remove, e.g. "#FF00FF"
+ * @param tolerance - Euclidean distance tolerance (default 30)
+ */
+function removeBackgroundByChromaKey(
+  data: Uint8ClampedArray,
+  width: number,
+  height: number,
+  chromaKey: string,
+  tolerance: number = CHROMA_KEY_TOLERANCE
+): void {
+  // Parse chromaKey hex to RGB
+  const keyR = parseInt(chromaKey.slice(1, 3), 16);
+  const keyG = parseInt(chromaKey.slice(3, 5), 16);
+  const keyB = parseInt(chromaKey.slice(5, 7), 16);
+
+  let removedCount = 0;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+
+    // Euclidean distance check
+    const distance = Math.sqrt(
+      Math.pow(r - keyR, 2) +
+      Math.pow(g - keyG, 2) +
+      Math.pow(b - keyB, 2)
+    );
+
+    if (distance <= tolerance) {
+      data[i + 3] = 0; // Make transparent
+      removedCount++;
+    }
+  }
+
+  console.log(`[removeBackgroundByChromaKey] Removed ${removedCount} pixels matching ${chromaKey} (tolerance: ${tolerance}) from ${width}x${height} image`);
+}
+
+/**
  * Converts a PNG image to a pixel array with palette extraction.
  *
  * WORKFLOW ORDER (CRITICAL - Gemini recommended):
  * 1. Load image at ORIGINAL resolution
  * 2. Apply pixel snapper FIRST to quantize fuzzy edge pixels
- *    (forces AA pixels to snap to either background grey or sprite colors)
- * 3. THEN flood fill from corners to remove background
- *    (contiguous removal preserves white/light pixels INSIDE sprite)
+ *    (forces AA pixels to snap to either background or sprite colors)
+ * 3. THEN remove background using global chroma key matching
+ *    (removes ALL pixels matching chromaKey, including interior gaps)
  * 4. Extract pixels from result
  *
  * This order ensures clean edges because:
  * - Anti-aliased edge pixels snap to background or sprite (not hybrid)
- * - Flood fill only removes CONTIGUOUS background, not internal whites
+ * - Global chroma key removes ALL matching pixels, not just connected ones
  *
  * @param imageData - The source image as Blob or base64 string
  * @param targetWidth - Target width in pixels
  * @param targetHeight - Target height in pixels
- * @param parsedMask - Optional ParsedMask (unused in flood fill approach but kept for API compat)
+ * @param chromaKey - Hex colour to remove as background, e.g. "#FF00FF"
+ * @param parsedMask - Optional ParsedMask (unused, kept for API compat)
  */
 export async function pngToPixelArray(
   imageData: Blob | string,
   targetWidth: number,
   targetHeight: number,
+  chromaKey: string,
   parsedMask?: ParsedMask
 ): Promise<{ pixels: string[]; palette: string[] }> {
   const { src, revoke } = resolveImageSrc(imageData);
@@ -367,21 +435,23 @@ export async function pngToPixelArray(
 
   // Step 2: Apply pixel snapper FIRST to quantize fuzzy edge pixels
   // This forces anti-aliased pixels at sprite edges to snap to either:
-  // - The background color (dark grey #202020)
-  // - Or the sprite outline color
+  // - The background colour (chromaKey)
+  // - Or the sprite outline colour
   // This eliminates the "fuzzy fringe" problem before background removal
   const snappedImageData = snapToGrid(sourceImageData, {
     targetSize: targetWidth,
     colorTolerance: 20,
   });
 
-  // Step 3: Flood fill from corners to remove background
-  // Uses spatial isolation - only removes CONTIGUOUS background pixels
-  // White/light pixels INSIDE the sprite outline are preserved
-  floodFillBackgroundRemoval(
+  // Step 3: Global chroma key removal
+  // Removes ALL pixels matching chromaKey, including interior gaps
+  // (between legs, under arms, inside handles, etc.)
+  // SAFE because each palette has a unique chromaKey not in the sprite
+  removeBackgroundByChromaKey(
     snappedImageData.data,
     snappedImageData.width,
-    snappedImageData.height
+    snappedImageData.height,
+    chromaKey
   );
 
   // Step 4: Extract pixels from processed data
@@ -395,7 +465,7 @@ export async function pngToPixelArray(
     const b = data[i + 2];
     const a = data[i + 3];
 
-    // Transparent pixels (removed by flood fill)
+    // Transparent pixels (removed by chroma key)
     if (a < 128) {
       pixels.push('transparent');
       continue;

@@ -16,7 +16,8 @@ import {
 } from '../../services/gemini';
 import type { ReferenceImage } from '../../services/gemini';
 import { saveAsset, generateAssetId, getAssetsByType } from '../../services/storage';
-import { pngToPixelArray, removeCheckerboardBackground, flipSpriteHorizontally, parseSegmentationMask, type ParsedMask } from '../../utils/imageUtils';
+import { pngToPixelArray, removeCheckerboardBackground, flipSpriteHorizontally, parseSegmentationMask, DEFAULT_CHROMA_KEY, type ParsedMask } from '../../utils/imageUtils';
+import { getChromaKey } from '../../services/paletteData';
 import { renderPixelDataToDataUrl, validateAndSnapPixelData, renderPixelDataToBase64 } from '../../utils/paletteGovernor';
 import { getLospecColors } from '../../data/lospecPalettes';
 import type { Asset, Direction, SpriteData } from '../../types';
@@ -627,11 +628,23 @@ export const CharacterTab: React.FC = () => {
     const lospecColors = paletteMode.startsWith('lospec_') ? getLospecColors(paletteMode) : undefined;
     const effectivePalette = currentLockedPalette ?? lospecColors ?? undefined;
 
+    // Get palette-specific chromaKey for background removal
+    // Extract palette name from paletteMode (e.g., "lospec_sweetie-16" -> "sweetie16")
+    let chromaKey = DEFAULT_CHROMA_KEY;
+    if (paletteMode.startsWith('lospec_')) {
+      const paletteName = paletteMode.replace('lospec_', '').replace(/-/g, '');
+      const paletteChromaKey = await getChromaKey(paletteName);
+      if (paletteChromaKey) {
+        chromaKey = paletteChromaKey;
+        console.log(`[CharacterTab] Using chromaKey ${chromaKey} for palette ${paletteName}`);
+      }
+    }
+
     let rawImageBase64: string;
 
     if (existingSprites.size === 0) {
       // First sprite - use generateSprite (creates new session)
-      rawImageBase64 = await generateSprite(identity, direction, 'final');
+      rawImageBase64 = await generateSprite(identity, direction, 'final', undefined, chromaKey);
       setHasActiveSession(true);
     } else {
       // Subsequent sprites - use reference stacking for consistency
@@ -654,7 +667,9 @@ export const CharacterTab: React.FC = () => {
         identity,
         direction,
         referenceImages,
-        'final'
+        'final',
+        undefined,
+        chromaKey
       );
     }
 
@@ -676,7 +691,7 @@ export const CharacterTab: React.FC = () => {
       console.warn('[CharacterTab] Segmentation mask failed, using color-only extraction:', maskError);
     }
 
-    const { pixels, palette } = await pngToPixelArray(imageBase64, size, size, segmentationMask);
+    const { pixels, palette } = await pngToPixelArray(imageBase64, size, size, chromaKey, segmentationMask);
     const pixelData = validateAndSnapPixelData(
       {
         name: identity.name,

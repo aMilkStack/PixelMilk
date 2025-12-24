@@ -1,0 +1,1250 @@
+{
+    "cultoftheeighties":  {
+                              "path":  "Extended (16-28)/20/cultoftheeighties.hex",
+                              "tags":  [
+                                           "warm",
+                                           "balanced",
+                                           "high-contrast",
+                                           "retro"
+                                       ],
+                              "colours":  20
+                          },
+    "midflight":  {
+                      "path":  "Full (32-256)/64/midflight.hex",
+                      "tags":  [
+                                   "mixed",
+                                   "balanced",
+                                   "high-contrast"
+                               ],
+                      "colours":  64
+                  },
+    "outerspasing":  {
+                         "path":  "Limited (8-15)/10/outerspasing.hex",
+                         "tags":  [
+                                      "mixed",
+                                      "balanced",
+                                      "high-contrast",
+                                      "cyan",
+                                      "teal",
+                                      "purple",
+                                      "violet"
+                                  ],
+                         "colours":  10
+                     },
+    "cobble":  {
+                   "path":  "Micro (2-7)/3/cobble.hex",
+                   "tags":  [
+                                "mixed",
+                                "muted",
+                                "high-contrast",
+                                "purple",
+                                "violet"
+                            ],
+                   "colours":  3
+               },
+    "joystick":  {
+                     "path":  "Extended (16-28)/24/joystick.hex",
+                     "tags":  [
+                                  "warm",
+                                  "balanced",
+                                  "high-contrast",
+                                  "cheerful"
+                              ],
+                     "colours":  24
+                 },
+    "lavender":  {
+                     "path":  "Micro (2-7)/3/lavender.hex",
+                     "tags":  [
+                                  "mixed",
+                                  "muted",
+                                  "high-contrast",
+                                  "neon",
+                                  "synthwave",
+                                  "cyberpunk",
+                                  "blue"
+                              ],
+                     "colours":  3
+                 },
+    "brussel":  {
+                    "path":  "Micro (2-7)/3/brussel.hex",
+                    "tags":  [
+                                 "warm",
+                                 "vibrant",
+                                 "saturated",
+                                 "orange",
+                                 "yellow",
+                                 "gold"
+                             ],
+                    "colours":  3
+                },
+    "hide":  {
+                 "path":  "Extended (16-28)/28/hide.hex",
+                 "tags":  [
+                              "mixed",
+                              "muted",
+                              "desaturated",
+                              "high-contrast",
+                              "earthy",
+                              "natural",
+                              "organic"
+                          ],
+                 "colours":  28
+             },
+    "felinewine":  {
+                       "path":  "Micro (2-7)/3/felinewine.hex",
+                       "tags":  [
+                                    "warm",
+                                    "balanced",
+                                    "high-contrast",
+                                    "neon",
+                                    "synthwave",
+                                    "cyberpunk",
+                                    "pink",
+                                    "magenta"
+                                ],
+                       "colours":  3
+                   },
+    "chipotle":  {
+                     "path":  "Micro (2-7)/6/chipotle.hex",
+                     "tags":  [
+                                  "warm",
+                                  "vibrant",
+                                  "saturated",
+                                  "dark",
+                                  "neon",
+                                  "synthwave",
+                                  "cyberpunk",
+                                  "red"
+                              ],
+                     "colours":  6
+                 },
+    "slimeboi":  {
+                     "path":  "Micro (2-7)/5/slimeboi.hex",
+                     "tags":  [
+                                  "mixed",
+                                  "balanced",
+                                  "dark",
+                                  "cyan",
+                                  "teal"
+                              ],
+                     "colours":  5
+                 },
+    "koldhart":  {
+                     "path":  "Micro (2-7)/4/koldhart.hex",
+                     "tags":  [
+                                  "mixed",
+                                  "muted",
+                                  "retro"
+                              ],
+                     "colours":  4
+                 },
+    "wanted":  {
+                   "path":  "Micro (2-7)/6/wanted.hex",
+                   "tags":  [
+                                "warm",
+                                "muted",
+                                "orange"
+                            ],
+                   "colours":  6
+               },
+    "starstruck":  {
+                       "path":  "Limited (8-15)/12/starstruck.hex",
+                       "tags":  [
+                                    "cool",
+                                    "vibrant",
+                                    "saturated",
+                                    "neon",
+                                    "synthwave",
+                                    "cyberpunk",
+                                    "blue",
+                                    "sci-fi"
+                                ],
+                       "colours":  12
+                   },
+    "purenostalgia":  {
+                          "path":  "Extended (16-28)/16/purenostalgia.hex",
+                          "tags":  [
+                                       "mixed",
+                                       "balanced",
+                                       "high-contrast",
+                                       "neon",
+                                       "synthwave",
+                                       "cyberpunk",
+                                       "retro"
+                                   ],
+                          "colours":  16
+                      },
+    "bewitched":  {
+                      "path":  "Limited (8-15)/10/bewitched.hex",
+                      "tags":  [
+                                   "warm",
+                                   "vibrant",
+                                   "saturated",
+                                   "dark",
+                                   "purple",
+                                   "violet",
+                                   "pink",
+                                   "magenta",
+                                   "horror"
+                               ],
+                      "colours":  10
+                  },
+    "lunarpresence":  {
+                          "path":  "Micro (2-7)/2/lunarpresence.hex",
+                          "tags":  [
+                                       "mixed",
+                                       "balanced",
+                                       "yellow",
+                                       "gold",
+                                       "purple",
+                                       "violet"
+                                   ],
+                          "colours":  2
+                      },
+    "invasion":  {
+                     "path":  "Limited (8-15)/10/invasion.hex",
+                     "tags":  [
+                                  "mixed",
+                                  "balanced",
+                                  "purple",
+                                  "violet"
+                              ],
+                     "colours":  10
+                 },
+    "steelreflect":  {
+                         "path":  "Micro (2-7)/7/steelreflect.hex",
+                         "tags":  [
+                                      "warm",
+                                      "muted",
+                                      "desaturated",
+                                      "high-contrast",
+                                      "earthy",
+                                      "natural",
+                                      "organic",
+                                      "gritty"
+                                  ],
+                         "colours":  7
+                     },
+    "exhale":  {
+                   "path":  "Full (32-256)/48/exhale.hex",
+                   "tags":  [
+                                "warm",
+                                "balanced",
+                                "high-contrast"
+                            ],
+                   "colours":  48
+               },
+    "fairydust":  {
+                      "path":  "Extended (16-28)/16/fairydust.hex",
+                      "tags":  [
+                                   "cool",
+                                   "balanced",
+                                   "high-contrast",
+                                   "neon",
+                                   "synthwave",
+                                   "cyberpunk",
+                                   "blue",
+                                   "fantasy",
+                                   "melancholic"
+                               ],
+                      "colours":  16
+                  },
+    "twistedpunch":  {
+                         "path":  "Extended (16-28)/24/twistedpunch.hex",
+                         "tags":  [
+                                      "cool",
+                                      "balanced",
+                                      "high-contrast",
+                                      "blue"
+                                  ],
+                         "colours":  24
+                     },
+    "hoot":  {
+                 "path":  "Full (32-256)/32/hoot.hex",
+                 "tags":  [
+                              "warm",
+                              "balanced",
+                              "high-contrast",
+                              "purple",
+                              "violet"
+                          ],
+                 "colours":  32
+             },
+    "mead":  {
+                 "path":  "Full (32-256)/40/mead.hex",
+                 "tags":  [
+                              "warm",
+                              "muted",
+                              "high-contrast",
+                              "dark"
+                          ],
+                 "colours":  40
+             },
+    "writersblock":  {
+                         "path":  "Extended (16-28)/20/writersblock.hex",
+                         "tags":  [
+                                      "mixed",
+                                      "muted",
+                                      "desaturated",
+                                      "earthy",
+                                      "natural",
+                                      "organic",
+                                      "monochrome",
+                                      "grayscale"
+                                  ],
+                         "colours":  20
+                     },
+    "serpentine":  {
+                       "path":  "Extended (16-28)/28/serpentine.hex",
+                       "tags":  [
+                                    "mixed",
+                                    "muted",
+                                    "high-contrast",
+                                    "earthy",
+                                    "natural",
+                                    "organic"
+                                ],
+                       "colours":  28
+                   },
+    "lovecraft":  {
+                      "path":  "Extended (16-28)/24/lovecraft.hex",
+                      "tags":  [
+                                   "mixed",
+                                   "muted",
+                                   "earthy",
+                                   "natural",
+                                   "organic",
+                                   "horror"
+                               ],
+                      "colours":  24
+                  },
+    "dustyshelvingunit":  {
+                              "path":  "Full (32-256)/128/dustyshelvingunit.hex",
+                              "tags":  [
+                                           "mixed",
+                                           "muted",
+                                           "high-contrast",
+                                           "melancholic"
+                                       ],
+                              "colours":  128
+                          },
+    "pastelmemory":  {
+                         "path":  "Micro (2-7)/5/pastelmemory.hex",
+                         "tags":  [
+                                      "cool",
+                                      "balanced",
+                                      "red",
+                                      "blue",
+                                      "melancholic"
+                                  ],
+                         "colours":  5
+                     },
+    "dnbnovelist":  {
+                        "path":  "Full (32-256)/64/dnbnovelist.hex",
+                        "tags":  [
+                                     "mixed",
+                                     "balanced",
+                                     "high-contrast"
+                                 ],
+                        "colours":  64
+                    },
+    "newage":  {
+                   "path":  "Full (32-256)/256/newage.hex",
+                   "tags":  [
+                                "warm",
+                                "balanced",
+                                "high-contrast"
+                            ],
+                   "colours":  256
+               },
+    "toothpaste":  {
+                       "path":  "Micro (2-7)/2/toothpaste.hex",
+                       "tags":  [
+                                    "mixed",
+                                    "muted",
+                                    "desaturated",
+                                    "high-contrast",
+                                    "monochrome",
+                                    "grayscale"
+                                ],
+                       "colours":  2
+                   },
+    "steadyandsimple":  {
+                            "path":  "Full (32-256)/40/steadyandsimple.hex",
+                            "tags":  [
+                                         "mixed",
+                                         "muted",
+                                         "high-contrast",
+                                         "minimal"
+                                     ],
+                            "colours":  40
+                        },
+    "similar":  {
+                    "path":  "Full (32-256)/32/similar.hex",
+                    "tags":  [
+                                 "warm",
+                                 "balanced",
+                                 "high-contrast"
+                             ],
+                    "colours":  32
+                },
+    "poisonpillow":  {
+                         "path":  "Limited (8-15)/8/poisonpillow.hex",
+                         "tags":  [
+                                      "warm",
+                                      "balanced",
+                                      "high-contrast",
+                                      "horror"
+                                  ],
+                         "colours":  8
+                     },
+    "superseeker":  {
+                        "path":  "Full (32-256)/64/superseeker.hex",
+                        "tags":  [
+                                     "warm",
+                                     "vibrant",
+                                     "saturated",
+                                     "high-contrast"
+                                 ],
+                        "colours":  64
+                    },
+    "musky":  {
+                  "path":  "Extended (16-28)/28/musky.hex",
+                  "tags":  [
+                               "warm",
+                               "vibrant",
+                               "saturated",
+                               "high-contrast",
+                               "orange",
+                               "nature"
+                           ],
+                  "colours":  28
+              },
+    "lostspirit":  {
+                       "path":  "Limited (8-15)/8/lostspirit.hex",
+                       "tags":  [
+                                    "mixed",
+                                    "muted",
+                                    "desaturated",
+                                    "earthy",
+                                    "natural",
+                                    "organic",
+                                    "melancholic"
+                                ],
+                       "colours":  8
+                   },
+    "icecreamvan":  {
+                        "path":  "Micro (2-7)/5/icecreamvan.hex",
+                        "tags":  [
+                                     "mixed",
+                                     "balanced",
+                                     "light",
+                                     "bright",
+                                     "purple",
+                                     "violet",
+                                     "winter"
+                                 ],
+                        "colours":  5
+                    },
+    "coldsummer":  {
+                       "path":  "Limited (8-15)/14/coldsummer.hex",
+                       "tags":  [
+                                    "mixed",
+                                    "muted",
+                                    "blue",
+                                    "summer",
+                                    "retro",
+                                    "winter",
+                                    "melancholic"
+                                ],
+                       "colours":  14
+                   },
+    "void":  {
+                 "path":  "Micro (2-7)/4/void.hex",
+                 "tags":  [
+                              "mixed",
+                              "muted",
+                              "high-contrast",
+                              "horror"
+                          ],
+                 "colours":  4
+             },
+    "cliche":  {
+                   "path":  "Limited (8-15)/8/cliche.hex",
+                   "tags":  [
+                                "warm",
+                                "balanced",
+                                "high-contrast",
+                                "neon",
+                                "synthwave",
+                                "cyberpunk"
+                            ],
+                   "colours":  8
+               },
+    "stardust":  {
+                     "path":  "Full (32-256)/48/stardust.hex",
+                     "tags":  [
+                                  "warm",
+                                  "balanced",
+                                  "high-contrast",
+                                  "purple",
+                                  "violet",
+                                  "melancholic",
+                                  "sci-fi"
+                              ],
+                     "colours":  48
+                 },
+    "alphabetsoup":  {
+                         "path":  "Full (32-256)/48/alphabetsoup.hex",
+                         "tags":  [
+                                      "warm",
+                                      "balanced",
+                                      "high-contrast"
+                                  ],
+                         "colours":  48
+                     },
+    "cleanbedroom":  {
+                         "path":  "Extended (16-28)/20/cleanbedroom.hex",
+                         "tags":  [
+                                      "warm",
+                                      "balanced",
+                                      "high-contrast",
+                                      "minimal",
+                                      "cosy"
+                                  ],
+                         "colours":  20
+                     },
+    "behindyou":  {
+                      "path":  "Full (32-256)/112/behindyou.hex",
+                      "tags":  [
+                                   "warm",
+                                   "balanced",
+                                   "high-contrast"
+                               ],
+                      "colours":  112
+                  },
+    "calmdevil":  {
+                      "path":  "Micro (2-7)/3/calmdevil.hex",
+                      "tags":  [
+                                   "warm",
+                                   "muted",
+                                   "red",
+                                   "orange",
+                                   "horror"
+                               ],
+                      "colours":  3
+                  },
+    "yolkfolk":  {
+                     "path":  "Micro (2-7)/3/yolkfolk.hex",
+                     "tags":  [
+                                  "warm",
+                                  "vibrant",
+                                  "saturated",
+                                  "low-contrast",
+                                  "light",
+                                  "bright",
+                                  "neon",
+                                  "synthwave",
+                                  "cyberpunk",
+                                  "orange",
+                                  "yellow",
+                                  "gold"
+                              ],
+                     "colours":  3
+                 },
+    "leftleftdownright":  {
+                              "path":  "Full (32-256)/48/leftleftdownright.hex",
+                              "tags":  [
+                                           "mixed",
+                                           "balanced",
+                                           "high-contrast"
+                                       ],
+                              "colours":  48
+                          },
+    "retroposter":  {
+                        "path":  "Micro (2-7)/4/retroposter.hex",
+                        "tags":  [
+                                     "warm",
+                                     "balanced",
+                                     "light",
+                                     "bright",
+                                     "neon",
+                                     "synthwave",
+                                     "cyberpunk",
+                                     "retro"
+                                 ],
+                        "colours":  4
+                    },
+    "simulatedbliss":  {
+                           "path":  "Full (32-256)/64/simulatedbliss.hex",
+                           "tags":  [
+                                        "warm",
+                                        "balanced",
+                                        "high-contrast",
+                                        "neon",
+                                        "synthwave",
+                                        "cyberpunk"
+                                    ],
+                           "colours":  64
+                       },
+    "cherrysorbet":  {
+                         "path":  "Extended (16-28)/28/cherrysorbet.hex",
+                         "tags":  [
+                                      "warm",
+                                      "balanced",
+                                      "high-contrast",
+                                      "red"
+                                  ],
+                         "colours":  28
+                     },
+    "purplerain":  {
+                       "path":  "Micro (2-7)/6/purplerain.hex",
+                       "tags":  [
+                                    "mixed",
+                                    "muted",
+                                    "high-contrast",
+                                    "orange",
+                                    "blue",
+                                    "melancholic"
+                                ],
+                       "colours":  6
+                   },
+    "neonpassing":  {
+                        "path":  "Extended (16-28)/24/neonpassing.hex",
+                        "tags":  [
+                                     "mixed",
+                                     "vibrant",
+                                     "saturated",
+                                     "high-contrast",
+                                     "sci-fi"
+                                 ],
+                        "colours":  24
+                    },
+    "fortknox":  {
+                     "path":  "Limited (8-15)/10/fortknox.hex",
+                     "tags":  [
+                                  "warm",
+                                  "muted",
+                                  "high-contrast"
+                              ],
+                     "colours":  10
+                 },
+    "viewfromtheigloo":  {
+                             "path":  "Full (32-256)/256/viewfromtheigloo.hex",
+                             "tags":  [
+                                          "mixed",
+                                          "balanced",
+                                          "high-contrast",
+                                          "winter"
+                                      ],
+                             "colours":  256
+                         },
+    "mysteryinc":  {
+                       "path":  "Limited (8-15)/12/mysteryinc.hex",
+                       "tags":  [
+                                    "mixed",
+                                    "muted",
+                                    "high-contrast"
+                                ],
+                       "colours":  12
+                   },
+    "nurture":  {
+                    "path":  "Micro (2-7)/3/nurture.hex",
+                    "tags":  [
+                                 "warm",
+                                 "balanced",
+                                 "low-contrast",
+                                 "light",
+                                 "bright",
+                                 "neon",
+                                 "synthwave",
+                                 "cyberpunk",
+                                 "red",
+                                 "yellow",
+                                 "gold",
+                                 "green"
+                             ],
+                    "colours":  3
+                },
+    "zine":  {
+                 "path":  "Micro (2-7)/2/zine.hex",
+                 "tags":  [
+                              "mixed",
+                              "muted",
+                              "desaturated",
+                              "earthy",
+                              "natural",
+                              "organic",
+                              "monochrome",
+                              "grayscale",
+                              "ink"
+                          ],
+                 "colours":  2
+             },
+    "filteredjoy":  {
+                        "path":  "Extended (16-28)/16/filteredjoy.hex",
+                        "tags":  [
+                                     "mixed",
+                                     "muted",
+                                     "desaturated",
+                                     "high-contrast",
+                                     "earthy",
+                                     "natural",
+                                     "organic",
+                                     "monochrome",
+                                     "grayscale",
+                                     "cheerful"
+                                 ],
+                        "colours":  16
+                    },
+    "warmpainting":  {
+                         "path":  "Full (32-256)/40/warmpainting.hex",
+                         "tags":  [
+                                      "warm",
+                                      "muted",
+                                      "cosy"
+                                  ],
+                         "colours":  40
+                     },
+    "neonabyss":  {
+                      "path":  "Micro (2-7)/7/neonabyss.hex",
+                      "tags":  [
+                                   "cool",
+                                   "balanced",
+                                   "high-contrast",
+                                   "blue",
+                                   "horror",
+                                   "sci-fi"
+                               ],
+                      "colours":  7
+                  },
+    "scurvy":  {
+                   "path":  "Full (32-256)/48/scurvy.hex",
+                   "tags":  [
+                                "warm",
+                                "balanced",
+                                "high-contrast",
+                                "pirate"
+                            ],
+                   "colours":  48
+               },
+    "pixelkodak":  {
+                       "path":  "Limited (8-15)/8/pixelkodak.hex",
+                       "tags":  [
+                                    "warm",
+                                    "vibrant",
+                                    "saturated",
+                                    "retro"
+                                ],
+                       "colours":  8
+                   },
+    "honest":  {
+                   "path":  "Extended (16-28)/20/honest.hex",
+                   "tags":  [
+                                "warm",
+                                "muted",
+                                "high-contrast",
+                                "earthy",
+                                "natural",
+                                "organic",
+                                "orange"
+                            ],
+                   "colours":  20
+               },
+    "poisoncandy":  {
+                        "path":  "Micro (2-7)/4/poisoncandy.hex",
+                        "tags":  [
+                                     "mixed",
+                                     "balanced",
+                                     "green",
+                                     "cheerful",
+                                     "horror"
+                                 ],
+                        "colours":  4
+                    },
+    "iconic":  {
+                   "path":  "Extended (16-28)/16/iconic.hex",
+                   "tags":  [
+                                "mixed",
+                                "balanced",
+                                "high-contrast",
+                                "neon",
+                                "synthwave",
+                                "cyberpunk"
+                            ],
+                   "colours":  16
+               },
+    "clearskies":  {
+                       "path":  "Extended (16-28)/28/clearskies.hex",
+                       "tags":  [
+                                    "mixed",
+                                    "balanced",
+                                    "high-contrast"
+                                ],
+                       "colours":  28
+                   },
+    "leshen":  {
+                   "path":  "Micro (2-7)/6/leshen.hex",
+                   "tags":  [
+                                "mixed",
+                                "balanced",
+                                "high-contrast",
+                                "orange"
+                            ],
+                   "colours":  6
+               },
+    "tattoo":  {
+                   "path":  "Micro (2-7)/7/tattoo.hex",
+                   "tags":  [
+                                "warm",
+                                "muted",
+                                "earthy",
+                                "natural",
+                                "organic",
+                                "orange"
+                            ],
+                   "colours":  7
+               },
+    "satanicwish":  {
+                        "path":  "Limited (8-15)/12/satanicwish.hex",
+                        "tags":  [
+                                     "warm",
+                                     "vibrant",
+                                     "saturated",
+                                     "dark",
+                                     "neon",
+                                     "synthwave",
+                                     "cyberpunk",
+                                     "red",
+                                     "horror"
+                                 ],
+                        "colours":  12
+                    },
+    "rooted":  {
+                   "path":  "Extended (16-28)/16/rooted.hex",
+                   "tags":  [
+                                "warm",
+                                "muted",
+                                "desaturated",
+                                "earthy",
+                                "natural",
+                                "organic"
+                            ],
+                   "colours":  16
+               },
+    "royalrobes":  {
+                       "path":  "Micro (2-7)/2/royalrobes.hex",
+                       "tags":  [
+                                    "warm",
+                                    "vibrant",
+                                    "saturated",
+                                    "low-contrast",
+                                    "neon",
+                                    "synthwave",
+                                    "cyberpunk",
+                                    "yellow",
+                                    "gold",
+                                    "purple",
+                                    "violet"
+                                ],
+                       "colours":  2
+                   },
+    "lilith":  {
+                   "path":  "Micro (2-7)/5/lilith.hex",
+                   "tags":  [
+                                "warm",
+                                "balanced",
+                                "dark",
+                                "red"
+                            ],
+                   "colours":  5
+               },
+    "flump":  {
+                  "path":  "Micro (2-7)/3/flump.hex",
+                  "tags":  [
+                               "warm",
+                               "balanced",
+                               "low-contrast",
+                               "light",
+                               "bright",
+                               "orange",
+                               "blue",
+                               "pink",
+                               "magenta"
+                           ],
+                  "colours":  3
+              },
+    "yeti":  {
+                 "path":  "Micro (2-7)/3/yeti.hex",
+                 "tags":  [
+                              "cool",
+                              "muted",
+                              "high-contrast",
+                              "cyan",
+                              "teal"
+                          ],
+                 "colours":  3
+             },
+    "beluga":  {
+                   "path":  "Limited (8-15)/10/beluga.hex",
+                   "tags":  [
+                                "mixed",
+                                "vibrant",
+                                "saturated",
+                                "high-contrast",
+                                "cyan",
+                                "teal",
+                                "blue"
+                            ],
+                   "colours":  10
+               },
+    "steampunkscientist":  {
+                               "path":  "Full (32-256)/32/steampunkscientist.hex",
+                               "tags":  [
+                                            "mixed",
+                                            "muted",
+                                            "high-contrast",
+                                            "earthy",
+                                            "natural",
+                                            "organic",
+                                            "orange",
+                                            "steampunk"
+                                        ],
+                               "colours":  32
+                           },
+    "reason":  {
+                   "path":  "Micro (2-7)/2/reason.hex",
+                   "tags":  [
+                                "mixed",
+                                "muted",
+                                "pastel",
+                                "soft",
+                                "dreamy",
+                                "blue"
+                            ],
+                   "colours":  2
+               },
+    "soft":  {
+                 "path":  "Micro (2-7)/7/soft.hex",
+                 "tags":  [
+                              "warm",
+                              "balanced",
+                              "orange",
+                              "cosy"
+                          ],
+                 "colours":  7
+             },
+    "catridge":  {
+                     "path":  "Full (32-256)/40/catridge.hex",
+                     "tags":  [
+                                  "mixed",
+                                  "vibrant",
+                                  "saturated",
+                                  "high-contrast",
+                                  "green"
+                              ],
+                     "colours":  40
+                 },
+    "lysergic":  {
+                     "path":  "Limited (8-15)/14/lysergic.hex",
+                     "tags":  [
+                                  "mixed",
+                                  "vibrant",
+                                  "saturated",
+                                  "dark"
+                              ],
+                     "colours":  14
+                 },
+    "molecular":  {
+                      "path":  "Full (32-256)/128/molecular.hex",
+                      "tags":  [
+                                   "mixed",
+                                   "muted",
+                                   "high-contrast",
+                                   "sci-fi"
+                               ],
+                      "colours":  128
+                  },
+    "piratesfortune":  {
+                           "path":  "Limited (8-15)/8/piratesfortune.hex",
+                           "tags":  [
+                                        "warm",
+                                        "muted",
+                                        "dark",
+                                        "orange",
+                                        "pirate"
+                                    ],
+                           "colours":  8
+                       },
+    "realityfordreamers":  {
+                               "path":  "Full (32-256)/40/realityfordreamers.hex",
+                               "tags":  [
+                                            "mixed",
+                                            "vibrant",
+                                            "saturated",
+                                            "light",
+                                            "bright",
+                                            "neon",
+                                            "synthwave",
+                                            "cyberpunk"
+                                        ],
+                               "colours":  40
+                           },
+    "sensei":  {
+                   "path":  "Micro (2-7)/2/sensei.hex",
+                   "tags":  [
+                                "mixed",
+                                "balanced",
+                                "light",
+                                "bright",
+                                "neon",
+                                "synthwave",
+                                "cyberpunk",
+                                "red"
+                            ],
+                   "colours":  2
+               },
+    "medievalcommon":  {
+                           "path":  "Extended (16-28)/24/medievalcommon.hex",
+                           "tags":  [
+                                        "warm",
+                                        "vibrant",
+                                        "saturated",
+                                        "dark",
+                                        "orange",
+                                        "fantasy"
+                                    ],
+                           "colours":  24
+                       },
+    "gingevitis":  {
+                       "path":  "Limited (8-15)/14/gingevitis.hex",
+                       "tags":  [
+                                    "warm",
+                                    "vibrant",
+                                    "saturated",
+                                    "high-contrast",
+                                    "neon",
+                                    "synthwave",
+                                    "cyberpunk"
+                                ],
+                       "colours":  14
+                   },
+    "hotline":  {
+                    "path":  "Full (32-256)/64/hotline.hex",
+                    "tags":  [
+                                 "warm",
+                                 "balanced",
+                                 "high-contrast"
+                             ],
+                    "colours":  64
+                },
+    "burning":  {
+                    "path":  "Micro (2-7)/7/burning.hex",
+                    "tags":  [
+                                 "warm",
+                                 "vibrant",
+                                 "saturated",
+                                 "dark",
+                                 "pink",
+                                 "magenta"
+                             ],
+                    "colours":  7
+                },
+    "levelup":  {
+                    "path":  "Full (32-256)/32/levelup.hex",
+                    "tags":  [
+                                 "warm",
+                                 "vibrant",
+                                 "saturated",
+                                 "high-contrast"
+                             ],
+                    "colours":  32
+                },
+    "bash":  {
+                 "path":  "Micro (2-7)/2/bash.hex",
+                 "tags":  [
+                              "mixed",
+                              "muted",
+                              "desaturated",
+                              "high-contrast",
+                              "pastel",
+                              "soft",
+                              "dreamy",
+                              "monochrome",
+                              "grayscale",
+                              "green"
+                          ],
+                 "colours":  2
+             },
+    "buffalo":  {
+                    "path":  "Micro (2-7)/2/buffalo.hex",
+                    "tags":  [
+                                 "mixed",
+                                 "vibrant",
+                                 "saturated",
+                                 "neon",
+                                 "synthwave",
+                                 "cyberpunk",
+                                 "red",
+                                 "blue"
+                             ],
+                    "colours":  2
+                },
+    "calculated":  {
+                       "path":  "Micro (2-7)/2/calculated.hex",
+                       "tags":  [
+                                    "mixed",
+                                    "muted",
+                                    "desaturated",
+                                    "dark",
+                                    "monochrome",
+                                    "grayscale",
+                                    "green"
+                                ],
+                       "colours":  2
+                   },
+    "marineturbine":  {
+                          "path":  "Micro (2-7)/2/marineturbine.hex",
+                          "tags":  [
+                                       "mixed",
+                                       "vibrant",
+                                       "saturated",
+                                       "dark",
+                                       "neon",
+                                       "synthwave",
+                                       "cyberpunk",
+                                       "cyan",
+                                       "teal",
+                                       "pink",
+                                       "magenta"
+                                   ],
+                          "colours":  2
+                      },
+    "clawmachine":  {
+                        "path":  "Extended (16-28)/20/clawmachine.hex",
+                        "tags":  [
+                                     "mixed",
+                                     "balanced",
+                                     "high-contrast",
+                                     "sci-fi"
+                                 ],
+                        "colours":  20
+                    },
+    "oldmachine":  {
+                       "path":  "Limited (8-15)/12/oldmachine.hex",
+                       "tags":  [
+                                    "mixed",
+                                    "balanced",
+                                    "high-contrast",
+                                    "retro",
+                                    "sci-fi"
+                                ],
+                       "colours":  12
+                   },
+    "toastedconcrete":  {
+                            "path":  "Limited (8-15)/14/toastedconcrete.hex",
+                            "tags":  [
+                                         "warm",
+                                         "muted",
+                                         "earthy",
+                                         "natural",
+                                         "organic",
+                                         "gritty"
+                                     ],
+                            "colours":  14
+                        },
+    "miami":  {
+                  "path":  "Micro (2-7)/4/miami.hex",
+                  "tags":  [
+                               "mixed",
+                               "balanced",
+                               "high-contrast",
+                               "purple",
+                               "violet",
+                               "summer"
+                           ],
+                  "colours":  4
+              },
+    "barry":  {
+                  "path":  "Micro (2-7)/3/barry.hex",
+                  "tags":  [
+                               "mixed",
+                               "vibrant",
+                               "saturated",
+                               "high-contrast",
+                               "neon",
+                               "synthwave",
+                               "cyberpunk",
+                               "orange",
+                               "green",
+                               "blue"
+                           ],
+                  "colours":  3
+              },
+    "expandedmemory":  {
+                           "path":  "Full (32-256)/32/expandedmemory.hex",
+                           "tags":  [
+                                        "warm",
+                                        "balanced",
+                                        "high-contrast",
+                                        "neon",
+                                        "synthwave",
+                                        "cyberpunk",
+                                        "melancholic"
+                                    ],
+                           "colours":  32
+                       },
+    "entityloading":  {
+                          "path":  "Limited (8-15)/12/entityloading.hex",
+                          "tags":  [
+                                       "mixed",
+                                       "muted",
+                                       "desaturated",
+                                       "high-contrast",
+                                       "earthy",
+                                       "natural",
+                                       "organic",
+                                       "monochrome",
+                                       "grayscale"
+                                   ],
+                          "colours":  12
+                      },
+    "scarecrow":  {
+                      "path":  "Limited (8-15)/14/scarecrow.hex",
+                      "tags":  [
+                                   "warm",
+                                   "muted",
+                                   "earthy",
+                                   "natural",
+                                   "organic",
+                                   "orange",
+                                   "autumn"
+                               ],
+                      "colours":  14
+                  },
+    "peonyslideshow":  {
+                           "path":  "Micro (2-7)/6/peonyslideshow.hex",
+                           "tags":  [
+                                        "mixed",
+                                        "balanced",
+                                        "high-contrast",
+                                        "purple",
+                                        "violet"
+                                    ],
+                           "colours":  6
+                       },
+    "newspaper":  {
+                      "path":  "Micro (2-7)/5/newspaper.hex",
+                      "tags":  [
+                                   "cool",
+                                   "muted",
+                                   "desaturated",
+                                   "high-contrast",
+                                   "earthy",
+                                   "natural",
+                                   "organic",
+                                   "ink"
+                               ],
+                      "colours":  5
+                  }
+}

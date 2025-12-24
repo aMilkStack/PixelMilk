@@ -154,3 +154,23 @@ export interface Palette {
   tags?: string[];
   createdAt: number;
 }
+
+// Palette metadata from JSON files (paletteData service)
+export interface ChromaKeyEntry {
+  chromaKey: string; // Hex WITHOUT # prefix in source
+  distance: number;
+}
+
+export interface PaletteMetaEntry {
+  path: string;
+  tags: string[];
+  colours: number;
+}
+
+export interface PaletteRolesEntry {
+  midtones: string[];
+  darkest: string;
+  outlines: string[];
+  lightest: string;
+  accents: string[];
+}
