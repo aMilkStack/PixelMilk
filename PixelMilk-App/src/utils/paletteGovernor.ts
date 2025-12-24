@@ -180,6 +180,8 @@ export async function renderPixelDataToDataUrl(
       return;
     }
 
+    // Ensure crisp pixel rendering
+    ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, data.width, data.height);
 
     if (background) {

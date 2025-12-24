@@ -10,18 +10,62 @@ import type { SpriteData, Direction } from '../types';
 const MASK_CONFIDENCE_THRESHOLD = 128;
 
 /**
- * Parses a segmentation mask (base64 PNG) into a boolean array.
- * True = pixel is part of the subject (foreground)
- * False = pixel is background
+ * Result of parsing a segmentation mask.
+ * Includes the binary mask and its original dimensions for proper scaling.
+ */
+export interface ParsedMask {
+  /** Boolean array: true = foreground, false = background */
+  mask: boolean[];
+  /** Width of the mask at its original resolution */
+  width: number;
+  /** Height of the mask at its original resolution */
+  height: number;
+}
+
+/**
+ * Nearest-neighbor scaling for binary masks.
  *
- * The mask is a grayscale probability map where pixel values represent
- * AI confidence that the pixel belongs to the subject.
+ * CRITICAL: Standard canvas drawImage() uses bilinear interpolation which
+ * corrupts binary decisions. This function preserves hard edges by using
+ * nearest-neighbor sampling.
+ */
+function nearestNeighborScaleMask(
+  source: boolean[],
+  srcWidth: number,
+  srcHeight: number,
+  dstWidth: number,
+  dstHeight: number
+): boolean[] {
+  const result = new Array<boolean>(dstWidth * dstHeight);
+  const xRatio = srcWidth / dstWidth;
+  const yRatio = srcHeight / dstHeight;
+
+  for (let y = 0; y < dstHeight; y++) {
+    for (let x = 0; x < dstWidth; x++) {
+      const srcX = Math.floor(x * xRatio);
+      const srcY = Math.floor(y * yRatio);
+      const srcIdx = srcY * srcWidth + srcX;
+      const dstIdx = y * dstWidth + x;
+      result[dstIdx] = source[srcIdx];
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Parses a segmentation mask (base64 PNG) into a boolean array.
+ *
+ * CRITICAL FIX: Binarizes at ORIGINAL resolution first, then scales with
+ * nearest-neighbor. This prevents interpolation from corrupting the binary
+ * mask boundaries.
+ *
+ * @param maskBase64 - Base64 encoded mask image
+ * @returns ParsedMask with boolean array and original dimensions
  */
 export async function parseSegmentationMask(
-  maskBase64: string,
-  targetWidth: number,
-  targetHeight: number
-): Promise<boolean[]> {
+  maskBase64: string
+): Promise<ParsedMask> {
   const cleanBase64 = maskBase64.replace(/^data:image\/\w+;base64,/, '');
 
   return new Promise((resolve, reject) => {
@@ -29,8 +73,8 @@ export async function parseSegmentationMask(
 
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      canvas.width = targetWidth;
-      canvas.height = targetHeight;
+      canvas.width = img.width;
+      canvas.height = img.height;
 
       const ctx = canvas.getContext('2d');
       if (!ctx) {
@@ -38,20 +82,23 @@ export async function parseSegmentationMask(
         return;
       }
 
-      // Draw and resize mask to target dimensions
-      ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-      const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+      // CRITICAL: Disable smoothing - we want exact pixel values
+      ctx.imageSmoothingEnabled = false;
+
+      // Draw at ORIGINAL resolution - no scaling yet
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, img.width, img.height);
       const data = imageData.data;
 
-      // Convert to boolean array based on confidence threshold
+      // Binarize at ORIGINAL resolution FIRST
+      // This preserves hard edges before any scaling
       const mask: boolean[] = [];
       for (let i = 0; i < data.length; i += 4) {
-        // Use grayscale value (average of RGB, or just R for grayscale masks)
-        const confidence = data[i]; // R channel
+        const confidence = data[i]; // R channel (grayscale mask)
         mask.push(confidence > MASK_CONFIDENCE_THRESHOLD);
       }
 
-      resolve(mask);
+      resolve({ mask, width: img.width, height: img.height });
     };
 
     img.onerror = () => {
@@ -120,6 +167,9 @@ export async function prepareCanvasForGemini(base64: string): Promise<string> {
         return;
       }
 
+      // CRITICAL: Disable smoothing to preserve pixel edges
+      ctx.imageSmoothingEnabled = false;
+
       // Fill with white background first
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -155,6 +205,12 @@ function resolveImageSrc(imageData: Blob | string): { src: string; revoke: boole
 /**
  * White background detection using Euclidean distance.
  * Tolerance of 4 catches near-white drift but preserves #FEFEFE highlights.
+ *
+ * Examples:
+ * - Pure white #FFFFFF: distance = 0 (removed)
+ * - Near white #FFFFFE: distance = 1 (removed)
+ * - Safe white #FEFEFE: distance = sqrt(3) ≈ 1.7 (removed - too close)
+ * - Actual safe #FCFCFC: distance = sqrt(27) ≈ 5.2 (preserved)
  */
 const WHITE_BG_TOLERANCE = 4;
 
@@ -172,24 +228,63 @@ function isWhiteBackground(r: number, g: number, b: number): boolean {
 }
 
 /**
+ * Applies background removal at ORIGINAL resolution by setting alpha to 0.
+ *
+ * CRITICAL: This must run BEFORE snapToGrid to prevent white pixels from
+ * participating in colour voting at sprite edges.
+ */
+function applyBackgroundRemovalInPlace(
+  data: Uint8ClampedArray,
+  mask: boolean[] | null
+): void {
+  const pixelCount = data.length / 4;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const pixelIndex = i / 4;
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+
+    const isWhite = isWhiteBackground(r, g, b);
+
+    if (mask && mask.length === pixelCount) {
+      // Dual-check: remove only if BOTH white AND mask says background
+      const isForeground = mask[pixelIndex];
+      if (isWhite && !isForeground) {
+        data[i + 3] = 0; // Set alpha to 0
+      }
+    } else {
+      // No mask: simple white check
+      if (isWhite) {
+        data[i + 3] = 0;
+      }
+    }
+  }
+}
+
+/**
  * Converts a PNG image to a pixel array with palette extraction.
  *
- * Dual-check background removal strategy:
- * - If segmentationMask is provided, only remove a pixel if BOTH:
- *   1. It passes the isWhiteBackground() color check (near pure white)
- *   2. AND the mask says it's background (not foreground)
- * - This prevents removing #FEFEFE highlights that the AI knows are part of the character
+ * WORKFLOW ORDER (CRITICAL):
+ * 1. Load image at ORIGINAL resolution
+ * 2. Scale mask to match original image dimensions (nearest-neighbor)
+ * 3. Apply background removal at ORIGINAL resolution (set alpha = 0)
+ * 4. THEN run snapToGrid on the now-transparent image
+ * 5. Extract pixels from snapped result
+ *
+ * This order prevents white background pixels from participating in
+ * colour voting during the snapping process, eliminating edge blur.
  *
  * @param imageData - The source image as Blob or base64 string
  * @param targetWidth - Target width in pixels
  * @param targetHeight - Target height in pixels
- * @param segmentationMask - Optional boolean array from parseSegmentationMask()
+ * @param parsedMask - Optional ParsedMask from parseSegmentationMask()
  */
 export async function pngToPixelArray(
   imageData: Blob | string,
   targetWidth: number,
   targetHeight: number,
-  segmentationMask?: boolean[]
+  parsedMask?: ParsedMask
 ): Promise<{ pixels: string[]; palette: string[] }> {
   const { src, revoke } = resolveImageSrc(imageData);
   const image = new Image();
@@ -214,52 +309,60 @@ export async function pngToPixelArray(
   if (!sourceCtx) {
     throw new Error('Canvas context not available');
   }
+
+  // CRITICAL: Disable smoothing to prevent interpolation artifacts
+  sourceCtx.imageSmoothingEnabled = false;
+
   sourceCtx.drawImage(image, 0, 0);
   const sourceImageData = sourceCtx.getImageData(0, 0, image.width, image.height);
 
-  // Step 2: Apply pixel snapper to clean up off-grid pixels
-  // This uses color voting to determine the correct color for each target pixel
+  // Step 2: Scale mask to match source image dimensions (if needed)
+  let scaledMask: boolean[] | null = null;
+  if (parsedMask) {
+    if (parsedMask.width === image.width && parsedMask.height === image.height) {
+      // Mask already at correct size
+      scaledMask = parsedMask.mask;
+    } else {
+      // Scale mask with nearest-neighbor to match source image
+      scaledMask = nearestNeighborScaleMask(
+        parsedMask.mask,
+        parsedMask.width,
+        parsedMask.height,
+        image.width,
+        image.height
+      );
+      console.log(`[pngToPixelArray] Scaled mask from ${parsedMask.width}x${parsedMask.height} to ${image.width}x${image.height}`);
+    }
+  }
+
+  // Step 3: Apply background removal at ORIGINAL resolution BEFORE snapping
+  // This is the critical fix - white pixels are removed before they can
+  // participate in colour voting during the snap process
+  applyBackgroundRemovalInPlace(sourceImageData.data, scaledMask);
+
+  // Step 4: Apply pixel snapper to clean up off-grid pixels
+  // Now only opaque (non-background) pixels participate in voting
   const snappedImageData = snapToGrid(sourceImageData, {
     targetSize: targetWidth,
     colorTolerance: 20,
   });
 
-  // Step 3: Extract pixels from snapped data with dual-check background removal
+  // Step 5: Extract pixels from snapped data
+  // Background removal already done - just extract colours
   const data = snappedImageData.data;
   const pixels: string[] = [];
   const paletteSet = new Set<string>();
 
   for (let i = 0; i < data.length; i += 4) {
-    const pixelIndex = i / 4;
     const r = data[i];
     const g = data[i + 1];
     const b = data[i + 2];
     const a = data[i + 3];
 
-    // Transparent pixels stay transparent
-    if (a === 0 || a < 128) {
+    // Transparent pixels (already removed in step 3, or from original alpha)
+    if (a < 128) {
       pixels.push('transparent');
       continue;
-    }
-
-    // Dual-check background removal strategy:
-    // Only make transparent if BOTH color check AND mask check pass
-    const isWhite = isWhiteBackground(r, g, b);
-
-    if (segmentationMask && segmentationMask.length === (data.length / 4)) {
-      // Dual-check: must be white AND mask says it's background
-      const isForeground = segmentationMask[pixelIndex];
-      if (isWhite && !isForeground) {
-        pixels.push('transparent');
-        continue;
-      }
-      // If mask says foreground, keep the pixel even if it looks white
-    } else {
-      // No mask: fall back to color-only check
-      if (isWhite) {
-        pixels.push('transparent');
-        continue;
-      }
     }
 
     const hex = rgbToHex(r, g, b);
@@ -427,6 +530,9 @@ export async function removeCheckerboardBackground(base64: string): Promise<stri
         reject(new Error('Canvas context not available'));
         return;
       }
+
+      // CRITICAL: Disable smoothing to preserve pixel edges
+      ctx.imageSmoothingEnabled = false;
 
       ctx.drawImage(img, 0, 0);
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);

@@ -16,7 +16,7 @@ import {
 } from '../../services/gemini';
 import type { ReferenceImage } from '../../services/gemini';
 import { saveAsset, generateAssetId, getAssetsByType } from '../../services/storage';
-import { pngToPixelArray, removeCheckerboardBackground, flipSpriteHorizontally, parseSegmentationMask } from '../../utils/imageUtils';
+import { pngToPixelArray, removeCheckerboardBackground, flipSpriteHorizontally, parseSegmentationMask, type ParsedMask } from '../../utils/imageUtils';
 import { renderPixelDataToDataUrl, validateAndSnapPixelData, renderPixelDataToBase64 } from '../../utils/paletteGovernor';
 import { getLospecColors } from '../../data/lospecPalettes';
 import type { Asset, Direction, SpriteData } from '../../types';
@@ -663,12 +663,14 @@ export const CharacterTab: React.FC = () => {
 
     // Generate segmentation mask for dual-check background removal
     // This prevents removing white highlights the AI knows are part of the character
-    let segmentationMask: boolean[] | undefined;
+    // CRITICAL: The mask is now parsed at ORIGINAL resolution, then scaled with
+    // nearest-neighbor in pngToPixelArray to prevent interpolation blur
+    let segmentationMask: ParsedMask | undefined;
     try {
       console.log('[CharacterTab] Generating segmentation mask...');
       const { maskData } = await generateSegmentationMask(imageBase64);
-      segmentationMask = await parseSegmentationMask(maskData, size, size);
-      console.log('[CharacterTab] Segmentation mask generated successfully');
+      segmentationMask = await parseSegmentationMask(maskData);
+      console.log(`[CharacterTab] Segmentation mask parsed at ${segmentationMask.width}x${segmentationMask.height}`);
     } catch (maskError) {
       // Fall back to color-only extraction if mask generation fails
       console.warn('[CharacterTab] Segmentation mask failed, using color-only extraction:', maskError);
