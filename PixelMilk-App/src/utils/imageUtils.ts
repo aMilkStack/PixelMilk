@@ -203,82 +203,131 @@ function resolveImageSrc(imageData: Blob | string): { src: string; revoke: boole
 }
 
 /**
- * White background detection using Euclidean distance.
- * Tolerance of 4 catches near-white drift but preserves #FEFEFE highlights.
- *
- * Examples:
- * - Pure white #FFFFFF: distance = 0 (removed)
- * - Near white #FFFFFE: distance = 1 (removed)
- * - Safe white #FEFEFE: distance = sqrt(3) ≈ 1.7 (removed - too close)
- * - Actual safe #FCFCFC: distance = sqrt(27) ≈ 5.2 (preserved)
+ * Tolerance for flood fill background detection.
+ * Higher tolerance catches noise/dithering at edges but risks eating into sprite.
+ * 20 is conservative - catches #202020 ± noise but preserves dark sprite pixels.
  */
-const WHITE_BG_TOLERANCE = 4;
+const FLOOD_FILL_TOLERANCE = 20;
 
 /**
- * Returns true for pixels close to pure white (#FFFFFF).
- * Preserves #FEFEFE (Safe White) and hue-shifted highlights.
+ * Checks if two colors are within tolerance (Euclidean distance).
  */
-function isWhiteBackground(r: number, g: number, b: number): boolean {
+function colorsMatch(
+  r1: number, g1: number, b1: number,
+  r2: number, g2: number, b2: number,
+  tolerance: number
+): boolean {
   const distance = Math.sqrt(
-    Math.pow(255 - r, 2) +
-    Math.pow(255 - g, 2) +
-    Math.pow(255 - b, 2)
+    Math.pow(r1 - r2, 2) +
+    Math.pow(g1 - g2, 2) +
+    Math.pow(b1 - b2, 2)
   );
-  return distance < WHITE_BG_TOLERANCE;
+  return distance <= tolerance;
 }
 
 /**
- * Applies background removal at ORIGINAL resolution by setting alpha to 0.
+ * Flood fill transparency from a starting point.
+ * Like Photoshop's Magic Wand - only removes CONTIGUOUS pixels matching target color.
+ * This preserves white/light pixels INSIDE the sprite outline.
  *
- * CRITICAL: This must run BEFORE snapToGrid to prevent white pixels from
- * participating in colour voting at sprite edges.
+ * Uses BFS (breadth-first search) for efficiency.
  */
-function applyBackgroundRemovalInPlace(
+function floodFillTransparency(
   data: Uint8ClampedArray,
-  mask: boolean[] | null
+  width: number,
+  height: number,
+  startX: number,
+  startY: number,
+  tolerance: number = FLOOD_FILL_TOLERANCE
 ): void {
-  const pixelCount = data.length / 4;
+  const startIdx = (startY * width + startX) * 4;
+  const targetR = data[startIdx];
+  const targetG = data[startIdx + 1];
+  const targetB = data[startIdx + 2];
 
-  for (let i = 0; i < data.length; i += 4) {
-    const pixelIndex = i / 4;
-    const r = data[i];
-    const g = data[i + 1];
-    const b = data[i + 2];
+  // Track visited pixels to avoid infinite loops
+  const visited = new Set<number>();
+  const queue: Array<{ x: number; y: number }> = [{ x: startX, y: startY }];
 
-    const isWhite = isWhiteBackground(r, g, b);
+  while (queue.length > 0) {
+    const { x, y } = queue.shift()!;
+    const pixelKey = y * width + x;
 
-    if (mask && mask.length === pixelCount) {
-      // Dual-check: remove only if BOTH white AND mask says background
-      const isForeground = mask[pixelIndex];
-      if (isWhite && !isForeground) {
-        data[i + 3] = 0; // Set alpha to 0
-      }
-    } else {
-      // No mask: simple white check
-      if (isWhite) {
-        data[i + 3] = 0;
-      }
-    }
+    // Skip if out of bounds or already visited
+    if (x < 0 || x >= width || y < 0 || y >= height) continue;
+    if (visited.has(pixelKey)) continue;
+    visited.add(pixelKey);
+
+    const idx = pixelKey * 4;
+    const r = data[idx];
+    const g = data[idx + 1];
+    const b = data[idx + 2];
+    const a = data[idx + 3];
+
+    // Skip if already transparent
+    if (a === 0) continue;
+
+    // Check if this pixel matches the target background color
+    if (!colorsMatch(r, g, b, targetR, targetG, targetB, tolerance)) continue;
+
+    // Make transparent
+    data[idx + 3] = 0;
+
+    // Add 4-connected neighbors to queue
+    queue.push({ x: x + 1, y });
+    queue.push({ x: x - 1, y });
+    queue.push({ x, y: y + 1 });
+    queue.push({ x, y: y - 1 });
   }
+}
+
+/**
+ * Removes background using flood fill from all 4 corners.
+ * This catches disconnected background "islands" that might exist.
+ *
+ * CRITICAL: Run AFTER snapToGrid so fuzzy edge pixels have been
+ * snapped to either background or sprite colors first.
+ */
+function floodFillBackgroundRemoval(
+  data: Uint8ClampedArray,
+  width: number,
+  height: number,
+  tolerance: number = FLOOD_FILL_TOLERANCE
+): void {
+  // Flood fill from all 4 corners to catch any disconnected background
+  const corners = [
+    { x: 0, y: 0 },                    // Top-left
+    { x: width - 1, y: 0 },            // Top-right
+    { x: 0, y: height - 1 },           // Bottom-left
+    { x: width - 1, y: height - 1 },   // Bottom-right
+  ];
+
+  for (const corner of corners) {
+    floodFillTransparency(data, width, height, corner.x, corner.y, tolerance);
+  }
+
+  console.log(`[floodFillBackgroundRemoval] Removed background from ${width}x${height} image`);
 }
 
 /**
  * Converts a PNG image to a pixel array with palette extraction.
  *
- * WORKFLOW ORDER (CRITICAL):
+ * WORKFLOW ORDER (CRITICAL - Gemini recommended):
  * 1. Load image at ORIGINAL resolution
- * 2. Scale mask to match original image dimensions (nearest-neighbor)
- * 3. Apply background removal at ORIGINAL resolution (set alpha = 0)
- * 4. THEN run snapToGrid on the now-transparent image
- * 5. Extract pixels from snapped result
+ * 2. Apply pixel snapper FIRST to quantize fuzzy edge pixels
+ *    (forces AA pixels to snap to either background grey or sprite colors)
+ * 3. THEN flood fill from corners to remove background
+ *    (contiguous removal preserves white/light pixels INSIDE sprite)
+ * 4. Extract pixels from result
  *
- * This order prevents white background pixels from participating in
- * colour voting during the snapping process, eliminating edge blur.
+ * This order ensures clean edges because:
+ * - Anti-aliased edge pixels snap to background or sprite (not hybrid)
+ * - Flood fill only removes CONTIGUOUS background, not internal whites
  *
  * @param imageData - The source image as Blob or base64 string
  * @param targetWidth - Target width in pixels
  * @param targetHeight - Target height in pixels
- * @param parsedMask - Optional ParsedMask from parseSegmentationMask()
+ * @param parsedMask - Optional ParsedMask (unused in flood fill approach but kept for API compat)
  */
 export async function pngToPixelArray(
   imageData: Blob | string,
@@ -316,39 +365,26 @@ export async function pngToPixelArray(
   sourceCtx.drawImage(image, 0, 0);
   const sourceImageData = sourceCtx.getImageData(0, 0, image.width, image.height);
 
-  // Step 2: Scale mask to match source image dimensions (if needed)
-  let scaledMask: boolean[] | null = null;
-  if (parsedMask) {
-    if (parsedMask.width === image.width && parsedMask.height === image.height) {
-      // Mask already at correct size
-      scaledMask = parsedMask.mask;
-    } else {
-      // Scale mask with nearest-neighbor to match source image
-      scaledMask = nearestNeighborScaleMask(
-        parsedMask.mask,
-        parsedMask.width,
-        parsedMask.height,
-        image.width,
-        image.height
-      );
-      console.log(`[pngToPixelArray] Scaled mask from ${parsedMask.width}x${parsedMask.height} to ${image.width}x${image.height}`);
-    }
-  }
-
-  // Step 3: Apply background removal at ORIGINAL resolution BEFORE snapping
-  // This is the critical fix - white pixels are removed before they can
-  // participate in colour voting during the snap process
-  applyBackgroundRemovalInPlace(sourceImageData.data, scaledMask);
-
-  // Step 4: Apply pixel snapper to clean up off-grid pixels
-  // Now only opaque (non-background) pixels participate in voting
+  // Step 2: Apply pixel snapper FIRST to quantize fuzzy edge pixels
+  // This forces anti-aliased pixels at sprite edges to snap to either:
+  // - The background color (dark grey #202020)
+  // - Or the sprite outline color
+  // This eliminates the "fuzzy fringe" problem before background removal
   const snappedImageData = snapToGrid(sourceImageData, {
     targetSize: targetWidth,
     colorTolerance: 20,
   });
 
-  // Step 5: Extract pixels from snapped data
-  // Background removal already done - just extract colours
+  // Step 3: Flood fill from corners to remove background
+  // Uses spatial isolation - only removes CONTIGUOUS background pixels
+  // White/light pixels INSIDE the sprite outline are preserved
+  floodFillBackgroundRemoval(
+    snappedImageData.data,
+    snappedImageData.width,
+    snappedImageData.height
+  );
+
+  // Step 4: Extract pixels from processed data
   const data = snappedImageData.data;
   const pixels: string[] = [];
   const paletteSet = new Set<string>();
@@ -359,7 +395,7 @@ export async function pngToPixelArray(
     const b = data[i + 2];
     const a = data[i + 3];
 
-    // Transparent pixels (already removed in step 3, or from original alpha)
+    // Transparent pixels (removed by flood fill)
     if (a < 128) {
       pixels.push('transparent');
       continue;

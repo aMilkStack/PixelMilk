@@ -1,5 +1,29 @@
 # Phase 5: Tile Tab
 
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║   ⚠️  CRITICAL: EDGE WRAPPING REQUIRED FOR CENTER-POINT SAMPLING  ⚠️         ║
+║                                                                              ║
+║   The "Center-Point Sampling" + "Palette Snap" combo from the PixelMilk      ║
+║   Protocol is your Excalibur, but it will DESTROY seamless tiles if not      ║
+║   adapted.                                                                   ║
+║                                                                              ║
+║   THE RISK: If a seamless grass tile has even ONE pixel of "drift" or        ║
+║   anti-aliasing on the edge, you will see a GRID LINE every 32 pixels        ║
+║   on your map. The tiling will be visibly broken.                            ║
+║                                                                              ║
+║   THE FIX: When implementing tiles, enforce the same center-point sampling   ║
+║   logic but with EDGE WRAPPING on the sampling. The left edge must sample    ║
+║   from positions that wrap to the right edge, and vice versa. Same for       ║
+║   top/bottom.                                                                ║
+║                                                                              ║
+║   See: utils/pixelSnapper.ts - needs a tileAware version                     ║
+║   See: CLAUDE.md - PixelMilk Protocol section                                ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+```
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Create tileset generation with seamless patterns, variants, and autotile support.

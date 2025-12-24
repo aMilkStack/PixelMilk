@@ -106,36 +106,71 @@ function colorsMatch(
 }
 
 /**
+ * Center-Point Sampler (Gemini recommended)
+ *
+ * For each target pixel, calculate the CENTER of its corresponding "virtual pixel"
+ * region in the source, then sample ONLY that single pixel.
+ *
+ * This completely ignores anti-aliased edge pixels because:
+ * - AA happens at the EDGES of virtual pixels
+ * - The CENTER is always the "true" color
+ *
+ * Much more aggressive than voting - no democracy, just grab the center.
+ */
+function centerPointSample(
+  source: ImageData,
+  targetSize: number
+): ImageData {
+  const { width: srcWidth, height: srcHeight, data: srcData } = source;
+  const output = new ImageData(targetSize, targetSize);
+
+  // Step size: how many source pixels per target pixel
+  const stepX = srcWidth / targetSize;
+  const stepY = srcHeight / targetSize;
+
+  for (let y = 0; y < targetSize; y++) {
+    for (let x = 0; x < targetSize; x++) {
+      // Calculate the absolute CENTER of this "virtual pixel" in source space
+      const centerX = Math.floor((x * stepX) + (stepX / 2));
+      const centerY = Math.floor((y * stepY) + (stepY / 2));
+
+      // Clamp to valid range
+      const sx = Math.min(srcWidth - 1, Math.max(0, centerX));
+      const sy = Math.min(srcHeight - 1, Math.max(0, centerY));
+
+      // Sample ONLY that center pixel
+      const srcIdx = (sy * srcWidth + sx) * 4;
+      const dstIdx = (y * targetSize + x) * 4;
+
+      output.data[dstIdx] = srcData[srcIdx];
+      output.data[dstIdx + 1] = srcData[srcIdx + 1];
+      output.data[dstIdx + 2] = srcData[srcIdx + 2];
+      output.data[dstIdx + 3] = srcData[srcIdx + 3];
+    }
+  }
+
+  return output;
+}
+
+/**
  * Snaps an AI-generated image to a strict pixel grid.
+ *
+ * Uses CENTER-POINT SAMPLING (Gemini recommended):
+ * - Samples the CENTER of each virtual pixel block
+ * - Completely ignores anti-aliased edges
+ * - No voting/averaging - direct sampling
  *
  * @param source - The AI output ImageData
  * @param options - Snapping options including target grid size
  * @returns New ImageData with pixels aligned to exact grid
  */
 export function snapToGrid(source: ImageData, options: SnapOptions): ImageData {
-  const { targetSize, colorTolerance = 20 } = options;
-  const detectedPixelSize = detectPixelSize(source);
+  const { targetSize } = options;
 
-  const output = new ImageData(targetSize, targetSize);
+  // Use center-point sampling - ignores AA completely
+  const output = centerPointSample(source, targetSize);
 
-  // For each target pixel, sample the source region and vote on color
-  for (let y = 0; y < targetSize; y++) {
-    for (let x = 0; x < targetSize; x++) {
-      // Map target pixel to source region
-      const sourceX = (x / targetSize) * source.width;
-      const sourceY = (y / targetSize) * source.height;
-
-      // Sample a region around this point based on detected pixel size
-      const color = sampleWithVoting(source, sourceX, sourceY, detectedPixelSize, colorTolerance);
-
-      // Set output pixel
-      const i = (y * targetSize + x) * 4;
-      output.data[i] = color[0];
-      output.data[i + 1] = color[1];
-      output.data[i + 2] = color[2];
-      output.data[i + 3] = color[3];
-    }
-  }
+  console.log(`[snapToGrid] Center-sampled ${source.width}x${source.height} → ${targetSize}x${targetSize}`);
 
   return output;
 }

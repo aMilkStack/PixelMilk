@@ -379,13 +379,7 @@ ${identity.angleNotes[direction] ? `ANGLE NOTES: ${identity.angleNotes[direction
 
 ${palettePrompt}
 
-BACKGROUND: Solid pure white (#FFFFFF) - flat background anchor
-
-COLOUR SAFETY OFFSET (CRITICAL):
-- Background pixels: ONLY pure white #FFFFFF
-- Character highlights: Use #FEFEFE (off-white) for any bright/white highlights inside the sprite
-- This creates mathematical distinction between sprite and background
-- NEVER use #FFFFFF anywhere inside the character sprite
+BACKGROUND: Solid dark grey (#202020) - provides contrast for edge detection
 
 COMPOSITION: ${compositionGuide}
 
@@ -394,11 +388,11 @@ CRITICAL REQUIREMENTS:
 - True pixel art with clean, crisp pixels
 - No anti-aliasing on edges
 - Horizontally centered
-- SOLID WHITE BACKGROUND (#FFFFFF) IS MANDATORY
-- Fill ALL background pixels with pure white (#FFFFFF)
+- SOLID DARK GREY BACKGROUND (#202020) IS MANDATORY
+- Fill ALL background pixels with dark grey (#202020)
 - Do NOT draw a checkerboard pattern
-- Do NOT use any grey, off-white, or transparent background
-- Character sprite must use #FEFEFE for any white/bright highlights, NOT #FFFFFF
+- Do NOT use transparency - use solid #202020 for all background areas
+- White highlights (#FFFFFF, #FEFEFE) are allowed inside the sprite
 
 ${techniquePrompt}`;
 
@@ -503,19 +497,15 @@ STYLE LOCK (must match Image 1 exactly):
 - Shading: ${identity.styleParameters.shadingStyle}
 - Color Palette: ${palettePrompt}
 
-COLOUR SAFETY OFFSET (CRITICAL):
-- Background pixels: ONLY pure white #FFFFFF
-- Character highlights: Use #FEFEFE (off-white) for any bright/white highlights inside the sprite
-- NEVER use #FFFFFF anywhere inside the character sprite
-
 CRITICAL REQUIREMENTS:
 - Match the character from Image 1 EXACTLY
 - Same proportions, art style, and level of detail as Image 1
 - ${size}x${size} pixels, no anti-aliasing
-- SOLID WHITE BACKGROUND (#FFFFFF) IS MANDATORY
-- Fill ALL background pixels with pure white (#FFFFFF)
+- SOLID DARK GREY BACKGROUND (#202020) IS MANDATORY
+- Fill ALL background pixels with dark grey (#202020)
 - Do NOT draw a checkerboard pattern
-- Character sprite must use #FEFEFE for any white/bright highlights, NOT #FFFFFF
+- Do NOT use transparency - use solid #202020 for all background areas
+- White highlights (#FFFFFF, #FEFEFE) are allowed inside the sprite
 
 ${techniquePrompt}`;
 

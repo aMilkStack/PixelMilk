@@ -136,3 +136,31 @@ Detailed plans in `docs/plans/`.
 
 **When editing Gemini system instructions or needing Gemini API information:** Use Chrome to query Ethan's NotebookLM notebook (188 sources) for instant, accurate answers:
 https://notebooklm.google.com/notebook/bafbef1c-192a-498a-96d4-d80b0e6f021c
+
+## PixelMilk Protocol (Background Removal Pipeline)
+
+Critical image processing pipeline developed with Gemini's guidance. Solves mixels, fringing, and drift issues.
+
+**The Input/Output Distinction:**
+- **INPUT** (reference images TO Gemini): WHITE (#FFFFFF) background - simulates paper, best semantic understanding
+- **OUTPUT** (generated sprites FROM Gemini): DARK GREY (#202020) background - prevents highlight blending
+
+**Processing Pipeline (in order):**
+1. Receive ~1024px image from Gemini (dark grey background)
+2. **Center-point sample** to target size (`pixelSnapper.ts`) - samples CENTER of each virtual pixel, ignores AA edges
+3. **Flood fill** from all 4 corners (`imageUtils.ts`) - spatial isolation, preserves white pixels INSIDE sprite outline
+4. Extract pixels to array
+
+**Why this works:**
+- Dark grey provides contrast against both white highlights AND dark outlines
+- Center-point sampling ignores anti-aliased edge pixels completely
+- Flood fill is spatial - can't reach inside the sprite boundary, so white eyes/teeth preserved
+- Snap before removal ensures fuzzy edge pixels commit to either background or sprite colour
+
+**Key files:**
+- `utils/pixelSnapper.ts` - `centerPointSample()` function
+- `utils/imageUtils.ts` - `floodFillBackgroundRemoval()` function
+- `services/gemini/geminiService.ts` - prompts request #202020 background
+
+**Phase 5 (Tiles) Warning:**
+The center-point sampling + palette snap combo is critical for seamless tiles. If a tile has even ONE pixel of drift on the edge, you'll see grid lines every 32px on the map. When implementing tiles, enforce this same logic but with **edge wrapping** on the sampling.
