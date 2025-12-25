@@ -63,7 +63,15 @@ interface PlaylistTrack extends ExtendedPalette {
   energy?: 'low' | 'medium' | 'high';
   coverScene?: string;
   thematicPlaylist?: string;
+  hasAudio?: boolean;
 }
+
+// Known audio files (add more as you generate them)
+const AVAILABLE_AUDIO = new Set([
+  'cultoftheeighties',
+  'midflight',
+  'outerspasing',
+]);
 
 function buildPlaylistTracks(): PlaylistTrack[] {
   return LOSPEC_PALETTES.map(palette => {
@@ -75,8 +83,17 @@ function buildPlaylistTracks(): PlaylistTrack[] {
       energy: info?.energy,
       coverScene: info?.coverScene,
       thematicPlaylist: info?.playlist,
+      hasAudio: AVAILABLE_AUDIO.has(palette.id),
     };
   });
+}
+
+/** Get audio URL for a palette (returns null if no audio available) */
+function getAudioUrl(paletteId: string): string | null {
+  if (AVAILABLE_AUDIO.has(paletteId)) {
+    return `/audio/${paletteId}.wav`;
+  }
+  return null;
 }
 
 // All tracks
@@ -118,9 +135,45 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<PaletteCategory | 'all'>('all');
   const [waveHeights, setWaveHeights] = useState<number[]>(Array(24).fill(20));
   const [currentTrackIndex, setCurrentTrackIndex] = useState(-1);
+  const [audioLoaded, setAudioLoaded] = useState(false);
 
-  // Audio ref for future audio playback
+  // Audio ref for playback
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize audio element
+  useEffect(() => {
+    const audio = new Audio();
+    audio.loop = true;
+    audio.preload = 'none'; // Don't preload - load on demand
+    audio.volume = 0.7;
+    audioRef.current = audio;
+
+    // Cleanup on unmount
+    return () => {
+      audio.pause();
+      audio.src = '';
+    };
+  }, []);
+
+  // Sync mute state
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
+
+  // Handle play/pause
+  useEffect(() => {
+    if (!audioRef.current || !audioLoaded) return;
+
+    if (isPlaying) {
+      audioRef.current.play().catch(err => {
+        console.warn('[PalettePlaylist] Audio play failed:', err);
+      });
+    } else {
+      audioRef.current.pause();
+    }
+  }, [isPlaying, audioLoaded]);
 
   // Get filtered tracks based on category
   const filteredTracks = useMemo(() => {
@@ -154,6 +207,25 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
     return () => clearInterval(interval);
   }, [isPlaying]);
 
+  // Load audio for a track
+  const loadAudio = useCallback((track: PlaylistTrack) => {
+    if (!audioRef.current) return;
+
+    const audioUrl = getAudioUrl(track.id);
+    if (audioUrl) {
+      setAudioLoaded(false);
+      audioRef.current.src = audioUrl;
+      audioRef.current.load();
+      audioRef.current.oncanplaythrough = () => {
+        setAudioLoaded(true);
+      };
+    } else {
+      // No audio for this track
+      setAudioLoaded(false);
+      audioRef.current.src = '';
+    }
+  }, []);
+
   // Play a track
   const playTrack = useCallback((track: PlaylistTrack) => {
     const index = filteredTracks.findIndex(t => t.id === track.id);
@@ -161,12 +233,9 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
     setIsPlaying(true);
     onSelect(track.id);
 
-    // Future: Load and play audio
-    // if (audioRef.current && track.audioFile) {
-    //   audioRef.current.src = track.audioFile;
-    //   audioRef.current.play();
-    // }
-  }, [filteredTracks, onSelect]);
+    // Load audio if available
+    loadAudio(track);
+  }, [filteredTracks, onSelect, loadAudio]);
 
   // Toggle play/pause
   const togglePlay = useCallback(() => {
@@ -186,18 +255,22 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
       nextIndex = (currentTrackIndex + 1) % filteredTracks.length;
     }
 
+    const track = filteredTracks[nextIndex];
     setCurrentTrackIndex(nextIndex);
-    onSelect(filteredTracks[nextIndex].id);
-  }, [currentTrackIndex, filteredTracks, shuffleMode, onSelect]);
+    onSelect(track.id);
+    loadAudio(track);
+  }, [currentTrackIndex, filteredTracks, shuffleMode, onSelect, loadAudio]);
 
   // Previous track
   const prevTrack = useCallback(() => {
     if (filteredTracks.length === 0) return;
 
     const prevIndex = (currentTrackIndex - 1 + filteredTracks.length) % filteredTracks.length;
+    const track = filteredTracks[prevIndex];
     setCurrentTrackIndex(prevIndex);
-    onSelect(filteredTracks[prevIndex].id);
-  }, [currentTrackIndex, filteredTracks, onSelect]);
+    onSelect(track.id);
+    loadAudio(track);
+  }, [currentTrackIndex, filteredTracks, onSelect, loadAudio]);
 
   // Sync selected palette with current track
   useEffect(() => {
@@ -602,8 +675,16 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
                   <span style={{ color: colors.mintFaint }}>
                     {isActive && isPlaying ? '>' : String(idx + 1).padStart(2, '0')}
                   </span>
-                  <span style={{ color: isActive ? colors.cream : colors.mint }}>
+                  <span style={{
+                    color: isActive ? colors.cream : colors.mint,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}>
                     {track.name}
+                    {track.hasAudio && (
+                      <Volume2 size={10} style={{ color: colors.mintDim, opacity: 0.7 }} />
+                    )}
                   </span>
                   <span style={{
                     display: 'flex',
@@ -827,13 +908,6 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
                 </button>
               </div>
 
-              {/* Audio element (for future audio playback) */}
-              <audio
-                ref={audioRef}
-                loop
-                muted={isMuted}
-                style={{ display: 'none' }}
-              />
             </>
           ) : (
             <div style={{
