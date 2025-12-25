@@ -3,6 +3,7 @@ import { Settings } from 'lucide-react';
 import { TabBar } from './TabBar';
 import { ApiKeyModal } from './ApiKeyModal';
 import { ErrorBoundary } from './ErrorBoundary';
+import { PaletteMiniPlayer } from './PaletteMiniPlayer';
 import { Button } from '../shared';
 import { useAppStore, useCanvasStore } from '../../stores';
 import { initializeClient, validateApiKey } from '../../services/gemini';
@@ -201,6 +202,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         </main>
 
         {isApiKeyModalOpen && <ApiKeyModal />}
+
+        {/* Floating palette mini-player */}
+        <PaletteMiniPlayer />
       </div>
     </ErrorBoundary>
   );

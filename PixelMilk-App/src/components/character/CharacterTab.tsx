@@ -4,7 +4,6 @@ import { StyleSelector } from './StyleSelector';
 import { IdentityCard } from './IdentityCard';
 import { GenerateControls } from './GenerateControls';
 import { PaletteDisplay } from './PaletteDisplay';
-import { PalettePlaylist } from './PalettePlaylist';
 import { SpriteCanvas } from '../canvas';
 import { Button } from '../shared/Button';
 import { useAppStore, useCanvasStore, useCharacterStore } from '../../stores';
@@ -1073,17 +1072,6 @@ export const CharacterTab: React.FC = () => {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Palette Playlist - Music player for palette selection */}
-        <div style={sectionStyle}>
-          <div style={sectionTitleStyle}>Palette Selection</div>
-          <PalettePlaylist
-            selectedPaletteId={styleParams.paletteMode === 'auto' ? null : styleParams.paletteMode}
-            onSelect={(paletteId) => setStyleParams({ paletteMode: paletteId })}
-            disabled={isGeneratingIdentity || isGeneratingSprite}
-            defaultCompact={true}
-          />
         </div>
 
         {/* Style Selector */}
