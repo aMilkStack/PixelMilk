@@ -1,13 +1,13 @@
 /**
- * PaletteMiniPlayer - Floating Spotify-style mini-player for palette selection
+ * PaletteMiniPlayer - Floating Spotify-style music player for palette selection
  *
- * Fixed position bottom-right corner. Expands to full playlist modal.
- * Updates styleParams.paletteMode when a palette is selected.
+ * Collapsed: Mini widget bottom-right
+ * Expanded: Full-screen music player with descriptions
  */
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Play, Pause, SkipBack, SkipForward, Shuffle,
-  Volume2, VolumeX, ChevronUp, ChevronDown, Music, X
+  Volume2, VolumeX, ChevronUp, ChevronDown, Music, X, Maximize2, Minimize2
 } from 'lucide-react';
 import { useCharacterStore } from '../../stores';
 import {
@@ -16,6 +16,7 @@ import {
   type PaletteCategory,
 } from '../../data/lospecPalettes';
 import soundtrackData from '../../data/soundtrack.json';
+import paletteDescriptions from '../../data/paletteDescriptions.json';
 
 // Terminal aesthetic colors
 const colors = {
@@ -28,14 +29,20 @@ const colors = {
   cream: '#d8c8b8',
 };
 
-// Soundtrack types
+// Types
 interface SoundtrackEntry {
   audioPrompt: string;
   bpm: number;
   energy: 'low' | 'medium' | 'high';
 }
 
+interface DescriptionEntry {
+  description: string;
+  keywords: string[];
+}
+
 const soundtrack = soundtrackData as Record<string, SoundtrackEntry>;
+const descriptions = paletteDescriptions as Record<string, DescriptionEntry>;
 
 // Known audio files
 const AVAILABLE_AUDIO = new Set([
@@ -52,20 +59,17 @@ function getAudioUrl(paletteId: string): string | null {
 interface Track extends ExtendedPalette {
   hasAudio: boolean;
   bpm?: number;
+  description?: string;
+  keywords?: string[];
 }
 
 const ALL_TRACKS: Track[] = LOSPEC_PALETTES.map(p => ({
   ...p,
   hasAudio: AVAILABLE_AUDIO.has(p.id),
   bpm: soundtrack[p.id]?.bpm,
+  description: descriptions[p.id]?.description,
+  keywords: descriptions[p.id]?.keywords,
 }));
-
-const TRACKS_BY_CATEGORY: Record<PaletteCategory, Track[]> = {
-  Micro: ALL_TRACKS.filter(t => t.category === 'Micro'),
-  Limited: ALL_TRACKS.filter(t => t.category === 'Limited'),
-  Extended: ALL_TRACKS.filter(t => t.category === 'Extended'),
-  Full: ALL_TRACKS.filter(t => t.category === 'Full'),
-};
 
 export const PaletteMiniPlayer: React.FC = () => {
   const { styleParams, setStyleParams } = useCharacterStore();
@@ -76,7 +80,7 @@ export const PaletteMiniPlayer: React.FC = () => {
   const [isMuted, setIsMuted] = useState(true);
   const [shuffleMode, setShuffleMode] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<PaletteCategory | 'all'>('all');
-  const [waveHeights, setWaveHeights] = useState<number[]>(Array(16).fill(20));
+  const [waveHeights, setWaveHeights] = useState<number[]>(Array(32).fill(20));
   const [audioLoaded, setAudioLoaded] = useState(false);
 
   // Audio
@@ -85,7 +89,7 @@ export const PaletteMiniPlayer: React.FC = () => {
   // Get filtered tracks
   const filteredTracks = useMemo(() => {
     if (selectedCategory === 'all') return ALL_TRACKS;
-    return TRACKS_BY_CATEGORY[selectedCategory];
+    return ALL_TRACKS.filter(t => t.category === selectedCategory);
   }, [selectedCategory]);
 
   // Current track from styleParams
@@ -136,8 +140,8 @@ export const PaletteMiniPlayer: React.FC = () => {
   useEffect(() => {
     if (!isPlaying) return;
     const interval = setInterval(() => {
-      setWaveHeights(Array(16).fill(0).map(() => 15 + Math.random() * 70));
-    }, 150);
+      setWaveHeights(Array(32).fill(0).map(() => 10 + Math.random() * 80));
+    }, 120);
     return () => clearInterval(interval);
   }, [isPlaying]);
 
@@ -191,24 +195,18 @@ export const PaletteMiniPlayer: React.FC = () => {
   // ============================================
   // MINI PLAYER (Collapsed State)
   // ============================================
-  const miniPlayerStyle: React.CSSProperties = {
-    position: 'fixed',
-    bottom: '20px',
-    right: '20px',
-    zIndex: 1000,
-    display: 'flex',
-    flexDirection: 'column',
-    background: colors.bgPrimary,
-    border: `1px solid ${colors.mintFaint}`,
-    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-    width: isExpanded ? '400px' : '320px',
-    maxHeight: isExpanded ? '500px' : 'auto',
-    transition: 'all 0.2s ease',
-  };
-
   if (!isExpanded) {
     return (
-      <div style={miniPlayerStyle}>
+      <div style={{
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        zIndex: 1000,
+        background: colors.bgPrimary,
+        border: `1px solid ${colors.mintFaint}`,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+        width: '320px',
+      }}>
         {/* Header */}
         <div style={{
           display: 'flex',
@@ -241,8 +239,9 @@ export const PaletteMiniPlayer: React.FC = () => {
               padding: '4px',
               display: 'flex',
             }}
+            title="Expand"
           >
-            <ChevronUp size={14} />
+            <Maximize2 size={14} />
           </button>
         </div>
 
@@ -303,7 +302,7 @@ export const PaletteMiniPlayer: React.FC = () => {
               color: colors.mintDim,
               padding: '8px',
             }}>
-              Click <ChevronUp size={10} style={{ verticalAlign: 'middle' }} /> to browse palettes
+              Click <Maximize2 size={10} style={{ verticalAlign: 'middle' }} /> to browse palettes
             </div>
           )}
         </div>
@@ -317,14 +316,14 @@ export const PaletteMiniPlayer: React.FC = () => {
             height: '20px',
             padding: '0 12px 8px',
           }}>
-            {waveHeights.map((h, i) => (
+            {waveHeights.slice(0, 16).map((h, i) => (
               <div
                 key={i}
                 style={{
                   flex: 1,
                   height: `${isPlaying ? h : 20}%`,
                   backgroundColor: activeColors[i % activeColors.length],
-                  transition: 'height 0.15s ease-out',
+                  transition: 'height 0.12s ease-out',
                 }}
               />
             ))}
@@ -335,203 +334,367 @@ export const PaletteMiniPlayer: React.FC = () => {
   }
 
   // ============================================
-  // EXPANDED PLAYER
+  // FULL PLAYER (Expanded State)
   // ============================================
   return (
-    <div style={miniPlayerStyle}>
-      {/* Header */}
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      zIndex: 1000,
+      background: colors.bgPrimary,
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
+      {/* Header Bar */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '10px 12px',
+        padding: '12px 24px',
         borderBottom: `1px solid ${colors.mintFaint}`,
         background: colors.bgSecondary,
       }}>
         <div style={{
           fontFamily: 'Georgia, serif',
-          fontSize: '14px',
+          fontSize: '20px',
           color: colors.cream,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
         }}>
-          <span style={{ color: colors.mint }}>&gt;</span> Palette Playlist
+          <Music size={20} style={{ color: colors.mint }} />
+          Palette Playlist
+          <span style={{
+            fontFamily: 'monospace',
+            fontSize: '12px',
+            color: colors.mintDim,
+          }}>
+            {ALL_TRACKS.length} palettes
+          </span>
         </div>
         <button
           onClick={() => setIsExpanded(false)}
           style={{
             background: 'transparent',
-            border: 'none',
+            border: `1px solid ${colors.mintFaint}`,
             color: colors.mint,
             cursor: 'pointer',
-            padding: '4px',
+            padding: '8px 16px',
             display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontFamily: 'monospace',
+            fontSize: '12px',
           }}
         >
-          <ChevronDown size={14} />
+          <Minimize2 size={14} />
+          Minimize
         </button>
       </div>
 
-      {/* Category tabs */}
-      <div style={{
-        display: 'flex',
-        borderBottom: `1px solid ${colors.mintFaint}`,
-        background: colors.bgSecondary,
-        flexWrap: 'wrap',
-      }}>
-        {(['all', 'Micro', 'Limited', 'Extended', 'Full'] as const).map(cat => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            style={{
-              padding: '6px 10px',
-              background: selectedCategory === cat ? colors.bgTertiary : 'transparent',
-              border: 'none',
-              borderBottom: selectedCategory === cat ? `2px solid ${colors.mint}` : '2px solid transparent',
-              color: selectedCategory === cat ? colors.mint : colors.mintDim,
-              fontFamily: 'monospace',
-              fontSize: '10px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              textTransform: 'uppercase',
-            }}
-          >
-            {cat === 'all' ? 'All' : cat}
-          </button>
-        ))}
-      </div>
-
-      {/* Track list */}
+      {/* Main Content */}
       <div style={{
         flex: 1,
-        overflow: 'auto',
-        maxHeight: '280px',
+        display: 'grid',
+        gridTemplateColumns: '1fr 380px',
+        overflow: 'hidden',
       }}>
-        {filteredTracks.map((track, idx) => {
-          const isActive = currentTrack?.id === track.id;
-          return (
-            <button
-              key={track.id}
-              onClick={() => selectTrack(track)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                width: '100%',
-                padding: '8px 12px',
-                background: isActive ? `${colors.mint}15` : 'transparent',
-                border: 'none',
-                borderBottom: `1px solid ${colors.mintFaint}30`,
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
-            >
-              <span style={{
-                fontFamily: 'monospace',
-                fontSize: '10px',
-                color: colors.mintFaint,
-                width: '20px',
-              }}>
-                {isActive && isPlaying ? '>' : String(idx + 1).padStart(2, '0')}
-              </span>
+        {/* Left: Track List */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          borderRight: `1px solid ${colors.mintFaint}`,
+        }}>
+          {/* Category tabs */}
+          <div style={{
+            display: 'flex',
+            borderBottom: `1px solid ${colors.mintFaint}`,
+            background: colors.bgSecondary,
+            padding: '0 16px',
+          }}>
+            {(['all', 'Micro', 'Limited', 'Extended', 'Full'] as const).map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                style={{
+                  padding: '12px 20px',
+                  background: selectedCategory === cat ? colors.bgTertiary : 'transparent',
+                  border: 'none',
+                  borderBottom: selectedCategory === cat ? `2px solid ${colors.mint}` : '2px solid transparent',
+                  color: selectedCategory === cat ? colors.mint : colors.mintDim,
+                  fontFamily: 'monospace',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                {cat === 'all' ? `All (${ALL_TRACKS.length})` : cat}
+              </button>
+            ))}
+          </div>
 
-              {/* Color preview */}
-              <div style={{ display: 'flex', gap: '1px' }}>
-                {track.colors.slice(0, 4).map((c, i) => (
-                  <div key={i} style={{ width: '10px', height: '10px', backgroundColor: c }} />
+          {/* Track list header */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '50px 1fr 120px 80px',
+            padding: '10px 24px',
+            borderBottom: `1px solid ${colors.mintFaint}`,
+            fontFamily: 'monospace',
+            fontSize: '10px',
+            color: colors.mintFaint,
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            background: colors.bgSecondary,
+          }}>
+            <span>#</span>
+            <span>Palette</span>
+            <span>Colours</span>
+            <span>BPM</span>
+          </div>
+
+          {/* Scrollable track list */}
+          <div style={{ flex: 1, overflow: 'auto', padding: '8px 0' }}>
+            {filteredTracks.map((track, idx) => {
+              const isActive = currentTrack?.id === track.id;
+              return (
+                <button
+                  key={track.id}
+                  onClick={() => selectTrack(track)}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '50px 1fr 120px 80px',
+                    width: '100%',
+                    padding: '12px 24px',
+                    background: isActive ? `${colors.mint}15` : 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'background 0.1s',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) e.currentTarget.style.background = colors.bgTertiary;
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <span style={{
+                    fontFamily: 'monospace',
+                    fontSize: '12px',
+                    color: isActive ? colors.mint : colors.mintFaint,
+                  }}>
+                    {isActive && isPlaying ? '▶' : String(idx + 1).padStart(2, '0')}
+                  </span>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {/* Color preview */}
+                    <div style={{ display: 'flex', gap: '1px', flexShrink: 0 }}>
+                      {track.colors.slice(0, 6).map((c, i) => (
+                        <div key={i} style={{ width: '12px', height: '12px', backgroundColor: c }} />
+                      ))}
+                    </div>
+                    <span style={{
+                      fontFamily: 'monospace',
+                      fontSize: '13px',
+                      color: isActive ? colors.cream : colors.mint,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}>
+                      {track.name}
+                      {track.hasAudio && <Volume2 size={10} style={{ opacity: 0.5 }} />}
+                    </span>
+                  </div>
+
+                  <span style={{
+                    fontFamily: 'monospace',
+                    fontSize: '12px',
+                    color: colors.mintDim,
+                  }}>
+                    {track.colourCount} colours
+                  </span>
+
+                  <span style={{
+                    fontFamily: 'monospace',
+                    fontSize: '12px',
+                    color: colors.mintFaint,
+                  }}>
+                    {track.bpm || '-'}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right: Now Playing Panel */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          background: colors.bgSecondary,
+          padding: '24px',
+        }}>
+          {currentTrack ? (
+            <>
+              {/* Large album art */}
+              <div style={{
+                aspectRatio: '1',
+                display: 'flex',
+                flexDirection: 'column',
+                border: `2px solid ${colors.mintFaint}`,
+                marginBottom: '20px',
+              }}>
+                {activeColors.map((c, i) => (
+                  <div key={i} style={{ flex: 1, backgroundColor: c }} />
                 ))}
               </div>
 
-              <span style={{
-                flex: 1,
-                fontFamily: 'monospace',
-                fontSize: '11px',
-                color: isActive ? colors.cream : colors.mint,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
+              {/* Track name */}
+              <div style={{
+                fontFamily: 'Georgia, serif',
+                fontSize: '24px',
+                color: colors.cream,
+                marginBottom: '4px',
               }}>
-                {track.name}
-                {track.hasAudio && (
-                  <Volume2 size={8} style={{ marginLeft: '4px', opacity: 0.5 }} />
-                )}
-              </span>
+                {currentTrack.name}
+              </div>
 
-              <span style={{
+              <div style={{
                 fontFamily: 'monospace',
-                fontSize: '9px',
-                color: colors.mintFaint,
+                fontSize: '12px',
+                color: colors.mintDim,
+                marginBottom: '16px',
               }}>
-                {track.colourCount}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+                {currentTrack.colourCount} colours · {currentTrack.category}
+                {currentTrack.bpm && ` · ${currentTrack.bpm} BPM`}
+              </div>
 
-      {/* Now Playing footer */}
-      {currentTrack && (
-        <div style={{
-          borderTop: `1px solid ${colors.mintFaint}`,
-          padding: '10px 12px',
-          background: colors.bgSecondary,
-        }}>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            {/* Album art */}
-            <div style={{
-              width: '40px',
-              height: '40px',
-              display: 'flex',
-              flexDirection: 'column',
-              border: `1px solid ${colors.mintFaint}`,
-            }}>
-              {activeColors.slice(0, 5).map((c, i) => (
-                <div key={i} style={{ flex: 1, backgroundColor: c }} />
-              ))}
-            </div>
+              {/* Keywords */}
+              {currentTrack.keywords && currentTrack.keywords.length > 0 && (
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '6px',
+                  marginBottom: '16px',
+                }}>
+                  {currentTrack.keywords.map((kw, i) => (
+                    <span
+                      key={i}
+                      style={{
+                        padding: '4px 10px',
+                        background: colors.bgTertiary,
+                        border: `1px solid ${colors.mintFaint}`,
+                        fontFamily: 'monospace',
+                        fontSize: '10px',
+                        color: colors.mint,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      {kw}
+                    </span>
+                  ))}
+                </div>
+              )}
 
-            {/* Waveform */}
+              {/* Description */}
+              {currentTrack.description && (
+                <div style={{
+                  fontFamily: 'Georgia, serif',
+                  fontSize: '13px',
+                  lineHeight: '1.6',
+                  color: colors.cream,
+                  opacity: 0.8,
+                  marginBottom: '20px',
+                  maxHeight: '120px',
+                  overflow: 'auto',
+                }}>
+                  {currentTrack.description}
+                </div>
+              )}
+
+              {/* Waveform */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'flex-end',
+                gap: '3px',
+                height: '60px',
+                marginBottom: '20px',
+              }}>
+                {waveHeights.map((h, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      flex: 1,
+                      height: `${isPlaying ? h : 15}%`,
+                      backgroundColor: activeColors[i % activeColors.length],
+                      transition: 'height 0.12s ease-out',
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Controls */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '12px',
+              }}>
+                <button
+                  onClick={() => setShuffleMode(!shuffleMode)}
+                  style={{
+                    ...iconBtnStyleLarge,
+                    background: shuffleMode ? colors.bgTertiary : 'transparent',
+                    borderColor: shuffleMode ? colors.mint : colors.mintFaint,
+                  }}
+                  title="Shuffle"
+                >
+                  <Shuffle size={16} />
+                </button>
+                <button onClick={prevTrack} style={iconBtnStyleLarge}>
+                  <SkipBack size={18} />
+                </button>
+                <button onClick={togglePlay} style={playBtnStyleLarge}>
+                  {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+                </button>
+                <button onClick={nextTrack} style={iconBtnStyleLarge}>
+                  <SkipForward size={18} />
+                </button>
+                <button
+                  onClick={() => setIsMuted(!isMuted)}
+                  style={{
+                    ...iconBtnStyleLarge,
+                    background: isMuted ? colors.bgTertiary : 'transparent',
+                    borderColor: isMuted ? colors.mint : colors.mintFaint,
+                  }}
+                  title={isMuted ? 'Unmute' : 'Mute'}
+                >
+                  {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                </button>
+              </div>
+            </>
+          ) : (
             <div style={{
               flex: 1,
               display: 'flex',
-              alignItems: 'flex-end',
-              gap: '2px',
-              height: '30px',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: colors.mintDim,
+              textAlign: 'center',
             }}>
-              {waveHeights.map((h, i) => (
-                <div
-                  key={i}
-                  style={{
-                    flex: 1,
-                    height: `${isPlaying ? h : 20}%`,
-                    backgroundColor: activeColors[i % activeColors.length],
-                    transition: 'height 0.15s ease-out',
-                  }}
-                />
-              ))}
+              <Music size={48} style={{ marginBottom: '16px', opacity: 0.3 }} />
+              <div style={{ fontFamily: 'monospace', fontSize: '14px' }}>
+                Select a palette to preview
+              </div>
             </div>
-
-            {/* Controls */}
-            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-              <button onClick={() => setShuffleMode(!shuffleMode)} style={{
-                ...iconBtnStyle,
-                background: shuffleMode ? colors.bgTertiary : 'transparent',
-              }}>
-                <Shuffle size={10} />
-              </button>
-              <button onClick={prevTrack} style={iconBtnStyle}><SkipBack size={12} /></button>
-              <button onClick={togglePlay} style={playBtnStyle}>
-                {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-              </button>
-              <button onClick={nextTrack} style={iconBtnStyle}><SkipForward size={12} /></button>
-              <button onClick={() => setIsMuted(!isMuted)} style={{
-                ...iconBtnStyle,
-                background: isMuted ? colors.bgTertiary : 'transparent',
-              }}>
-                {isMuted ? <VolumeX size={10} /> : <Volume2 size={10} />}
-              </button>
-            </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
@@ -552,6 +715,30 @@ const iconBtnStyle: React.CSSProperties = {
 const playBtnStyle: React.CSSProperties = {
   width: '32px',
   height: '32px',
+  background: colors.mint,
+  border: 'none',
+  color: colors.bgPrimary,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
+
+const iconBtnStyleLarge: React.CSSProperties = {
+  width: '44px',
+  height: '44px',
+  background: 'transparent',
+  border: `1px solid ${colors.mintFaint}`,
+  color: colors.mint,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
+
+const playBtnStyleLarge: React.CSSProperties = {
+  width: '64px',
+  height: '64px',
   background: colors.mint,
   border: 'none',
   color: colors.bgPrimary,
