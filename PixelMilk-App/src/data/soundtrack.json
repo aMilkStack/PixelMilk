@@ -1,0 +1,1670 @@
+{
+    "cultoftheeighties":  {
+                              "colours":  20,
+                              "audioPrompt":  "pure 80s synthwave worship, 118bpm, analog warmth, VHS tracking artifacts, chrome sunset",
+                              "playlist":  "8-Bit Nostalgia",
+                              "bpm":  124,
+                              "coverScene":  "pixel boombox on beach, sunset grid, palm tree silhouettes, retro sports car",
+                              "energy":  "high",
+                              "tags":  [
+                                           "warm",
+                                           "balanced",
+                                           "high-contrast",
+                                           "retro"
+                                       ]
+                          },
+    "midflight":  {
+                      "colours":  64,
+                      "audioPrompt":  "airplane journey, 80bpm, engine hum, window seat view, destination unknown",
+                      "playlist":  "Miscellaneous",
+                      "bpm":  140,
+                      "coverScene":  "airplane interior, pixel passenger looking out window, clouds below",
+                      "energy":  "high",
+                      "tags":  [
+                                   "mixed",
+                                   "balanced",
+                                   "high-contrast"
+                               ]
+                  },
+    "outerspasing":  {
+                         "colours":  10,
+                         "audioPrompt":  "spacewalk serenity, 60bpm, oxygen tank breathing, tether floating, infinite stars",
+                         "playlist":  "Miscellaneous",
+                         "bpm":  144,
+                         "coverScene":  "astronaut sprite on EVA, space station behind, Earth below",
+                         "energy":  "high",
+                         "tags":  [
+                                      "mixed",
+                                      "balanced",
+                                      "high-contrast",
+                                      "cyan",
+                                      "teal",
+                                      "purple",
+                                      "violet"
+                                  ]
+                     },
+    "cobble":  {
+                   "colours":  3,
+                   "audioPrompt":  "gritty electronica, rugged atmosphere, 143bpm, wind textures, metallic percussion, energetic, driving rhythm",
+                   "playlist":  "Rust \u0026 Bone",
+                   "bpm":  143,
+                   "coverScene":  "abandoned factory at sunset, 3-colour palette, pixel art style",
+                   "energy":  "high",
+                   "tags":  [
+                                "mixed",
+                                "muted",
+                                "high-contrast",
+                                "purple",
+                                "violet"
+                            ]
+               },
+    "joystick":  {
+                     "colours":  24,
+                     "audioPrompt":  "classic arcade anthem, 140bpm, coin insert sounds, high score energy, 80s game room",
+                     "playlist":  "8-Bit Nostalgia",
+                     "bpm":  129,
+                     "coverScene":  "close-up of arcade joystick and buttons, CRT glow, high score screen",
+                     "energy":  "high",
+                     "tags":  [
+                                  "warm",
+                                  "balanced",
+                                  "high-contrast",
+                                  "cheerful"
+                              ]
+                 },
+    "lavender":  {
+                     "colours":  3,
+                     "audioPrompt":  "retrowave, pulsing atmosphere, 141bpm, FM leads, arpeggiated sequences, energetic, driving rhythm",
+                     "playlist":  "Midnight Arcade",
+                     "bpm":  141,
+                     "coverScene":  "rooftop overlooking neon skyline, 3-colour palette, pixel art style",
+                     "energy":  "high",
+                     "tags":  [
+                                  "mixed",
+                                  "muted",
+                                  "high-contrast",
+                                  "neon",
+                                  "synthwave",
+                                  "cyberpunk",
+                                  "blue"
+                              ]
+                 },
+    "brussel":  {
+                    "colours":  3,
+                    "audioPrompt":  "happy hardcore, euphoric atmosphere, 125bpm, bouncy bass, upbeat arps, energetic, driving rhythm",
+                    "playlist":  "Candy Crush",
+                    "bpm":  125,
+                    "coverScene":  "candy kingdom with sugar towers, 3-colour palette, pixel art style",
+                    "energy":  "high",
+                    "tags":  [
+                                 "warm",
+                                 "vibrant",
+                                 "saturated",
+                                 "orange",
+                                 "yellow",
+                                 "gold"
+                             ]
+                },
+    "hide":  {
+                 "colours":  28,
+                 "audioPrompt":  "stealth game tension, 80bpm, guard footsteps, shadows your friend, breath held",
+                 "playlist":  "Rust \u0026 Bone",
+                 "bpm":  138,
+                 "coverScene":  "pixel spy hiding behind crate, searchlight passing, enemy patrol",
+                 "energy":  "high",
+                 "tags":  [
+                              "mixed",
+                              "muted",
+                              "desaturated",
+                              "high-contrast",
+                              "earthy",
+                              "natural",
+                              "organic"
+                          ]
+             },
+    "yolkfolk":  {
+                     "colours":  3,
+                     "audioPrompt":  "egg-based adventure, 100bpm, breakfast kingdom, sunny side heroics, eggcellent quest",
+                     "playlist":  "Candy Crush",
+                     "bpm":  125,
+                     "coverScene":  "egg character sprites on breakfast plate landscape, bacon bridge, toast towers",
+                     "energy":  "high",
+                     "tags":  [
+                                  "warm",
+                                  "vibrant",
+                                  "saturated",
+                                  "low-contrast",
+                                  "light",
+                                  "bright",
+                                  "neon",
+                                  "synthwave",
+                                  "cyberpunk",
+                                  "orange",
+                                  "yellow",
+                                  "gold"
+                              ]
+                 },
+    "slimeboi":  {
+                     "colours":  5,
+                     "audioPrompt":  "bouncy blob beats, 125bpm, squelch sounds, gelatinous bass, dungeon first floor",
+                     "playlist":  "Candy Crush",
+                     "bpm":  87,
+                     "coverScene":  "cute slime sprite bouncing through pixel dungeon, treasure chest nearby",
+                     "energy":  "medium",
+                     "tags":  [
+                                  "mixed",
+                                  "balanced",
+                                  "dark",
+                                  "cyan",
+                                  "teal"
+                              ]
+                 },
+    "wanted":  {
+                   "colours":  6,
+                   "audioPrompt":  "western standoff tension, 90bpm, tumbleweeds, sheriff badge, high noon",
+                   "playlist":  "Rust \u0026 Bone",
+                   "bpm":  79,
+                   "coverScene":  "wanted poster on saloon wall, cowboy sprite, dusty main street",
+                   "energy":  "low",
+                   "tags":  [
+                                "warm",
+                                "muted",
+                                "orange"
+                            ]
+               },
+    "starstruck":  {
+                       "colours":  12,
+                       "audioPrompt":  "celebrity encounter, 120bpm, camera flashes, red carpet, fame and glamour",
+                       "playlist":  "Midnight Arcade",
+                       "bpm":  136,
+                       "coverScene":  "pixel paparazzi, star sprite in spotlight, velvet rope, premiere night",
+                       "energy":  "high",
+                       "tags":  [
+                                    "cool",
+                                    "vibrant",
+                                    "saturated",
+                                    "neon",
+                                    "synthwave",
+                                    "cyberpunk",
+                                    "blue",
+                                    "sci-fi"
+                                ]
+                   },
+    "purenostalgia":  {
+                          "colours":  16,
+                          "audioPrompt":  "outrun, nocturnal atmosphere, 129bpm, FM leads, gated reverb drums, energetic, driving rhythm",
+                          "playlist":  "Midnight Arcade",
+                          "bpm":  129,
+                          "coverScene":  "racing through cyber highway, 16-colour palette, pixel art style",
+                          "energy":  "high",
+                          "tags":  [
+                                       "mixed",
+                                       "balanced",
+                                       "high-contrast",
+                                       "neon",
+                                       "synthwave",
+                                       "cyberpunk",
+                                       "retro"
+                                   ]
+                      },
+    "bewitched":  {
+                      "colours":  10,
+                      "audioPrompt":  "glitchy 8-bit, unsettling atmosphere, 132bpm, lo-fi pads, reversed samples, energetic, driving rhythm",
+                      "playlist":  "Haunted Cartridge",
+                      "bpm":  132,
+                      "coverScene":  "corrupted game cartridge leaking static, 10-colour palette, pixel art style",
+                      "energy":  "high",
+                      "tags":  [
+                                   "warm",
+                                   "vibrant",
+                                   "saturated",
+                                   "dark",
+                                   "purple",
+                                   "violet",
+                                   "pink",
+                                   "magenta",
+                                   "horror"
+                               ]
+                  },
+    "lunarpresence":  {
+                          "colours":  2,
+                          "audioPrompt":  "moonlit mystery, 65bpm, lunar surface ambience, gravity-defying pads, crater echoes",
+                          "playlist":  "Miscellaneous",
+                          "bpm":  101,
+                          "coverScene":  "astronaut sprite on moon surface, Earth rising, footprints in dust",
+                          "energy":  "medium",
+                          "tags":  [
+                                       "mixed",
+                                       "balanced",
+                                       "yellow",
+                                       "gold",
+                                       "purple",
+                                       "violet"
+                                   ]
+                      },
+    "invasion":  {
+                     "colours":  10,
+                     "audioPrompt":  "alien attack urgency, 135bpm, UFO hovering, laser zaps, earthling panic",
+                     "playlist":  "Cosmic Drift",
+                     "bpm":  87,
+                     "coverScene":  "retro UFOs descending on pixel city, citizens running, ray beams",
+                     "energy":  "high",
+                     "tags":  [
+                                  "mixed",
+                                  "balanced",
+                                  "purple",
+                                  "violet"
+                              ]
+                 },
+    "steelreflect":  {
+                         "colours":  7,
+                         "audioPrompt":  "industrial mirror, 100bpm, metal on metal, factory precision, chrome finish",
+                         "playlist":  "Rust \u0026 Bone",
+                         "bpm":  142,
+                         "coverScene":  "futuristic factory floor, robot sprite, polished steel surfaces",
+                         "energy":  "high",
+                         "tags":  [
+                                      "warm",
+                                      "muted",
+                                      "desaturated",
+                                      "high-contrast",
+                                      "earthy",
+                                      "natural",
+                                      "organic",
+                                      "gritty"
+                                  ]
+                     },
+    "exhale":  {
+                   "colours":  48,
+                   "audioPrompt":  "release and relief, 55bpm, breath leaving body, tension dissolving, finally done",
+                   "playlist":  "Sunday Morning",
+                   "bpm":  134,
+                   "coverScene":  "figure sprite finally relaxing, sunset view, burden lifted",
+                   "energy":  "low",
+                   "tags":  [
+                                "warm",
+                                "balanced",
+                                "high-contrast"
+                            ]
+               },
+    "fairydust":  {
+                      "colours":  16,
+                      "audioPrompt":  "magical sparkle chiptune, 120bpm, twinkling arpeggios, enchanted forest vibes, whimsical melody",
+                      "playlist":  "Enchanted Realms",
+                      "bpm":  130,
+                      "coverScene":  "tiny fairy sprite leaving trail of sparkles through moonlit pixel forest",
+                      "energy":  "high",
+                      "tags":  [
+                                   "cool",
+                                   "balanced",
+                                   "high-contrast",
+                                   "neon",
+                                   "synthwave",
+                                   "cyberpunk",
+                                   "blue",
+                                   "fantasy",
+                                   "melancholic"
+                               ]
+                  },
+    "twistedpunch":  {
+                         "colours":  24,
+                         "audioPrompt":  "fighting game intensity, 140bpm, combo counter climbing, special move charge, KO impact",
+                         "playlist":  "Midnight Arcade",
+                         "bpm":  141,
+                         "coverScene":  "pixel fighting arena, martial artist sprite mid-attack, health bars",
+                         "energy":  "high",
+                         "tags":  [
+                                      "cool",
+                                      "balanced",
+                                      "high-contrast",
+                                      "blue"
+                                  ]
+                     },
+    "chipotle":  {
+                     "colours":  6,
+                     "audioPrompt":  "spicy mexican groove, 105bpm, hot sauce sizzle, kitchen energy, lunch rush",
+                     "playlist":  "Haunted Cartridge",
+                     "bpm":  138,
+                     "coverScene":  "busy pixel taqueria, chef sprite, steaming food, customers waiting",
+                     "energy":  "high",
+                     "tags":  [
+                                  "warm",
+                                  "vibrant",
+                                  "saturated",
+                                  "dark",
+                                  "neon",
+                                  "synthwave",
+                                  "cyberpunk",
+                                  "red"
+                              ]
+                 },
+    "hoot":  {
+                 "colours":  32,
+                 "audioPrompt":  "night owl wisdom, 75bpm, forest at night, who-who calls, wise observation",
+                 "playlist":  "Golden Hour",
+                 "bpm":  120,
+                 "coverScene":  "owl sprite on branch, full moon, forest silhouette, starry sky",
+                 "energy":  "high",
+                 "tags":  [
+                              "warm",
+                              "balanced",
+                              "high-contrast",
+                              "purple",
+                              "violet"
+                          ]
+             },
+    "mead":  {
+                 "colours":  40,
+                 "audioPrompt":  "viking tavern celebration, 105bpm, drinking horns clashing, hearty laughter, fireside",
+                 "playlist":  "Haunted Cartridge",
+                 "bpm":  138,
+                 "coverScene":  "pixel tavern with vikings, mead hall, roaring fire, bard with lyre",
+                 "energy":  "high",
+                 "tags":  [
+                              "warm",
+                              "muted",
+                              "high-contrast",
+                              "dark"
+                          ]
+             },
+    "writersblock":  {
+                         "colours":  20,
+                         "audioPrompt":  "frustrated creativity, 75bpm, crumpled paper sounds, stuck typewriter, coffee going cold",
+                         "playlist":  "Rainy Day",
+                         "bpm":  83,
+                         "coverScene":  "pixel writer at desk surrounded by crumpled papers, empty page glowing, late night",
+                         "energy":  "low",
+                         "tags":  [
+                                      "mixed",
+                                      "muted",
+                                      "desaturated",
+                                      "earthy",
+                                      "natural",
+                                      "organic",
+                                      "monochrome",
+                                      "grayscale"
+                                  ]
+                     },
+    "serpentine":  {
+                       "colours":  28,
+                       "audioPrompt":  "dusty western synth, contemplative atmosphere, 123bpm, metallic percussion, droning bass, energetic, driving rhythm",
+                       "playlist":  "Rust \u0026 Bone",
+                       "bpm":  123,
+                       "coverScene":  "rusted machinery overgrown with weeds, 28-colour palette, pixel art style",
+                       "energy":  "high",
+                       "tags":  [
+                                    "mixed",
+                                    "muted",
+                                    "high-contrast",
+                                    "earthy",
+                                    "natural",
+                                    "organic"
+                                ]
+                   },
+    "lovecraft":  {
+                      "colours":  24,
+                      "audioPrompt":  "cosmic horror drone, 55bpm, impossible geometries in sound, distant whispers, sanity-eroding pads",
+                      "playlist":  "Haunted Cartridge",
+                      "bpm":  84,
+                      "coverScene":  "tentacled horror emerging from pixel ocean, lighthouse in storm, eldritch geometry",
+                      "energy":  "low",
+                      "tags":  [
+                                   "mixed",
+                                   "muted",
+                                   "earthy",
+                                   "natural",
+                                   "organic",
+                                   "horror"
+                               ]
+                  },
+    "dustyshelvingunit":  {
+                              "colours":  128,
+                              "audioPrompt":  "forgotten storage, 60bpm, dust settling, old memories, abandoned objects",
+                              "playlist":  "Rust \u0026 Bone",
+                              "bpm":  133,
+                              "coverScene":  "dusty shelf with forgotten items, cobwebs, single light beam",
+                              "energy":  "high",
+                              "tags":  [
+                                           "mixed",
+                                           "muted",
+                                           "high-contrast",
+                                           "melancholic"
+                                       ]
+                          },
+    "dnbnovelist":  {
+                        "colours":  64,
+                        "audioPrompt":  "drum and bass storytelling, 174bpm, breakbeat narrative, jungle chapter, amen break",
+                        "playlist":  "Midnight Arcade",
+                        "bpm":  124,
+                        "coverScene":  "writer sprite at laptop, headphones on, bass face, coffee cold",
+                        "energy":  "high",
+                        "tags":  [
+                                     "mixed",
+                                     "balanced",
+                                     "high-contrast"
+                                 ]
+                    },
+    "newage":  {
+                   "colours":  256,
+                   "audioPrompt":  "crystal healing vibes, 70bpm, singing bowls, chakra alignment, positive energy",
+                   "playlist":  "Golden Hour",
+                   "bpm":  131,
+                   "coverScene":  "meditation room, crystals arranged, incense smoke, peaceful sprite",
+                   "energy":  "high",
+                   "tags":  [
+                                "warm",
+                                "balanced",
+                                "high-contrast"
+                            ]
+               },
+    "toothpaste":  {
+                       "colours":  2,
+                       "audioPrompt":  "fresh morning jingle, 110bpm, minty clean synths, bathroom acoustics, sparkle sounds",
+                       "playlist":  "Rust \u0026 Bone",
+                       "bpm":  120,
+                       "coverScene":  "pixel bathroom sink, toothbrush sprite, mirror reflection, morning light",
+                       "energy":  "high",
+                       "tags":  [
+                                    "mixed",
+                                    "muted",
+                                    "desaturated",
+                                    "high-contrast",
+                                    "monochrome",
+                                    "grayscale"
+                                ]
+                   },
+    "catridge":  {
+                     "colours":  40,
+                     "audioPrompt":  "blow on it and try again, 95bpm, cartridge slot click, nostalgia hit, childhood gaming",
+                     "playlist":  "Candy Crush",
+                     "bpm":  139,
+                     "coverScene":  "hands inserting game cartridge, console sprite, TV static then game",
+                     "energy":  "high",
+                     "tags":  [
+                                  "mixed",
+                                  "vibrant",
+                                  "saturated",
+                                  "high-contrast",
+                                  "green"
+                              ]
+                 },
+    "steadyandsimple":  {
+                            "colours":  40,
+                            "audioPrompt":  "reliable and honest, 85bpm, no surprises, comfortable routine, trustworthy",
+                            "playlist":  "Rust \u0026 Bone",
+                            "bpm":  121,
+                            "coverScene":  "simple cottage exterior, well-maintained garden, predictable beauty",
+                            "energy":  "high",
+                            "tags":  [
+                                         "mixed",
+                                         "muted",
+                                         "high-contrast",
+                                         "minimal"
+                                     ]
+                        },
+    "similar":  {
+                    "colours":  32,
+                    "audioPrompt":  "comfortable familiarity, 90bpm, like something you know, almost the same, cozy",
+                    "playlist":  "Golden Hour",
+                    "bpm":  131,
+                    "coverScene":  "two nearly identical pixel houses, spot the difference, comfortable",
+                    "energy":  "high",
+                    "tags":  [
+                                 "warm",
+                                 "balanced",
+                                 "high-contrast"
+                             ]
+                },
+    "poisonpillow":  {
+                         "colours":  8,
+                         "audioPrompt":  "toxic lullaby, 70bpm, music box going wrong, venomous sweetness, creeping dread",
+                         "playlist":  "Haunted Cartridge",
+                         "bpm":  131,
+                         "coverScene":  "innocent bedroom hiding danger, skull hidden in pillow pattern, moonlit window",
+                         "energy":  "low",
+                         "tags":  [
+                                      "warm",
+                                      "balanced",
+                                      "high-contrast",
+                                      "horror"
+                                  ]
+                     },
+    "superseeker":  {
+                        "colours":  64,
+                        "audioPrompt":  "search and find adventure, 120bpm, hidden object energy, discovery joy, eagle eyes",
+                        "playlist":  "Candy Crush",
+                        "bpm":  134,
+                        "coverScene":  "cluttered room full of items, magnifying glass, seeker sprite looking",
+                        "energy":  "high",
+                        "tags":  [
+                                     "warm",
+                                     "vibrant",
+                                     "saturated",
+                                     "high-contrast"
+                                 ]
+                    },
+    "musky":  {
+                  "colours":  28,
+                  "audioPrompt":  "antique shop atmosphere, 70bpm, old wood, leather books, grandfather clock",
+                  "playlist":  "Candy Crush",
+                  "bpm":  124,
+                  "coverScene":  "cluttered antique shop interior, curious items, shopkeeper sprite",
+                  "energy":  "high",
+                  "tags":  [
+                               "warm",
+                               "vibrant",
+                               "saturated",
+                               "high-contrast",
+                               "orange",
+                               "nature"
+                           ]
+              },
+    "lostspirit":  {
+                       "colours":  8,
+                       "audioPrompt":  "ethereal ghost ambient, 65bpm, hollow wind, distant memories, fading echoes",
+                       "playlist":  "Haunted Cartridge",
+                       "bpm":  82,
+                       "coverScene":  "translucent ghost sprite in abandoned pixel mansion, dust motes, moonlight through broken windows",
+                       "energy":  "low",
+                       "tags":  [
+                                    "mixed",
+                                    "muted",
+                                    "desaturated",
+                                    "earthy",
+                                    "natural",
+                                    "organic",
+                                    "melancholic"
+                                ]
+                   },
+    "behindyou":  {
+                      "colours":  112,
+                      "audioPrompt":  "horror game jumpscare, 140bpm, sudden presence, don\u0027t turn around, heart racing",
+                      "playlist":  "Haunted Cartridge",
+                      "bpm":  129,
+                      "coverScene":  "figure sprite in dark room, something in doorway behind, tension",
+                      "energy":  "high",
+                      "tags":  [
+                                   "warm",
+                                   "balanced",
+                                   "high-contrast"
+                               ]
+                  },
+    "coldsummer":  {
+                       "colours":  14,
+                       "audioPrompt":  "seasonal contradiction, 75bpm, beach with fog, swimsuit in shade, confused vibes",
+                       "playlist":  "Rainy Day",
+                       "bpm":  77,
+                       "coverScene":  "beach scene but overcast, pixel sunbathers in jackets, grey waves",
+                       "energy":  "low",
+                       "tags":  [
+                                    "mixed",
+                                    "muted",
+                                    "blue",
+                                    "summer",
+                                    "retro",
+                                    "winter",
+                                    "melancholic"
+                                ]
+                   },
+    "alphabetsoup":  {
+                         "colours":  48,
+                         "audioPrompt":  "childhood comfort, 90bpm, kitchen warmth, spoon stirring, learning to spell",
+                         "playlist":  "Golden Hour",
+                         "bpm":  133,
+                         "coverScene":  "bowl of soup sprite with floating letters, kitchen table, mom cooking",
+                         "energy":  "high",
+                         "tags":  [
+                                      "warm",
+                                      "balanced",
+                                      "high-contrast"
+                                  ]
+                     },
+    "stardust":  {
+                     "colours":  48,
+                     "audioPrompt":  "cosmic wonder, 90bpm, stellar arpeggios, nebula pads, astronaut floating peacefully",
+                     "playlist":  "Cosmic Drift",
+                     "bpm":  142,
+                     "coverScene":  "pixel astronaut reaching toward colorful nebula, stardust particles everywhere",
+                     "energy":  "high",
+                     "tags":  [
+                                  "warm",
+                                  "balanced",
+                                  "high-contrast",
+                                  "purple",
+                                  "violet",
+                                  "melancholic",
+                                  "sci-fi"
+                              ]
+                 },
+    "pixelkodak":  {
+                       "colours":  8,
+                       "audioPrompt":  "vintage camera click, 85bpm, film advance, photo developing, captured moments",
+                       "playlist":  "8-Bit Nostalgia",
+                       "bpm":  140,
+                       "coverScene":  "retro camera sprite, polaroid photos scattered, nostalgic memories",
+                       "energy":  "high",
+                       "tags":  [
+                                    "warm",
+                                    "vibrant",
+                                    "saturated",
+                                    "retro"
+                                ]
+                   },
+    "cleanbedroom":  {
+                         "colours":  20,
+                         "audioPrompt":  "satisfying organization, 85bpm, gentle clicks, soft accomplishment, tidy vibes",
+                         "playlist":  "Sunday Morning",
+                         "bpm":  122,
+                         "coverScene":  "perfectly organized pixel bedroom, made bed, morning light, plant on windowsill",
+                         "energy":  "low",
+                         "tags":  [
+                                      "warm",
+                                      "balanced",
+                                      "high-contrast",
+                                      "minimal",
+                                      "cosy"
+                                  ]
+                     },
+    "poisoncandy":  {
+                        "colours":  4,
+                        "audioPrompt":  "sweet danger, 115bpm, lollipop percussion, toxic bass, deceptive melody",
+                        "playlist":  "Haunted Cartridge",
+                        "bpm":  107,
+                        "coverScene":  "sinister candy shop, skull-shaped sweets, witch shopkeeper sprite",
+                        "energy":  "medium",
+                        "tags":  [
+                                     "mixed",
+                                     "balanced",
+                                     "green",
+                                     "cheerful",
+                                     "horror"
+                                 ]
+                    },
+    "calmdevil":  {
+                      "colours":  3,
+                      "audioPrompt":  "distorted synth, tense atmosphere, 65bpm, detuned square waves, reversed samples, ambient, sparse arrangement",
+                      "playlist":  "Haunted Cartridge",
+                      "bpm":  65,
+                      "coverScene":  "demonic boss room with ritual circles, 3-colour palette, pixel art style",
+                      "energy":  "low",
+                      "tags":  [
+                                   "warm",
+                                   "muted",
+                                   "red",
+                                   "orange",
+                                   "horror"
+                               ]
+                  },
+    "retroposter":  {
+                        "colours":  4,
+                        "audioPrompt":  "vintage advertisement, 100bpm, old radio jingle, nostalgia, propaganda vibes",
+                        "playlist":  "8-Bit Nostalgia",
+                        "bpm":  140,
+                        "coverScene":  "faded pixel poster on brick wall, retro typography, aged paper texture",
+                        "energy":  "high",
+                        "tags":  [
+                                     "warm",
+                                     "balanced",
+                                     "light",
+                                     "bright",
+                                     "neon",
+                                     "synthwave",
+                                     "cyberpunk",
+                                     "retro"
+                                 ]
+                    },
+    "leftleftdownright":  {
+                              "colours":  48,
+                              "audioPrompt":  "combo input memory, 130bpm, button mashing, special move unlocked, fighting game",
+                              "playlist":  "8-Bit Nostalgia",
+                              "bpm":  123,
+                              "coverScene":  "arcade stick close-up, input display, fighting game screen",
+                              "energy":  "high",
+                              "tags":  [
+                                           "mixed",
+                                           "balanced",
+                                           "high-contrast"
+                                       ]
+                          },
+    "simulatedbliss":  {
+                           "colours":  64,
+                           "audioPrompt":  "artificial happiness, 100bpm, uncanny valley comfort, algorithm contentment",
+                           "playlist":  "Midnight Arcade",
+                           "bpm":  130,
+                           "coverScene":  "too-perfect pixel suburb, identical houses, simulated sunset, NPC smiles",
+                           "energy":  "high",
+                           "tags":  [
+                                        "warm",
+                                        "balanced",
+                                        "high-contrast",
+                                        "neon",
+                                        "synthwave",
+                                        "cyberpunk"
+                                    ]
+                       },
+    "cherrysorbet":  {
+                         "colours":  28,
+                         "audioPrompt":  "summer sweetness, 110bpm, brain freeze moment, refreshing, cherry blossom",
+                         "playlist":  "Golden Hour",
+                         "bpm":  138,
+                         "coverScene":  "pixel dessert shop, sorbet in glass, cherry on top, sunny day",
+                         "energy":  "high",
+                         "tags":  [
+                                      "warm",
+                                      "balanced",
+                                      "high-contrast",
+                                      "red"
+                                  ]
+                     },
+    "purplerain":  {
+                       "colours":  6,
+                       "audioPrompt":  "melancholic synth ballad, 75bpm, weeping lead melody, soft rain samples, purple-tinted pads",
+                       "playlist":  "Rainy Day",
+                       "bpm":  124,
+                       "coverScene":  "lonely figure under purple streetlight, rain falling, reflections in puddles",
+                       "energy":  "low",
+                       "tags":  [
+                                    "mixed",
+                                    "muted",
+                                    "high-contrast",
+                                    "orange",
+                                    "blue",
+                                    "melancholic"
+                                ]
+                   },
+    "neonpassing":  {
+                        "colours":  24,
+                        "audioPrompt":  "fleeting city lights, 115bpm, cars passing by, momentary glimpses, urban transience",
+                        "playlist":  "Candy Crush",
+                        "bpm":  129,
+                        "coverScene":  "rain-blurred car window view, neon signs streaking past, night drive",
+                        "energy":  "high",
+                        "tags":  [
+                                     "mixed",
+                                     "vibrant",
+                                     "saturated",
+                                     "high-contrast",
+                                     "sci-fi"
+                                 ]
+                    },
+    "pastelmemory":  {
+                         "colours":  5,
+                         "audioPrompt":  "faded photograph feeling, 65bpm, soft focus nostalgia, gentle recall, bittersweet",
+                         "playlist":  "Sunday Morning",
+                         "bpm":  88,
+                         "coverScene":  "old photo album pages, faded pixel memories, soft vintage filter",
+                         "energy":  "low",
+                         "tags":  [
+                                      "cool",
+                                      "balanced",
+                                      "red",
+                                      "blue",
+                                      "melancholic"
+                                  ]
+                     },
+    "viewfromtheigloo":  {
+                             "colours":  256,
+                             "audioPrompt":  "arctic coziness, 65bpm, blizzard outside, warm inside, northern lights",
+                             "playlist":  "Miscellaneous",
+                             "bpm":  122,
+                             "coverScene":  "igloo interior, fire glow, aurora visible through ice window",
+                             "energy":  "high",
+                             "tags":  [
+                                          "mixed",
+                                          "balanced",
+                                          "high-contrast",
+                                          "winter"
+                                      ]
+                         },
+    "mysteryinc":  {
+                       "colours":  12,
+                       "audioPrompt":  "spooky investigation, 95bpm, creaky door, flashlight beam, meddling kids",
+                       "playlist":  "Haunted Cartridge",
+                       "bpm":  124,
+                       "coverScene":  "haunted mansion exterior, mystery van parked, detective sprites with flashlights",
+                       "energy":  "high",
+                       "tags":  [
+                                    "mixed",
+                                    "muted",
+                                    "high-contrast"
+                                ]
+                   },
+    "nurture":  {
+                    "colours":  3,
+                    "audioPrompt":  "cyberpunk electronica, nocturnal atmosphere, 122bpm, gated reverb drums, FM leads, energetic, driving rhythm",
+                    "playlist":  "Midnight Arcade",
+                    "bpm":  122,
+                    "coverScene":  "hacker den with multiple monitors, 3-colour palette, pixel art style",
+                    "energy":  "high",
+                    "tags":  [
+                                 "warm",
+                                 "balanced",
+                                 "low-contrast",
+                                 "light",
+                                 "bright",
+                                 "neon",
+                                 "synthwave",
+                                 "cyberpunk",
+                                 "red",
+                                 "yellow",
+                                 "gold",
+                                 "green"
+                             ]
+                },
+    "zine":  {
+                 "colours":  2,
+                 "audioPrompt":  "DIY punk aesthetic, 130bpm, photocopier rhythms, staple gun percussion, underground",
+                 "playlist":  "Rust \u0026 Bone",
+                 "bpm":  73,
+                 "coverScene":  "pixel punk making zines, scissors and glue, scattered cut-outs",
+                 "energy":  "low",
+                 "tags":  [
+                              "mixed",
+                              "muted",
+                              "desaturated",
+                              "earthy",
+                              "natural",
+                              "organic",
+                              "monochrome",
+                              "grayscale",
+                              "ink"
+                          ]
+             },
+    "filteredjoy":  {
+                        "colours":  16,
+                        "audioPrompt":  "instagram happiness, 95bpm, valencia warmth, curated contentment, perfect life",
+                        "playlist":  "Rust \u0026 Bone",
+                        "bpm":  139,
+                        "coverScene":  "aesthetically arranged pixel brunch, coffee art, succulents, ring light glow",
+                        "energy":  "high",
+                        "tags":  [
+                                     "mixed",
+                                     "muted",
+                                     "desaturated",
+                                     "high-contrast",
+                                     "earthy",
+                                     "natural",
+                                     "organic",
+                                     "monochrome",
+                                     "grayscale",
+                                     "cheerful"
+                                 ]
+                    },
+    "warmpainting":  {
+                         "colours":  40,
+                         "audioPrompt":  "art gallery warmth, 75bpm, oil paint texture, golden frame, classical appreciation",
+                         "playlist":  "Sunday Morning",
+                         "bpm":  75,
+                         "coverScene":  "pixel art museum, warm-toned painting on wall, viewer sprite contemplating",
+                         "energy":  "low",
+                         "tags":  [
+                                      "warm",
+                                      "muted",
+                                      "cosy"
+                                  ]
+                     },
+    "neonabyss":  {
+                      "colours":  7,
+                      "audioPrompt":  "deep void synthwave, crushing bass, 80bpm, echoing arps descending into darkness, distant screams",
+                      "playlist":  "Haunted Cartridge",
+                      "bpm":  134,
+                      "coverScene":  "figure standing at edge of neon-lit chasm, infinite depth below, cyberpunk void",
+                      "energy":  "high",
+                      "tags":  [
+                                   "cool",
+                                   "balanced",
+                                   "high-contrast",
+                                   "blue",
+                                   "horror",
+                                   "sci-fi"
+                               ]
+                  },
+    "scurvy":  {
+                   "colours":  48,
+                   "audioPrompt":  "sea shanty chiptune, 95bpm, accordion synths, ocean wave samples, rum-soaked adventure",
+                   "playlist":  "8-Bit Nostalgia",
+                   "bpm":  125,
+                   "coverScene":  "pixel pirate ship at sunset, skull flag, treasure island on horizon",
+                   "energy":  "high",
+                   "tags":  [
+                                "warm",
+                                "balanced",
+                                "high-contrast",
+                                "pirate"
+                            ]
+               },
+    "clearskies":  {
+                       "colours":  28,
+                       "audioPrompt":  "perfect weather, 95bpm, no clouds, optimistic, outdoor adventure",
+                       "playlist":  "Miscellaneous",
+                       "bpm":  132,
+                       "coverScene":  "wide open landscape, blue sky, single cloud, perfect day",
+                       "energy":  "high",
+                       "tags":  [
+                                    "mixed",
+                                    "balanced",
+                                    "high-contrast"
+                                ]
+                   },
+    "icecreamvan":  {
+                        "colours":  5,
+                        "audioPrompt":  "playful music box melody, cheerful chiptune, 100bpm, twinkling bells, summer afternoon vibes",
+                        "playlist":  "Candy Crush",
+                        "bpm":  86,
+                        "coverScene":  "pastel ice cream truck on sunny street, happy pixel characters queuing",
+                        "energy":  "medium",
+                        "tags":  [
+                                     "mixed",
+                                     "balanced",
+                                     "light",
+                                     "bright",
+                                     "purple",
+                                     "violet",
+                                     "winter"
+                                 ]
+                    },
+    "void":  {
+                 "colours":  4,
+                 "audioPrompt":  "absolute nothing drone, 40bpm, sound of emptiness, existential bass, black hole gravity",
+                 "playlist":  "Cosmic Drift",
+                 "bpm":  130,
+                 "coverScene":  "single pixel of light in infinite darkness, slowly fading",
+                 "energy":  "low",
+                 "tags":  [
+                              "mixed",
+                              "muted",
+                              "high-contrast",
+                              "horror"
+                          ]
+             },
+    "iconic":  {
+                   "colours":  16,
+                   "audioPrompt":  "legendary status, 100bpm, hall of fame echo, timeless, remembered forever",
+                   "playlist":  "Midnight Arcade",
+                   "bpm":  141,
+                   "coverScene":  "pixel statue in plaza, pigeons, tourists taking photos, historic landmark",
+                   "energy":  "high",
+                   "tags":  [
+                                "mixed",
+                                "balanced",
+                                "high-contrast",
+                                "neon",
+                                "synthwave",
+                                "cyberpunk"
+                            ]
+               },
+    "tattoo":  {
+                   "colours":  7,
+                   "audioPrompt":  "needle buzz ambient, 95bpm, parlor atmosphere, rebel rock undertones, permanent decisions",
+                   "playlist":  "Rust \u0026 Bone",
+                   "bpm":  79,
+                   "coverScene":  "pixel tattoo parlor interior, flash art on walls, artist working on client",
+                   "energy":  "low",
+                   "tags":  [
+                                "warm",
+                                "muted",
+                                "earthy",
+                                "natural",
+                                "organic",
+                                "orange"
+                            ]
+               },
+    "leshen":  {
+                   "colours":  6,
+                   "audioPrompt":  "forest horror ambient, 50bpm, creaking branches, deer skull presence, ancient evil",
+                   "playlist":  "Haunted Cartridge",
+                   "bpm":  124,
+                   "coverScene":  "twisted forest clearing, antlered monster sprite emerging from trees, fog",
+                   "energy":  "low",
+                   "tags":  [
+                                "mixed",
+                                "balanced",
+                                "high-contrast",
+                                "orange"
+                            ]
+               },
+    "medievalcommon":  {
+                           "colours":  24,
+                           "audioPrompt":  "tavern folk chiptune, 90bpm, lute arpeggios, hearty drums, mead-drinking merriment",
+                           "playlist":  "Enchanted Realms",
+                           "bpm":  134,
+                           "coverScene":  "bustling pixel tavern interior, fireplace, bard performing, tankards raised",
+                           "energy":  "high",
+                           "tags":  [
+                                        "warm",
+                                        "vibrant",
+                                        "saturated",
+                                        "dark",
+                                        "orange",
+                                        "fantasy"
+                                    ]
+                       },
+    "rooted":  {
+                   "colours":  16,
+                   "audioPrompt":  "grounded growth, 65bpm, soil and rain, tree rings counting years, deep foundation",
+                   "playlist":  "Rust \u0026 Bone",
+                   "bpm":  75,
+                   "coverScene":  "ancient tree sprite with visible roots, forest floor, mushrooms growing",
+                   "energy":  "low",
+                   "tags":  [
+                                "warm",
+                                "muted",
+                                "desaturated",
+                                "earthy",
+                                "natural",
+                                "organic"
+                            ]
+               },
+    "lilith":  {
+                   "colours":  5,
+                   "audioPrompt":  "dark feminine power, 85bpm, seductive and dangerous, moonlit ritual, ancient goddess",
+                   "playlist":  "Haunted Cartridge",
+                   "bpm":  94,
+                   "coverScene":  "demon queen sprite in shadow realm, crescent moon, serpent companions",
+                   "energy":  "medium",
+                   "tags":  [
+                                "warm",
+                                "balanced",
+                                "dark",
+                                "red"
+                            ]
+               },
+    "honest":  {
+                   "colours":  20,
+                   "audioPrompt":  "straightforward sincerity, 80bpm, no pretense, clear communication, authentic",
+                   "playlist":  "Rust \u0026 Bone",
+                   "bpm":  124,
+                   "coverScene":  "simple pixel scene, two figures talking, no distractions, genuine moment",
+                   "energy":  "high",
+                   "tags":  [
+                                "warm",
+                                "muted",
+                                "high-contrast",
+                                "earthy",
+                                "natural",
+                                "organic",
+                                "orange"
+                            ]
+               },
+    "flump":  {
+                  "colours":  3,
+                  "audioPrompt":  "golden ambient, content atmosphere, 99bpm, golden keys, gentle drums",
+                  "playlist":  "Golden Hour",
+                  "bpm":  99,
+                  "coverScene":  "golden beach at dusk, 3-colour palette, pixel art style",
+                  "energy":  "medium",
+                  "tags":  [
+                               "warm",
+                               "balanced",
+                               "low-contrast",
+                               "light",
+                               "bright",
+                               "orange",
+                               "blue",
+                               "pink",
+                               "magenta"
+                           ]
+              },
+    "yeti":  {
+                 "colours":  3,
+                 "audioPrompt":  "desert drone, sparse atmosphere, 133bpm, distorted guitar samples, wind textures, energetic, driving rhythm",
+                 "playlist":  "Rust \u0026 Bone",
+                 "bpm":  133,
+                 "coverScene":  "lonely gas station at dusk, 3-colour palette, pixel art style",
+                 "energy":  "high",
+                 "tags":  [
+                              "cool",
+                              "muted",
+                              "high-contrast",
+                              "cyan",
+                              "teal"
+                          ]
+             },
+    "beluga":  {
+                   "colours":  10,
+                   "audioPrompt":  "arctic ocean ambient, 70bpm, whale song samples, ice shelf creaking, polar serenity",
+                   "playlist":  "Candy Crush",
+                   "bpm":  131,
+                   "coverScene":  "beluga whale sprite swimming under ice, aurora borealis above, arctic ocean",
+                   "energy":  "high",
+                   "tags":  [
+                                "mixed",
+                                "vibrant",
+                                "saturated",
+                                "high-contrast",
+                                "cyan",
+                                "teal",
+                                "blue"
+                            ]
+               },
+    "steampunkscientist":  {
+                               "colours":  32,
+                               "audioPrompt":  "victorian industrial, clockwork rhythms, 115bpm, brass synths, steam hiss samples, gear clicking",
+                               "playlist":  "Enchanted Realms",
+                               "bpm":  140,
+                               "coverScene":  "mad scientist in brass-filled laboratory, bubbling beakers, tesla coils, goggle-wearing sprite",
+                               "energy":  "high",
+                               "tags":  [
+                                            "mixed",
+                                            "muted",
+                                            "high-contrast",
+                                            "earthy",
+                                            "natural",
+                                            "organic",
+                                            "orange",
+                                            "steampunk"
+                                        ]
+                           },
+    "reason":  {
+                   "colours":  2,
+                   "audioPrompt":  "philosophical contemplation, 75bpm, thinking music, logical progression, clarity",
+                   "playlist":  "Sunday Morning",
+                   "bpm":  81,
+                   "coverScene":  "thinker sprite at desk, books stacked, candle burning, notes scattered",
+                   "energy":  "low",
+                   "tags":  [
+                                "mixed",
+                                "muted",
+                                "pastel",
+                                "soft",
+                                "dreamy",
+                                "blue"
+                            ]
+               },
+    "soft":  {
+                 "colours":  7,
+                 "audioPrompt":  "gentle embrace ambient, 60bpm, cotton cloud textures, whisper quiet, safe space",
+                 "playlist":  "Sunday Morning",
+                 "bpm":  95,
+                 "coverScene":  "cozy blanket fort interior, fairy lights, plush toys, warm glow",
+                 "energy":  "low",
+                 "tags":  [
+                              "warm",
+                              "balanced",
+                              "orange",
+                              "cosy"
+                          ]
+             },
+    "cliche":  {
+                   "colours":  8,
+                   "audioPrompt":  "deliberately generic, 100bpm, every trope at once, familiar comfort, knowing wink",
+                   "playlist":  "Midnight Arcade",
+                   "bpm":  123,
+                   "coverScene":  "pixel scene with every cliche - sunset, silhouette, birds flying, inspirational",
+                   "energy":  "high",
+                   "tags":  [
+                                "warm",
+                                "balanced",
+                                "high-contrast",
+                                "neon",
+                                "synthwave",
+                                "cyberpunk"
+                            ]
+               },
+    "satanicwish":  {
+                        "colours":  12,
+                        "audioPrompt":  "dark ritual chiptune, ominous chanting samples, 95bpm, detuned bells, demonic bass drops, minor key throughout",
+                        "playlist":  "Haunted Cartridge",
+                        "bpm":  129,
+                        "coverScene":  "blood-red altar in pixel dungeon, pentagram floor, flickering torches, hooded figure sprite",
+                        "energy":  "high",
+                        "tags":  [
+                                     "warm",
+                                     "vibrant",
+                                     "saturated",
+                                     "dark",
+                                     "neon",
+                                     "synthwave",
+                                     "cyberpunk",
+                                     "red",
+                                     "horror"
+                                 ]
+                    },
+    "felinewine":  {
+                       "colours":  3,
+                       "audioPrompt":  "outrun, driving atmosphere, 134bpm, gated reverb drums, FM leads, energetic, driving rhythm",
+                       "playlist":  "Midnight Arcade",
+                       "bpm":  134,
+                       "coverScene":  "rooftop overlooking neon skyline, 3-colour palette, pixel art style",
+                       "energy":  "high",
+                       "tags":  [
+                                    "warm",
+                                    "balanced",
+                                    "high-contrast",
+                                    "neon",
+                                    "synthwave",
+                                    "cyberpunk",
+                                    "pink",
+                                    "magenta"
+                                ]
+                   },
+    "levelup":  {
+                    "colours":  32,
+                    "audioPrompt":  "kawaii future bass, playful atmosphere, 137bpm, bright supersaws, upbeat arps, energetic, driving rhythm",
+                    "playlist":  "Candy Crush",
+                    "bpm":  137,
+                    "coverScene":  "candy kingdom with sugar towers, 32-colour palette, pixel art style",
+                    "energy":  "high",
+                    "tags":  [
+                                 "warm",
+                                 "vibrant",
+                                 "saturated",
+                                 "high-contrast"
+                             ]
+                },
+    "lysergic":  {
+                     "colours":  14,
+                     "audioPrompt":  "psychedelic journey, 90bpm, reality melting, pattern breathing, cosmic revelation",
+                     "playlist":  "Cosmic Drift",
+                     "bpm":  123,
+                     "coverScene":  "fractal pixel patterns, melting landscape, third eye opening, rainbow trails",
+                     "energy":  "high",
+                     "tags":  [
+                                  "mixed",
+                                  "vibrant",
+                                  "saturated",
+                                  "dark"
+                              ]
+                 },
+    "molecular":  {
+                      "colours":  128,
+                      "audioPrompt":  "scientific discovery, 100bpm, electron microscope hum, atomic vibrations, eureka moment",
+                      "playlist":  "Cosmic Drift",
+                      "bpm":  125,
+                      "coverScene":  "giant pixel molecule structure, scientist sprite taking notes, lab environment",
+                      "energy":  "high",
+                      "tags":  [
+                                   "mixed",
+                                   "muted",
+                                   "high-contrast",
+                                   "sci-fi"
+                               ]
+                  },
+    "piratesfortune":  {
+                           "colours":  8,
+                           "audioPrompt":  "treasure hunt adventure, 110bpm, map unfolding, X marks the spot, gold coins",
+                           "playlist":  "Haunted Cartridge",
+                           "bpm":  67,
+                           "coverScene":  "pirate sprite with treasure map, island in distance, parrot companion",
+                           "energy":  "low",
+                           "tags":  [
+                                        "warm",
+                                        "muted",
+                                        "dark",
+                                        "orange",
+                                        "pirate"
+                                    ]
+                       },
+    "realityfordreamers":  {
+                               "colours":  40,
+                               "audioPrompt":  "lucid dream ambient, 70bpm, sleep paralysis beauty, floating logic, soft impossible",
+                               "playlist":  "Midnight Arcade",
+                               "bpm":  130,
+                               "coverScene":  "surreal pixel landscape, impossible architecture, dreamer sprite floating",
+                               "energy":  "high",
+                               "tags":  [
+                                            "mixed",
+                                            "vibrant",
+                                            "saturated",
+                                            "light",
+                                            "bright",
+                                            "neon",
+                                            "synthwave",
+                                            "cyberpunk"
+                                        ]
+                           },
+    "sensei":  {
+                   "colours":  2,
+                   "audioPrompt":  "martial arts dojo ambient, 70bpm, bamboo wind chimes, focused breathing, ancient wisdom",
+                   "playlist":  "Midnight Arcade",
+                   "bpm":  124,
+                   "coverScene":  "zen dojo interior, sensei sprite meditating, cherry blossom through window",
+                   "energy":  "high",
+                   "tags":  [
+                                "mixed",
+                                "balanced",
+                                "light",
+                                "bright",
+                                "neon",
+                                "synthwave",
+                                "cyberpunk",
+                                "red"
+                            ]
+               },
+    "fortknox":  {
+                     "colours":  10,
+                     "audioPrompt":  "heist tension building, 105bpm, vault timer ticking, laser grid hum, gold reflection",
+                     "playlist":  "Midnight Arcade",
+                     "bpm":  127,
+                     "coverScene":  "massive vault door, stacked gold bars, security camera, thief sprite",
+                     "energy":  "high",
+                     "tags":  [
+                                  "warm",
+                                  "muted",
+                                  "high-contrast"
+                              ]
+                 },
+    "royalrobes":  {
+                       "colours":  2,
+                       "audioPrompt":  "regal fanfare chiptune, 95bpm, throne room grandeur, velvet and gold, royal court",
+                       "playlist":  "Midnight Arcade",
+                       "bpm":  131,
+                       "coverScene":  "pixel throne room, king sprite in purple robes, stained glass windows",
+                       "energy":  "high",
+                       "tags":  [
+                                    "warm",
+                                    "vibrant",
+                                    "saturated",
+                                    "low-contrast",
+                                    "neon",
+                                    "synthwave",
+                                    "cyberpunk",
+                                    "yellow",
+                                    "gold",
+                                    "purple",
+                                    "violet"
+                                ]
+                   },
+    "gingevitis":  {
+                       "colours":  14,
+                       "audioPrompt":  "dental horror comedy, 110bpm, drill whine, minty fresh, tooth fairy nightmare",
+                       "playlist":  "Midnight Arcade",
+                       "bpm":  137,
+                       "coverScene":  "giant tooth sprite, gum disease monster, dental chair, fluorescent lights",
+                       "energy":  "high",
+                       "tags":  [
+                                    "warm",
+                                    "vibrant",
+                                    "saturated",
+                                    "high-contrast",
+                                    "neon",
+                                    "synthwave",
+                                    "cyberpunk"
+                                ]
+                   },
+    "hotline":  {
+                    "colours":  64,
+                    "audioPrompt":  "aggressive outrun, 128bpm, dangerous Miami vibes, pulsing bass, neon violence",
+                    "playlist":  "Golden Hour",
+                    "bpm":  127,
+                    "coverScene":  "pixel hitman at phone booth, neon palm trees, sports car waiting, blood splatter",
+                    "energy":  "high",
+                    "tags":  [
+                                 "warm",
+                                 "balanced",
+                                 "high-contrast"
+                             ]
+                },
+    "burning":  {
+                    "colours":  7,
+                    "audioPrompt":  "fire and destruction, 145bpm, crackling flames, urgent alarm synths, everything ablaze",
+                    "playlist":  "Haunted Cartridge",
+                    "bpm":  124,
+                    "coverScene":  "pixel building engulfed in flames, fire sprites dancing, ember particles",
+                    "energy":  "high",
+                    "tags":  [
+                                 "warm",
+                                 "vibrant",
+                                 "saturated",
+                                 "dark",
+                                 "pink",
+                                 "magenta"
+                             ]
+                },
+    "koldhart":  {
+                     "colours":  4,
+                     "audioPrompt":  "frozen emotions, 60bpm, ice cracking, cold synth pads, bitter wind",
+                     "playlist":  "Rainy Day",
+                     "bpm":  63,
+                     "coverScene":  "ice palace interior, frozen throne, snow falling through broken roof",
+                     "energy":  "low",
+                     "tags":  [
+                                  "mixed",
+                                  "muted",
+                                  "retro"
+                              ]
+                 },
+    "bash":  {
+                 "colours":  2,
+                 "audioPrompt":  "minimal two-tone pulse, 90bpm, stark contrast, binary rhythm, digital heartbeat",
+                 "playlist":  "Sunday Morning",
+                 "bpm":  128,
+                 "coverScene":  "terminal screen with blinking cursor, single command prompt, hacker aesthetic",
+                 "energy":  "high",
+                 "tags":  [
+                              "mixed",
+                              "muted",
+                              "desaturated",
+                              "high-contrast",
+                              "pastel",
+                              "soft",
+                              "dreamy",
+                              "monochrome",
+                              "grayscale",
+                              "green"
+                          ]
+             },
+    "buffalo":  {
+                    "colours":  2,
+                    "audioPrompt":  "american frontier synth, 85bpm, wide open plains, dusty trail, lone wanderer",
+                    "playlist":  "Midnight Arcade",
+                    "bpm":  132,
+                    "coverScene":  "pixel buffalo silhouette against sunset, prairie grass, distant mountains",
+                    "energy":  "high",
+                    "tags":  [
+                                 "mixed",
+                                 "vibrant",
+                                 "saturated",
+                                 "neon",
+                                 "synthwave",
+                                 "cyberpunk",
+                                 "red",
+                                 "blue"
+                             ]
+                },
+    "calculated":  {
+                       "colours":  2,
+                       "audioPrompt":  "mathematical precision, 120bpm, calculator beeps, spreadsheet satisfaction, logic gates",
+                       "playlist":  "Haunted Cartridge",
+                       "bpm":  78,
+                       "coverScene":  "retro calculator display, equations floating, accountant sprite at work",
+                       "energy":  "low",
+                       "tags":  [
+                                    "mixed",
+                                    "muted",
+                                    "desaturated",
+                                    "dark",
+                                    "monochrome",
+                                    "grayscale",
+                                    "green"
+                                ]
+                   },
+    "marineturbine":  {
+                          "colours":  2,
+                          "audioPrompt":  "underwater industrial, 80bpm, submarine engine hum, deep pressure, bioluminescence",
+                          "playlist":  "Haunted Cartridge",
+                          "bpm":  133,
+                          "coverScene":  "deep sea research station, turbine machinery, fish sprites swimming past",
+                          "energy":  "high",
+                          "tags":  [
+                                       "mixed",
+                                       "vibrant",
+                                       "saturated",
+                                       "dark",
+                                       "neon",
+                                       "synthwave",
+                                       "cyberpunk",
+                                       "cyan",
+                                       "teal",
+                                       "pink",
+                                       "magenta"
+                                   ]
+                      },
+    "clawmachine":  {
+                        "colours":  20,
+                        "audioPrompt":  "arcade frustration, 105bpm, mechanical whir, almost grabbed it, one more try",
+                        "playlist":  "Cosmic Drift",
+                        "bpm":  129,
+                        "coverScene":  "claw machine cabinet, plush toys inside, determined player sprite",
+                        "energy":  "high",
+                        "tags":  [
+                                     "mixed",
+                                     "balanced",
+                                     "high-contrast",
+                                     "sci-fi"
+                                 ]
+                    },
+    "oldmachine":  {
+                       "colours":  12,
+                       "audioPrompt":  "mechanical nostalgia, 80bpm, gears grinding, steam release, industrial revolution",
+                       "playlist":  "8-Bit Nostalgia",
+                       "bpm":  137,
+                       "coverScene":  "ancient contraption sprite, brass and iron, cobwebs, workshop setting",
+                       "energy":  "high",
+                       "tags":  [
+                                    "mixed",
+                                    "balanced",
+                                    "high-contrast",
+                                    "retro",
+                                    "sci-fi"
+                                ]
+                   },
+    "toastedconcrete":  {
+                            "colours":  14,
+                            "audioPrompt":  "brutal architecture, 85bpm, urban grey, construction site, unforgiving angles",
+                            "playlist":  "Rust \u0026 Bone",
+                            "bpm":  62,
+                            "coverScene":  "brutalist building sprite, concrete texture, harsh shadows, city planning",
+                            "energy":  "low",
+                            "tags":  [
+                                         "warm",
+                                         "muted",
+                                         "earthy",
+                                         "natural",
+                                         "organic",
+                                         "gritty"
+                                     ]
+                        },
+    "miami":  {
+                  "colours":  4,
+                  "audioPrompt":  "vice city vibes, 122bpm, flamingo pink bass, cocaine white synths, dangerous paradise",
+                  "playlist":  "Miscellaneous",
+                  "bpm":  132,
+                  "coverScene":  "neon hotel at night, pixel palm trees, sports car, art deco architecture",
+                  "energy":  "high",
+                  "tags":  [
+                               "mixed",
+                               "balanced",
+                               "high-contrast",
+                               "purple",
+                               "violet",
+                               "summer"
+                           ]
+              },
+    "barry":  {
+                  "colours":  3,
+                  "audioPrompt":  "outrun, driving atmosphere, 144bpm, analog synth bass, gated reverb drums, energetic, driving rhythm",
+                  "playlist":  "Midnight Arcade",
+                  "bpm":  144,
+                  "coverScene":  "neon-lit city street at 2am, 3-colour palette, pixel art style",
+                  "energy":  "high",
+                  "tags":  [
+                               "mixed",
+                               "vibrant",
+                               "saturated",
+                               "high-contrast",
+                               "neon",
+                               "synthwave",
+                               "cyberpunk",
+                               "orange",
+                               "green",
+                               "blue"
+                           ]
+              },
+    "expandedmemory":  {
+                           "colours":  32,
+                           "audioPrompt":  "RAM upgrade satisfaction, 100bpm, system boost, more tabs open, performance",
+                           "playlist":  "Midnight Arcade",
+                           "bpm":  141,
+                           "coverScene":  "computer interior, RAM stick being inserted, tech upgrade sprite",
+                           "energy":  "high",
+                           "tags":  [
+                                        "warm",
+                                        "balanced",
+                                        "high-contrast",
+                                        "neon",
+                                        "synthwave",
+                                        "cyberpunk",
+                                        "melancholic"
+                                    ]
+                       },
+    "entityloading":  {
+                          "colours":  12,
+                          "audioPrompt":  "digital materialization, 100bpm, loading bar tension, data streaming, almost there",
+                          "playlist":  "Cosmic Drift",
+                          "bpm":  137,
+                          "coverScene":  "glitching entity sprite forming from pixels, loading percentage, digital void",
+                          "energy":  "high",
+                          "tags":  [
+                                       "mixed",
+                                       "muted",
+                                       "desaturated",
+                                       "high-contrast",
+                                       "earthy",
+                                       "natural",
+                                       "organic",
+                                       "monochrome",
+                                       "grayscale"
+                                   ]
+                      },
+    "scarecrow":  {
+                      "colours":  14,
+                      "audioPrompt":  "harvest season creep, 70bpm, crow caws, wind through cornfield, autumn dread",
+                      "playlist":  "Haunted Cartridge",
+                      "bpm":  63,
+                      "coverScene":  "ominous scarecrow sprite in cornfield at dusk, crows circling, orange sky",
+                      "energy":  "low",
+                      "tags":  [
+                                   "warm",
+                                   "muted",
+                                   "earthy",
+                                   "natural",
+                                   "organic",
+                                   "orange",
+                                   "autumn"
+                               ]
+                  },
+    "peonyslideshow":  {
+                           "colours":  6,
+                           "audioPrompt":  "elegant garden waltz, 80bpm, floral arrangements, slideshow click, wedding vibes",
+                           "playlist":  "Miscellaneous",
+                           "bpm":  143,
+                           "coverScene":  "pixel flower garden, peony blooms, garden party, butterfly sprites",
+                           "energy":  "high",
+                           "tags":  [
+                                        "mixed",
+                                        "balanced",
+                                        "high-contrast",
+                                        "purple",
+                                        "violet"
+                                    ]
+                       },
+    "newspaper":  {
+                      "colours":  5,
+                      "audioPrompt":  "minimal typewriter ambient, 60bpm, paper rustling, old radio static, noir detective vibes",
+                      "playlist":  "Deep Focus",
+                      "bpm":  123,
+                      "coverScene":  "black and white newsroom, printing press, fedora-wearing journalist sprite",
+                      "energy":  "low",
+                      "tags":  [
+                                   "cool",
+                                   "muted",
+                                   "desaturated",
+                                   "high-contrast",
+                                   "earthy",
+                                   "natural",
+                                   "organic",
+                                   "ink"
+                               ]
+                  }
+}

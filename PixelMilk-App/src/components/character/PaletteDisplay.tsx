@@ -14,13 +14,13 @@ export const PaletteDisplay: React.FC = () => {
   const { lockedPalette, styleParams, unlockPalette } = useCharacterStore();
   const { selectedColor, setSelectedColor } = useCanvasStore();
 
-  // Derive effective palette: locked takes precedence, then Lospec preset
-  const isLospecMode = styleParams.paletteMode.startsWith('lospec_');
-  const lospecColors = isLospecMode ? getLospecColors(styleParams.paletteMode) : undefined;
-  const lospecPalette = isLospecMode ? getLospecPalette(styleParams.paletteMode) : undefined;
-  const effectivePalette = lockedPalette ?? lospecColors;
+  // Derive effective palette: locked takes precedence, then selected palette
+  const hasPaletteSelected = styleParams.paletteMode && styleParams.paletteMode !== 'auto';
+  const paletteColors = hasPaletteSelected ? getLospecColors(styleParams.paletteMode) : undefined;
+  const selectedPalette = hasPaletteSelected ? getLospecPalette(styleParams.paletteMode) : undefined;
+  const effectivePalette = lockedPalette ?? paletteColors;
   const isLocked = lockedPalette !== null && lockedPalette.length > 0;
-  const isLospecPreset = !isLocked && lospecColors && lospecColors.length > 0;
+  const isPalettePreset = !isLocked && paletteColors && paletteColors.length > 0;
 
   if (!effectivePalette || effectivePalette.length === 0) {
     return (
@@ -101,8 +101,8 @@ export const PaletteDisplay: React.FC = () => {
   // Determine label text based on palette type
   const paletteLabel = isLocked
     ? 'Locked Palette'
-    : isLospecPreset && lospecPalette
-      ? `Preset: ${lospecPalette.name}`
+    : isPalettePreset && selectedPalette
+      ? `Preset: ${selectedPalette.name}`
       : 'Active Palette';
 
   const PaletteIcon = isLocked ? Lock : Palette;

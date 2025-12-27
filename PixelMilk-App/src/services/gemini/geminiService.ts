@@ -72,14 +72,14 @@ const buildPalettePrompt = (identity: CharacterIdentity): string => {
   // Always include identity colours for semantic meaning
   const semanticColors = `Character colours - Primary: ${identityPalette.primary}, Secondary: ${identityPalette.secondary}, Accent: ${identityPalette.accent}, Skin: ${identityPalette.skin}, Hair: ${identityPalette.hair}, Outline: ${identityPalette.outline}`;
 
-  // Check if using a Lospec palette
-  if (paletteMode && paletteMode.startsWith('lospec_')) {
-    const lospecColors = getLospecColors(paletteMode);
-    if (lospecColors && lospecColors.length > 0) {
-      const colorList = lospecColors.join(', ');
+  // Check if using a curated palette
+  if (paletteMode && paletteMode !== 'auto') {
+    const paletteColors = getLospecColors(paletteMode);
+    if (paletteColors && paletteColors.length > 0) {
+      const colorList = paletteColors.join(', ');
       return `COLOR PALETTE CONSTRAINT:
 You MUST use ONLY colours from this palette: ${colorList}
-Total available colours: ${lospecColors.length}
+Total available colours: ${paletteColors.length}
 
 ${semanticColors}
 

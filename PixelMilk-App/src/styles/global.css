@@ -38,6 +38,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  height: 100%;
 }
 
 /* ============================================
@@ -50,8 +51,8 @@ body {
   line-height: var(--line-height-base);
   color: var(--color-text-primary);
   background-color: var(--color-bg-primary);
-  min-height: 100vh;
-  overflow-x: hidden;
+  height: 100%;
+  overflow: hidden; /* Scroll happens in AppShell content area */
 
   /* Subtle grid background pattern */
   background-image:

@@ -81,17 +81,20 @@ function idToDisplayName(id: string): string {
 // Data Loading
 // ============================================
 
-// Import all .hex files from the Palettes directory structure
-const hexModules = import.meta.glob('../../Palettes/**/*.hex', {
+// Import all .hex files from the palettes directory structure
+const hexModules = import.meta.glob('./palettes/**/*.hex', {
   query: '?raw',
   import: 'default',
   eager: true,
 }) as Record<string, string>;
 
 // Import palettes.json for metadata at build time
-// Located in src/data/ for Vite compatibility (public/ can't be imported)
-import palettesMetaRaw from './palettes.json';
+import palettesMetaRaw from './palettes/palettes.json';
 const palettesMeta = palettesMetaRaw as Record<string, PaletteMetaEntry>;
+
+// Import chromakeys.json for background removal
+import chromakeysRaw from './palettes/chromakeys.json';
+const chromakeys = chromakeysRaw as Record<string, { chromaKey: string; distance: number }>;
 
 // ============================================
 // Palette Building
@@ -114,10 +117,10 @@ function buildPalettes(): ExtendedPalette[] {
     const colourCount = meta?.colours ?? colors.length;
 
     palettes.push({
-      id: `lospec_${id}`,
+      id: id,
       name: idToDisplayName(id),
       colors,
-      source: 'lospec',
+      source: 'curated',
       createdAt: 0,
       tags,
       category,
@@ -162,14 +165,8 @@ export function getLospecPalette(id: string): ExtendedPalette | undefined {
   // Try normalizing the input ID (remove hyphens)
   const normalizedId = id.replace(/-/g, '');
   palette = LOSPEC_PALETTES.find(p => p.id === normalizedId);
-  if (palette) return palette;
 
-  // Try adding lospec_ prefix if not present
-  if (!id.startsWith('lospec_')) {
-    return getLospecPalette(`lospec_${id}`);
-  }
-
-  return undefined;
+  return palette;
 }
 
 /**
@@ -258,4 +255,29 @@ export function getPaletteCounts(): Record<PaletteCategory, number> {
   }
 
   return counts;
+}
+
+// ============================================
+// ChromaKey Functions
+// ============================================
+
+/**
+ * Get chromaKey colour for a palette (sync, no fetch needed)
+ */
+export function getChromaKey(paletteName: string): string | null {
+  const entry = chromakeys[paletteName];
+  if (!entry) return null;
+  return `#${entry.chromaKey}`;
+}
+
+/**
+ * Get chromaKey with distance for tolerance calculation (sync)
+ */
+export function getChromaKeyWithDistance(paletteName: string): { chromaKey: string; distance: number } | null {
+  const entry = chromakeys[paletteName];
+  if (!entry) return null;
+  return {
+    chromaKey: `#${entry.chromaKey}`,
+    distance: entry.distance,
+  };
 }

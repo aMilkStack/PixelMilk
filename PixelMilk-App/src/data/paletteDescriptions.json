@@ -1,0 +1,1157 @@
+{
+  "fairydust": {
+    "description": "You have shrunk down to the size of a moth, resting on a mossy cobblestone in a **\"Twilight Glade.\"** The lighting here is bioluminescent; cyan and azure spores drift through the air, catching the light of a pixelated moon. The shadows are not black, but deep, rich indigo, hiding secrets in the underbrush. The flora is candy-colored yet earthen\u2014russet mushrooms with tangerine spots and emerald ferns that unfurl with a digital chime. It smells of wet soil and fizzy sherbet.",
+    "keywords": [
+      "Bioluminescence",
+      "Whimsy",
+      "Spores",
+      "Enchantment",
+      "Twilight",
+      "Moss"
+    ]
+  },
+  "filteredjoy": {
+    "description": "A monochromatic hallucination of a world that once held color. This is the **\"Static Void,\"** where emotions are rendered in varying shades of grey. It feels like walking through an old photograph that is slowly dissolving into grain. The contrast is low, the mood is somber, yet there is a stark, architectural beauty to the silver towers that stretch into the white fog. Silence here is heavy, like a woolen blanket.",
+    "keywords": [
+      "Monochrome",
+      "Grain",
+      "Silence",
+      "Memory",
+      "Structure",
+      "Desaturation"
+    ]
+  },
+  "iconic": {
+    "description": "The foundational bedrock of 8-bit reality. You are standing in the **\"Developer\u2019s Sandbox,\"** a place of pure, unadulterated potential. The colors are primary, bold, and unapologetic, clashing and singing in equal measure. The grass is a sharp, electric green, the sky a flat, perfect blue. It feels like the beginning of an adventure, where the air tastes like blown plastic cartridges and the horizon jitters with high-refresh-rate optimism.",
+    "keywords": [
+      "Arcade",
+      "Primary",
+      "Glitch",
+      "Adventure",
+      "CRT",
+      "Sprite"
+    ]
+  },
+  "purenostalgia": {
+    "description": "A late afternoon that stretches on forever. You are in the **\"Golden Hour Suburb,\"** where the sunlight hits the brickwork in deep oranges and rusty reds. Long shadows of teal and slate stretch across the pavement. It is a world viewed through rose-tinted glasses, where everything feels warm, safe, and vaguely familiar, like a childhood home you can\u2019t quite locate on a map.",
+    "keywords": [
+      "Sunset",
+      "Brickwork",
+      "Warmth",
+      "Sepia",
+      "Suburbia",
+      "Longing"
+    ]
+  },
+  "rooted": {
+    "description": "The **\"Ancient Grove\"** smells of peat and petrichor. The palette is dominated by muddy browns, olive greens, and slate greys, creating a dense, heavy atmosphere. Sunlight struggles to pierce the canopy, appearing only as muted beige shafts. This is a place of slow growth and decay, where roots intertwine with stone and the pixels themselves feel heavy and textured, like bark and clay.",
+    "keywords": [
+      "Earthen",
+      "Decay",
+      "Timber",
+      "Overcast",
+      "Organic",
+      "Stability"
+    ]
+  },
+  "clawmachine": {
+    "description": "Inside the glass case of a **\"Neon Carnival,\"** the air is stale and sweet. The colors are a mix of metallic greys and sudden, plastic pops of mustard yellow and crimson. It feels artificial and crowded, a pile of prizes waiting to be claimed. The lighting is harsh and fluorescent, reflecting off the shiny surfaces of rigid, synthetic plushies. There is a sense of suspended animation, a breath held before the claw descends.",
+    "keywords": [
+      "Artificial",
+      "Metallic",
+      "Prize",
+      "Fluorescent",
+      "Plastic",
+      "Mechanism"
+    ]
+  },
+  "cleanbedroom": {
+    "description": "A soft, morning haze fills the **\"Safe Haven.\"** The light is diffused through lavender curtains, casting soft pink and lilac shadows across the room. Everything here is soft to the touch\u2014plush rugs, marshmallow pillows, and wooden furniture painted in creamy whites. The world is quiet, safe, and incredibly gentle, smelling of fabric softener and morning dew. It is the visual equivalent of a lullaby.",
+    "keywords": [
+      "Pastel",
+      "Comfort",
+      "Morning",
+      "Softness",
+      "Lilac",
+      "Serenity"
+    ]
+  },
+  "cultoftheeighties": {
+    "description": "You are driving a convertible down a highway that exists only on a VHS cover. The **\"Synthwave Coast\"** is bathed in perpetual twilight, where the sun is a gradient of hot pink and tangerine. The ocean is a grid of teal, and the palm trees are silhouettes of deep violet. The air vibrates with a bass-heavy analog beat. It is a world of excess, neon, and chrome, reflecting a future that never happened.",
+    "keywords": [
+      "Synthwave",
+      "Neon",
+      "Retro",
+      "Sunset",
+      "Analog",
+      "Gradient"
+    ]
+  },
+  "honest": {
+    "description": "A rugged **\"Frontier Town\"** built from leather, dust, and dried blood. The palette is stripped of pretense\u2014browns, beiges, and skin tones dominate, grounded by deep charcoals. The lighting is natural and harsh, exposing every crack in the wood and every scar on the skin. It feels raw and unfiltered, smelling of coffee grounds, sawdust, and old paper. A place where stories are told without embellishment.",
+    "keywords": [
+      "Leather",
+      "Dust",
+      "Raw",
+      "Frontier",
+      "Parchment",
+      "Grounded"
+    ]
+  },
+  "writersblock": {
+    "description": "You sit in a **\"Rainy Study,\"** surrounded by towering stacks of grey paper and ink-stained wood. The colors are desaturated and moody\u2014slate blues, coffee browns, and muted purples. The atmosphere is thick with frustration and contemplation. Rain lashes against the window, blurring the outside world into a smear of steel grey. It is a cerebral space, quiet but loud with unwritten thoughts.",
+    "keywords": [
+      "Melancholy",
+      "Ink",
+      "Rain",
+      "Study",
+      "Paper",
+      "Contemplation"
+    ]
+  },
+  "joystick": {
+    "description": "The **\"Pixel Playground\"** is a vibrant collision of nature and technology. Lush, toxic greens mix with deep purples and bright cyans, creating a world that feels like a platformer level come to life. The ground is checkered, the trees are geometric, and the sky is a perfect, unclouded blue. It smells of ozone and fresh cut grass. Every movement here leaves a trail of motion-blurred color.",
+    "keywords": [
+      "Platformer",
+      "Toxic",
+      "Geometric",
+      "Vibrant",
+      "Playful",
+      "Digital"
+    ]
+  },
+  "lovecraft": {
+    "description": "You are wading through the **\"Eldritch Swamp.\"** The air is thick with a greenish-grey fog that clings to your skin. The palette is murky, composed of swamp greens, bruised purples, and desaturated teals. Shapes in the distance are indistinct, hinting at tentacles or ancient ruins. There is a damp, oppressive weight to the atmosphere, and the water is dark, reflecting nothing but the madness above.",
+    "keywords": [
+      "Eldritch",
+      "Murky",
+      "Fog",
+      "Cosmic",
+      "Damp",
+      "Horror"
+    ]
+  },
+  "medievalcommon": {
+    "description": "The **\"Peasant\u2019s Hearth\"** is warm, smoky, and dim. The colors are heavy on earth tones\u2014umber, ochre, and moss green\u2014punctuated by the glowing ember orange of a dying fire. The textures are rough: burlap, stone, and iron. It smells of roasting meat and damp straw. The world here is small, confined to the village walls, but deeply detailed and textured.",
+    "keywords": [
+      "Rustic",
+      "Iron",
+      "Hearth",
+      "Earthy",
+      "Village",
+      "Smoke"
+    ]
+  },
+  "neonpassing": {
+    "description": "A **\"Cyber-Alley\"** at midnight, illuminated by flickering holographic advertisements. The shadows are deep purple and navy, while the highlights are searing acid green and hot pink. The streets are slick with rain, reflecting the neon chaos above. It feels dangerous and electric, a place where high-tech meets low-life. The air tastes of copper and artificial cherry.",
+    "keywords": [
+      "Cyberpunk",
+      "Acid",
+      "Rain",
+      "Hologram",
+      "Night",
+      "Slick"
+    ]
+  },
+  "twistedpunch": {
+    "description": "You are floating in the **\"Bruised Ether.\"** The sky is a gradient of deep indigo fading into violent violet and electric blue. This is a dreamscape where gravity is optional. Floating islands of crystalline blue matter drift through the void. The light is cold and magical, casting long, sharp shadows. It feels like a lucid dream, intense and surreal, vibrating with magical energy.",
+    "keywords": [
+      "Ethereal",
+      "Indigo",
+      "Magic",
+      "Void",
+      "Crystal",
+      "Dream"
+    ]
+  },
+  "cherrysorbet": {
+    "description": "A **\"Confectionery Kingdom\"** melting under a summer sun. The world is built of soft creams, rich chocolates, and vibrant reds. It looks delicious but sticky. The ground is biscuit-beige, the trees are spun sugar in shades of rose and burgundy. The atmosphere is warm and sweet, smelling of strawberries and vanilla. It is a visual treat, soft, round, and inviting.",
+    "keywords": [
+      "Sweet",
+      "Dessert",
+      "Cream",
+      "Red",
+      "Summer",
+      "Soft"
+    ]
+  },
+  "clearskies": {
+    "description": "The **\"High Altitude Plains\"** offer a view that stretches for miles. The palette is airy and light, dominated by powder blues, soft teals, and gentle greens. The wind whips through grass that is a mix of sage and olive. The sunlight is bright but cool, filtering through thin, high clouds. It feels expansive, free, and breathless, a place of infinite horizon.",
+    "keywords": [
+      "Airy",
+      "Breeze",
+      "Horizon",
+      "Pastel",
+      "Flight",
+      "Open"
+    ]
+  },
+  "hide": {
+    "description": "You are crouching in the **\"Shadowed Thicket.\"** The colors are desaturated and low-contrast\u2014greys, olives, and browns that blend perfectly into one another. It is a world designed for camouflage. The light is flat, denying any specular highlights that might give away your position. The air is still and silent. It feels tense, a landscape holding its breath.",
+    "keywords": [
+      "Camouflage",
+      "Stealth",
+      "Desaturated",
+      "Thicket",
+      "Tension",
+      "Shadow"
+    ]
+  },
+  "musky": {
+    "description": "The **\"Spice Bazaar\"** is hot, dusty, and vibrant. The palette is rich with autumnal hues\u2014goldenrods, burnt oranges, and olive greens. The air is hazy with heat and the dust of crushed spices. Sunlight filters through tattered awnings, creating pools of intense warmth. It feels old and traveled, a place of trade and sensory overload, smelling of cumin, dry wood, and sand.",
+    "keywords": [
+      "Spice",
+      "Autumnal",
+      "Heat",
+      "Gold",
+      "Bazaar",
+      "Haze"
+    ]
+  },
+  "serpentine": {
+    "description": "A **\"Subterranean Cavern\"** lit by pale, lichen phosphorescence. The colors are cool and stony\u2014slate greys, desaturated teals, and muted purples. The rock formations are smooth and winding, like the coils of a great beast. The air is cool and damp. It feels ancient and silent, a place where time moves at the speed of dripping water.",
+    "keywords": [
+      "Stone",
+      "Cave",
+      "Coiled",
+      "Damp",
+      "Lichen",
+      "Muted"
+    ]
+  },
+  "behindyou": {
+    "description": "You are in a **\"Haunted Mansion\"** where the lights have just gone out. The palette is massive but dominated by the interplay of shadow and candlelight. Deep, terrifying blacks and browns contrast with pale, sickly skin tones and sudden, alarming reds. The atmosphere is thick with paranoia. Shadows seem to move in the corner of your eye. It is a place of jump scares and creeping dread.",
+    "keywords": [
+      "Horror",
+      "Shadow",
+      "Dread",
+      "Candlelight",
+      "Blood",
+      "Paranoia"
+    ]
+  },
+  "dustyshelvingunit": {
+    "description": "An **\"Abandoned Archive\"** where dust motes dance in shafts of afternoon light. The colors are muted and complex\u2014faded book covers in ochre, sage, and dusty rose. Everything is covered in a layer of grey silence. The smell is of old glue and decaying paper. It feels forgotten but peaceful, a repository of knowledge that no one visits anymore.",
+    "keywords": [
+      "Archive",
+      "Dust",
+      "Faded",
+      "Paper",
+      "Antique",
+      "Quiet"
+    ]
+  },
+  "molecular": {
+    "description": "A **\"Microscopic Landscape\"** viewed through an electron microscope, then colorized. The palette is scientific and precise, with distinct groups of colors representing different elements. It feels structured, biological, and teeming with invisible life. The shapes are cellular and geometric. It is a world of building blocks, fundamental and complex.",
+    "keywords": [
+      "Science",
+      "Cellular",
+      "Microscopic",
+      "Structure",
+      "Biology",
+      "Fundamental"
+    ]
+  },
+  "newage": {
+    "description": "A **\"Utopian City\"** of glass and water. The palette is vast, clean, and optimistic, featuring crisp blues, bright greens, and sterile whites. The architecture is curved and futuristic. The air is filtered and pure. It feels efficient and harmonious, a place where technology and nature have been perfectly integrated, perhaps a little too perfectly.",
+    "keywords": [
+      "Utopia",
+      "Clean",
+      "Future",
+      "Glass",
+      "Water",
+      "Harmony"
+    ]
+  },
+  "viewfromtheigloo": {
+    "description": "The **\"Arctic Aurora\"** shines above a frozen landscape. The palette is stark\u2014blinding whites and icy cyans contrasting with the deep, saturated colors of the northern lights (magenta, lime, violet). The air is razor-sharp and cold. It feels isolated and pristine. The silence is absolute, broken only by the crack of shifting ice.",
+    "keywords": [
+      "Arctic",
+      "Ice",
+      "Aurora",
+      "Cold",
+      "Pristine",
+      "Isolation"
+    ]
+  },
+  "expandedmemory": {
+    "description": "The **\"Overclocked Mainframe\"** is a bustling metropolis of data. This palette extends the boundaries of the 8-bit era, introducing deeper shadows and smoother gradients while retaining that retro punch. Neon signs in amaranth and sky-blue flicker against the rust-colored industrial pipes of the city's underbelly. It is a world that has grown beyond its original programming, chaotic, colorful, and alive with information.",
+    "keywords": [
+      "Data",
+      "Retro-Evolved",
+      "Metropolis",
+      "Overclocked",
+      "Vibrant",
+      "Complex"
+    ]
+  },
+  "hoot": {
+    "description": "A **\"Twilight Forest\"** inhabited by nocturnal creatures. The colors are muted purples, mossy greens, and soft pinks of the setting sun. It feels cozy but mysterious. The trees are tall and silhouetted against a lavender sky. It smells of pine needles and night-blooming jasmine. A quiet world where eyes watch from the shadows, friendly but hidden.",
+    "keywords": [
+      "Nocturnal",
+      "Forest",
+      "Owl",
+      "Mystery",
+      "Lavender",
+      "Cozy"
+    ]
+  },
+  "levelup": {
+    "description": "The **\"Victory Screen\"** of a bubbly Japanese RPG. The colors are confetti-bright\u2014hot pinks, sunny yellows, and energetic azures. It feels like a dopamine hit. The world is made of floating platforms and sparkling collectibles. The energy is high, the tempo is fast. It is a celebration of progress, shining and triumphant.",
+    "keywords": [
+      "Victory",
+      "Energy",
+      "Pop",
+      "Arcade",
+      "Sparkle",
+      "Triumph"
+    ]
+  },
+  "similar": {
+    "description": "A **\"Parallel Dimension\"** that looks almost like ours, but slightly off. The palette uses familiar earth tones and sky blues but twists them with strange accent colors like magenta and teal. It feels uncanny. The lighting is flat, like a sitcom set. It is a world of deja vu, where everything is recognizable but nothing is quite right.",
+    "keywords": [
+      "Uncanny",
+      "Parallel",
+      "Twist",
+      "Familiar",
+      "Off-beat",
+      "Dimension"
+    ]
+  },
+  "steampunkscientist": {
+    "description": "Inside the **\"Clockwork Laboratory,\"** brass gears grind against copper pipes. The palette is metallic and warm\u2014bronze, leather brown, and steam grey, with accents of oxidized teal. It smells of grease, coal smoke, and tea. The light is golden and hazy, filtering through smog. It is a world of industry and invention, tactile and heavy.",
+    "keywords": [
+      "Brass",
+      "Steam",
+      "Industry",
+      "Gear",
+      "Leather",
+      "Invention"
+    ]
+  },
+  "catridge": {
+    "description": "A **\"Glitchy Meadow\"** inside a dusty game cartridge. The greens are radioactive, the purples are deep and digital. The world is vibrant and high-contrast, pulsating with an electronic beat. Flowers are perfectly square pixels. It feels like a hidden level, accessible only by blowing into the slot and pressing start.",
+    "keywords": [
+      "Cartridge",
+      "Glitch",
+      "Radioactive",
+      "Pixel",
+      "Electronic",
+      "Hidden"
+    ]
+  },
+  "mead": {
+    "description": "A **\"Viking Longhall\"** during a feast. The palette is desaturated and gritty, focused on wood, fur, and metal. The light comes from flickering torches, casting long, dancing shadows. It smells of honey wine, smoke, and roast boar. The atmosphere is rowdy, ancient, and steeped in tradition. A world of warriors and winter.",
+    "keywords": [
+      "Viking",
+      "Wood",
+      "Feast",
+      "Gritty",
+      "Torchlight",
+      "Ancient"
+    ]
+  },
+  "realityfordreamers": {
+    "description": "You are walking on the **\"Rainbow Road\"** in the sky. The colors are hyper-saturated neon\u2014hot pink, electric cyan, and laser yellow. The world is devoid of black; shadows are just deep purple or blue. It feels euphoric and impossible, a sugar-rush visualization of a daydream where physics is replaced by fun.",
+    "keywords": [
+      "Neon",
+      "Euphoria",
+      "Dream",
+      "Rainbow",
+      "Saturated",
+      "Sky"
+    ]
+  },
+  "steadyandsimple": {
+    "description": "A **\"Zen Garden\"** of grey stones and raked sand. The palette is incredibly low-saturation, relying on subtle shifts in hue to define shape. It is quiet, minimalist, and balanced. The air is cool and still. It feels like a deep exhale, a place where clutter is removed and only the essential remains.",
+    "keywords": [
+      "Zen",
+      "Minimalist",
+      "Stone",
+      "Balance",
+      "Grey",
+      "Calm"
+    ]
+  },
+  "warmpainting": {
+    "description": "You are standing inside an **\"Old Oil Painting\"** in a museum. The varnish has yellowed with age, casting a golden hue over the scene. The shadows are deep brown rather than black. The texture is thick and impasto. It feels historic and preserved, a moment in time captured in amber and umber.",
+    "keywords": [
+      "Oil",
+      "Canvas",
+      "Varnish",
+      "Gold",
+      "Historic",
+      "Texture"
+    ]
+  },
+  "alphabetsoup": {
+    "description": "A **\"Chaotic Classroom\"** exploding with creativity. The palette is a riot of primary and secondary colors, messy and loud. It feels like crayons melted on a radiator. The walls are covered in scribbles. It is a world of unrefined energy, childish wonder, and the noisy clash of learning and playing.",
+    "keywords": [
+      "Chaos",
+      "Crayon",
+      "Primary",
+      "Play",
+      "Messy",
+      "Energy"
+    ]
+  },
+  "exhale": {
+    "description": "A **\"Desert at Dawn,\"** just before the sun breaks the horizon. The colors are soft gradients of peach, coral, and fading indigo. The air is cool but promising heat. It feels like a moment of relief, a pause between the darkness of night and the blinding light of day. The silence is vast and comforting.",
+    "keywords": [
+      "Dawn",
+      "Gradient",
+      "Peach",
+      "Relief",
+      "Breath",
+      "Desert"
+    ]
+  },
+  "leftleftdownright": {
+    "description": "A **\"Speedrun Glitch\"** zone. The colors are dark purples and intense, data-stream greens and magentas. The world is moving too fast to render correctly. Backgrounds are blurred streaks of neon. It feels competitive and frantic, a place where timing is everything and the environment is just an obstacle to be overcome.",
+    "keywords": [
+      "Speed",
+      "Glitch",
+      "Neon",
+      "Cheat",
+      "Blur",
+      "Frantic"
+    ]
+  },
+  "scurvy": {
+    "description": "The deck of a **\"Ghost Pirate Ship\"** under a sickly moon. The palette is nautical but rotten\u2014seaweed greens, bruised purples, and wood that has been bleached by salt and sun. It smells of brine and old rope. The atmosphere is adventurous but decayed, a swashbuckling tale told by a skeleton.",
+    "keywords": [
+      "Pirate",
+      "Nautical",
+      "Decay",
+      "Brine",
+      "Sea",
+      "Adventure"
+    ]
+  },
+  "stardust": {
+    "description": "A **\"Magical Girl\u2019s Transformation Sequence.\"** The world is a swirling vortex of sparkles, ribbons, and stars. The palette is pastel pink, periwinkle, and soft gold. It feels empowering and light as air. Gravity is replaced by floating hearts. It is the ultimate expression of femininity and cosmic power combined.",
+    "keywords": [
+      "Magical",
+      "Pastel",
+      "Sparkle",
+      "Ribbon",
+      "Cosmic",
+      "Transformation"
+    ]
+  },
+  "dnbnovelist": {
+    "description": "A **\"Underground Club\"** at 3 AM. The lighting is strobe-flashing red and blue against pitch black shadows. The palette is high contrast and gritty. It smells of sweat, smoke, and cheap cologne. The air thumps with a bass rhythm that rattles your ribcage. It is a world of urban nightlife, intense, raw, and rhythmic.",
+    "keywords": [
+      "Bass",
+      "Club",
+      "Urban",
+      "Night",
+      "Strobe",
+      "Rhythm"
+    ]
+  },
+  "hotline": {
+    "description": "A **\"Miami Stakeout\"** viewed through a thermal camera. The colors are heat-map intense: burning reds, oranges, and sickly greens against deep purples. It feels violent and humid. The tension is palpable. It is a world of violence, tropical heat, and retro-action movie aesthetics.",
+    "keywords": [
+      "Thermal",
+      "Miami",
+      "Violence",
+      "Heat",
+      "Action",
+      "Palm"
+    ]
+  },
+  "midflight": {
+    "description": "You are soaring through the **\"Stratosphere.\"** The palette is dominated by an endless spectrum of blues, from the deepest navy of space to the palest sky blue. Clouds form white islands below. It feels fast and cold. The wind roars in your ears. It is a world of absolute freedom and verticality.",
+    "keywords": [
+      "Sky",
+      "Flight",
+      "Blue",
+      "Altitude",
+      "Cloud",
+      "Freedom"
+    ]
+  },
+  "simulatedbliss": {
+    "description": "A **\"Virtual Reality Beach.\"** The water is a perfect, unmoving grid of cyan. The sand is a flat plane of beige. The colors are too bright, too perfect to be real. It feels sterile and joyous in a hollow way. A paradise rendered with limited polygons, beautiful but lacking the chaotic texture of reality.",
+    "keywords": [
+      "Virtual",
+      "Simulation",
+      "Polygon",
+      "Cyan",
+      "Sterile",
+      "Bliss"
+    ]
+  },
+  "superseeker": {
+    "description": "A **\"Hidden Object Game\"** attic. The palette is dusty, dark, and cluttered, with specific items highlighted in bright, unnatural colors. Shadows are deep violet. It feels investigative and claustrophobic. Every corner is packed with detail, demanding your attention. A world of secrets waiting to be found.",
+    "keywords": [
+      "Mystery",
+      "Clutter",
+      "Shadow",
+      "Investigation",
+      "Hidden",
+      "Detail"
+    ]
+  },
+  "beluga": {
+    "description": "The **\"Abyssal Zone.\"** You are deep underwater where sunlight barely penetrates. The palette is a gradient of crushing dark blues and teals, fading into black. Bioluminescent creatures provide the only light in cyan specks. It feels heavy, silent, and alien. The pressure is immense.",
+    "keywords": [
+      "Underwater",
+      "Abyss",
+      "Pressure",
+      "Teal",
+      "Deep",
+      "Silence"
+    ]
+  },
+  "bewitched": {
+    "description": "A **\"Sorceress\u2019s Chamber.\"** The palette is dominated by sinister magentas, deep purples, and glowing cyans. It smells of incense and ozone. Runes glow in the dark. It feels powerful and dangerous, a place where reality is bent by sheer will. The shadows are alive.",
+    "keywords": [
+      "Magic",
+      "Witch",
+      "Magenta",
+      "Spell",
+      "Dark",
+      "Power"
+    ]
+  },
+  "fortknox": {
+    "description": "The **\"Vault\"** interior. The world is metallic gold, copper, and deep shadow. Reflections are sharp and blinding. It feels cold, hard, and valuable. There is no organic softness here, only the rigid geometry of stacked bullion and steel bars. It smells of old coins.",
+    "keywords": [
+      "Gold",
+      "Wealth",
+      "Metal",
+      "Vault",
+      "Shadow",
+      "Greed"
+    ]
+  },
+  "invasion": {
+    "description": "A **\"Alien Landscape\"** under twin moons. The grass is purple, the sky is a sickly green. The architecture is organic and insectoid. It feels hostile and foreign. The colors clash in a way that unsettles the human eye, signaling that you do not belong here.",
+    "keywords": [
+      "Alien",
+      "Hostile",
+      "Purple",
+      "Space",
+      "Foreign",
+      "Sci-Fi"
+    ]
+  },
+  "outerspasing": {
+    "description": "A **\"Retro Space Station.\"** The walls are panelled in plastic blues and pinks. The stars outside are static white dots. It feels like a 1960s vision of 2000. Beeps and boops echo in the hallway. Gravity is low and the mood is groovy.",
+    "keywords": [
+      "Space",
+      "Retro",
+      "Plastic",
+      "Zero-G",
+      "Sci-Fi",
+      "Funky"
+    ]
+  },
+  "entityloading": {
+    "description": "A **\"Corrupted Save File.\"** The world is dissolving into greys and muted purples. Structures are flickering in and out of existence. It feels unstable and tragic. The colors are fading, representing a memory that is being overwritten by the void.",
+    "keywords": [
+      "Glitch",
+      "Corruption",
+      "Fade",
+      "Grey",
+      "Loss",
+      "Data"
+    ]
+  },
+  "mysteryinc": {
+    "description": "A **\"Foggy Moor\"** at night. The palette is murky blues, purples, and muted greens. A colorful van is parked in the distance. It feels campy but spooky. Eyes watch from the bushes. It is a world of cartoon logic and masked villains.",
+    "keywords": [
+      "Mystery",
+      "Fog",
+      "Cartoon",
+      "Spooky",
+      "Night",
+      "Investigation"
+    ]
+  },
+  "oldmachine": {
+    "description": "The insides of a **\"Rusty Robot.\"** The colors are oxidized copper, faded red paint, and grease. It feels creaky and stiff. The world is mechanical but dying, a forgotten automaton slowly seizing up in a junkyard.",
+    "keywords": [
+      "Rust",
+      "Robot",
+      "Copper",
+      "Machine",
+      "Age",
+      "Grease"
+    ]
+  },
+  "satanicwish": {
+    "description": "The **\"Ninth Circle.\"** The world is consumed by fire and brimstone. Deep reds, oranges, and charcoal blacks dominate. It feels hot, oppressive, and angry. The air tastes of ash. It is a landscape of suffering and jagged obsidian rocks.",
+    "keywords": [
+      "Hell",
+      "Fire",
+      "Ash",
+      "Red",
+      "Demon",
+      "Inferno"
+    ]
+  },
+  "starstruck": {
+    "description": "A **\"Galactic Disco.\"** The sky is a deep velvet blue studded with diamonds. The lights are lasers of cyan and magenta. It feels rhythmic and vast. You are dancing on an asteroid. The universe is the dancefloor.",
+    "keywords": [
+      "Galaxy",
+      "Disco",
+      "Star",
+      "Laser",
+      "Blue",
+      "Dance"
+    ]
+  },
+  "coldsummer": {
+    "description": "A **\"Beach in Winter.\"** The sand is cold and grey, the ocean is a steel blue. The sky is overcast with bruised purple clouds. It feels lonely and biting. A summer memory frozen in time, where the joy has been leached out by the chill wind.",
+    "keywords": [
+      "Winter",
+      "Beach",
+      "Cold",
+      "Grey",
+      "Lonely",
+      "Ocean"
+    ]
+  },
+  "gingevitis": {
+    "description": "A **\"Pumpkin Patch\"** at dusk. The colors are warm, spicy oranges and deep, leafy purples. It smells of cinnamon and rotting gourds. The atmosphere is Halloween-ready, a mix of cozy and slightly eerie. The shadows stretch long and thin.",
+    "keywords": [
+      "Pumpkin",
+      "Orange",
+      "Spice",
+      "Dusk",
+      "Autumn",
+      "Harvest"
+    ]
+  },
+  "lysergic": {
+    "description": "A **\"Psychedelic Trip.\"** The colors are impossible\u2014acid greens, deep purples, and vibrating hot pinks. The walls are breathing. It feels chaotic and mind-bending. There is no up or down, only a swirling vortex of sensory overload.",
+    "keywords": [
+      "Psychedelic",
+      "Acid",
+      "Trip",
+      "Chaos",
+      "Vibration",
+      "Hallucination"
+    ]
+  },
+  "scarecrow": {
+    "description": "A **\"Harvest Field\"** after the crops are gone. The palette is dry straw, brown earth, and faded denim. It feels scratchy and desolate. The wind whistles through dry stalks. A lone figure stands on a pole, watching nothing.",
+    "keywords": [
+      "Harvest",
+      "Straw",
+      "Dry",
+      "Field",
+      "Desolate",
+      "Earth"
+    ]
+  },
+  "toastedconcrete": {
+    "description": "A **\"Urban Ruins\"** at sunset. The concrete is cracked and stained, lit by the dying orange light. Shadows are purple and deep. It feels post-apocalyptic but calm. Nature is reclaiming the grey city with creeping brown vines.",
+    "keywords": [
+      "Urban",
+      "Ruin",
+      "Concrete",
+      "Sunset",
+      "Decay",
+      "City"
+    ]
+  },
+  "cliche": {
+    "description": "A **\"Standard Platformer\"** world 1-1. The sky is cyan, the ground is brown, the grass is green. It feels safe and expected. It is the vanilla flavor of video games, comforting in its predictability and simplicity.",
+    "keywords": [
+      "Basic",
+      "Platformer",
+      "Simple",
+      "Cyan",
+      "Green",
+      "Standard"
+    ]
+  },
+  "lostspirit": {
+    "description": "A **\"Limbo\"** of grey mists and faded memories. The palette is low contrast, blue-grey and slate. It feels weightless and sorrowful. Souls drift like smoke. It is a place of waiting and forgetting.",
+    "keywords": [
+      "Limbo",
+      "Ghost",
+      "Mist",
+      "Grey",
+      "Sorrow",
+      "Spirit"
+    ]
+  },
+  "piratesfortune": {
+    "description": "A **\"Treasure Cave.\"** The glitter of gold coins contrasts with the dark, wet cave walls. It feels greedy and secret. The light reflects off metallic surfaces. It smells of salt and old metal.",
+    "keywords": [
+      "Gold",
+      "Cave",
+      "Pirate",
+      "Treasure",
+      "Dark",
+      "Greed"
+    ]
+  },
+  "pixelkodak": {
+    "description": "A **\"Faded Photograph\"** found in a shoebox. The colors are shifted\u2014reds are pink, blacks are purple. It feels nostalgic and specific to the 1990s. A memory captured on cheap film, grainy and imperfect but full of soul.",
+    "keywords": [
+      "Photo",
+      "Film",
+      "Nostalgia",
+      "Grain",
+      "90s",
+      "Memory"
+    ]
+  },
+  "poisonpillow": {
+    "description": "A **\"Toxic Garden.\"** The flowers are beautiful but deadly, painted in violets, magentas, and sick greens. It feels seductive and dangerous. The air is sweet, masking the scent of poison. Soft textures hide sharp thorns.",
+    "keywords": [
+      "Poison",
+      "Garden",
+      "Violet",
+      "Thorn",
+      "Seductive",
+      "Toxic"
+    ]
+  },
+  "bash": {
+    "description": "A **\"Console Terminal.\"** Stark green text on a black background. It feels hacker-ish and obscure. The world is purely text-based, a command line interface where anything is possible if you know the code.",
+    "keywords": [
+      "Terminal",
+      "Code",
+      "Green",
+      "Hacker",
+      "Digital",
+      "Command"
+    ]
+  },
+  "buffalo": {
+    "description": "A **\"Midnight Plains.\"** Deep indigo darkness broken by a single, burning red campfire. It feels vast and wild. The silhouette of a beast moves against the stars. It is a world of solitude and survival.",
+    "keywords": [
+      "Plains",
+      "Night",
+      "Fire",
+      "Indigo",
+      "Wild",
+      "Beast"
+    ]
+  },
+  "calculated": {
+    "description": "A **\"Game Boy Screen.\"** Two colors: black and green olive. It feels retro and limited. The imagination fills in the gaps. A world of stark contrast and liquid crystal nostalgia.",
+    "keywords": [
+      "GameBoy",
+      "Retro",
+      "LCD",
+      "Green",
+      "Limited",
+      "Handheld"
+    ]
+  },
+  "lunarpresence": {
+    "description": "A **\"Moonlit Courtyard.\"** Creamy, pale light illuminates deep, dark shadows. It feels romantic and gothic. The contrast is high but soft. A place for secret meetings and silent contemplation under the orb.",
+    "keywords": [
+      "Moon",
+      "Shadow",
+      "Cream",
+      "Gothic",
+      "Night",
+      "Silence"
+    ]
+  },
+  "marineturbine": {
+    "description": "A **\"Deep Sea Vent.\"** Pitch black darkness pierced by a blinding, electric green warning light. It feels industrial and submerged. The pressure is immense. A machine hums in the crushing dark.",
+    "keywords": [
+      "Ocean",
+      "Dark",
+      "Warning",
+      "Industrial",
+      "Green",
+      "Submerged"
+    ]
+  },
+  "reason": {
+    "description": "A **\"Statue Gallery.\"** Cool, marble greys and deep indigo shadows. It feels intellectual and cold. The forms are perfect and frozen. A place of logic, philosophy, and stone silence.",
+    "keywords": [
+      "Marble",
+      "Statue",
+      "Cold",
+      "Logic",
+      "Grey",
+      "Stone"
+    ]
+  },
+  "royalrobes": {
+    "description": "A **\"Throne Room.\"** Rich, imperial purple and solid gold. It feels majestic and wealthy. The textures are velvet and metal. A world of power, decree, and absolute authority.",
+    "keywords": [
+      "Royal",
+      "Purple",
+      "Gold",
+      "Velvet",
+      "Crown",
+      "Power"
+    ]
+  },
+  "sensei": {
+    "description": "A **\"Dojo at Sunrise.\"** The paper walls glow with a soft cream light, accented by the red of a rising sun. It feels disciplined and energetic. The smell of tatami mats and sweat. A place of focus.",
+    "keywords": [
+      "Dojo",
+      "Sunrise",
+      "Focus",
+      "Cream",
+      "Red",
+      "Discipline"
+    ]
+  },
+  "toothpaste": {
+    "description": "A **\"Minty Fresh\"** bathroom. Deep teal and soft pink. It feels clean, hygienic, and medicinal. The surfaces are tiled and cold. A daily ritual rendered in sterile but pleasing colors.",
+    "keywords": [
+      "Mint",
+      "Clean",
+      "Teal",
+      "Hygiene",
+      "Fresh",
+      "Tile"
+    ]
+  },
+  "zine": {
+    "description": "A **\"Photocopied Pamphlet.\"** Gritty grey and ink black. It feels punk and DIY. The images are high contrast and noisy. A world of underground communication and rough edges.",
+    "keywords": [
+      "Punk",
+      "DIY",
+      "Xerox",
+      "Ink",
+      "Grey",
+      "Rough"
+    ]
+  },
+  "barry": {
+    "description": "A **\"Jazz Club\"** exterior. Deep navy night, a warm orange streetlamp, and the pale glow of the moon. It feels smooth and soulful. A saxophone plays in the distance. The mood is cool and urban.",
+    "keywords": [
+      "Jazz",
+      "Night",
+      "Navy",
+      "Smooth",
+      "Soul",
+      "Streetlamp"
+    ]
+  },
+  "brussel": {
+    "description": "A **\"Vegetable Garden.\"** Earthy browns and leafy greens. It feels organic and wholesome. The soil is rich and dark. The plants are sturdy. A world of growth and muddy boots.",
+    "keywords": [
+      "Garden",
+      "Earth",
+      "Green",
+      "Vegetable",
+      "Soil",
+      "Growth"
+    ]
+  },
+  "calmdevil": {
+    "description": "A **\"Demon's Study.\"** Dark charcoal walls, muted red upholstery, and cream parchment. It feels sophisticated but sinister. A place where contracts are signed in blood, but politely.",
+    "keywords": [
+      "Demon",
+      "Study",
+      "Sophisticated",
+      "Dark",
+      "Contract",
+      "Red"
+    ]
+  },
+  "cobble": {
+    "description": "A **\"Street at Night.\"** Dark asphalt, grey sidewalks, and the yellow glow of windows. It feels urban and quiet. The city sleeps. The textures are rough stone and concrete.",
+    "keywords": [
+      "Street",
+      "Night",
+      "Stone",
+      "Urban",
+      "Yellow",
+      "Quiet"
+    ]
+  },
+  "felinewine": {
+    "description": "A **\"Boudoir.\"** Dark, romantic shadows, hot pink silk, and cream lace. It feels playful and seductive. The lighting is dim and intimate. A place of luxury and secrets.",
+    "keywords": [
+      "Romantic",
+      "Pink",
+      "Silk",
+      "Dark",
+      "Luxury",
+      "Intimate"
+    ]
+  },
+  "flump": {
+    "description": "A **\"Marshmallow World.\"** Soft peach, baby pink, and periwinkle. It feels squishy and sweet. Everything is rounded and bouncy. A landscape made of candy and clouds.",
+    "keywords": [
+      "Candy",
+      "Soft",
+      "Pastel",
+      "Sweet",
+      "Cloud",
+      "Bounce"
+    ]
+  },
+  "lavender": {
+    "description": "A **\"Field of Flowers.\"** White light, soft purple blooms, and dark stems. It smells of perfume. It feels breezy and delicate. A simple, fragrant world of nature.",
+    "keywords": [
+      "Flower",
+      "Purple",
+      "Field",
+      "Scent",
+      "Delicate",
+      "Breeze"
+    ]
+  },
+  "nurture": {
+    "description": "A **\"Nursery.\"** Soft mint green, pale pink, and gentle yellow. It feels new and safe. The light is morning-soft. A place of beginnings and gentle care.",
+    "keywords": [
+      "Baby",
+      "Pastel",
+      "Care",
+      "Soft",
+      "Spring",
+      "Gentle"
+    ]
+  },
+  "yeti": {
+    "description": "A **\"Glacial Cave.\"** Dark rock, icy blue water, and white snow. It feels freezing and hidden. A monster lurks in the shadows. The air is crisp and deadly.",
+    "keywords": [
+      "Ice",
+      "Cave",
+      "Monster",
+      "Blue",
+      "Snow",
+      "Cold"
+    ]
+  },
+  "yolkfolk": {
+    "description": "A **\"Breakfast Table.\"** Pale yellow eggs, orange juice, and pink ham. It feels cheerful and morning-bright. A cartoonish world of food and sunshine.",
+    "keywords": [
+      "Breakfast",
+      "Egg",
+      "Morning",
+      "Yellow",
+      "Food",
+      "Cheerful"
+    ]
+  },
+  "koldhart": {
+    "description": "A **\"Steel Mill\"** in winter. Dark iron, cold blue steel, and teal ice. It feels hard and industrial. The metal is cold to the touch. A world of structure and freeze.",
+    "keywords": [
+      "Steel",
+      "Industrial",
+      "Cold",
+      "Metal",
+      "Teal",
+      "Structure"
+    ]
+  },
+  "miami": {
+    "description": "A **\"Synth-Pop Video.\"** Deep navy background, purple neon, and hot pink highlights. It feels 80s and electric. The palm trees are plastic. The vibe is cool and fast.",
+    "keywords": [
+      "Synth",
+      "80s",
+      "Neon",
+      "Pink",
+      "Electric",
+      "Miami"
+    ]
+  },
+  "poisoncandy": {
+    "description": "A **\"Radioactive Swamp.\"** Dark purple water, teal mists, and acid green slime. It feels toxic and glowing. The danger is bright and colorful.",
+    "keywords": [
+      "Toxic",
+      "Slime",
+      "Acid",
+      "Purple",
+      "Green",
+      "Swamp"
+    ]
+  },
+  "retroposter": {
+    "description": "A **\"Vintage Ad.\"** Muted maroon, faded red, warm orange, and cream. It feels printed and aged. A poster peeling off a wall in the summer sun.",
+    "keywords": [
+      "Vintage",
+      "Poster",
+      "Warm",
+      "Paper",
+      "Aged",
+      "Design"
+    ]
+  },
+  "void": {
+    "description": "The **\"Edge of Space.\"** Deep, almost black blue, grey metal, and star white. It feels empty and vast. You are floating in nothingness. The silence is deafening.",
+    "keywords": [
+      "Space",
+      "Void",
+      "Empty",
+      "Metal",
+      "Cold",
+      "Silent"
+    ]
+  },
+  "icecreamvan": {
+    "description": "A **\"Summer Treat.\"** Purple grape, mint green, lemon yellow, and strawberry pink. It feels refreshing and childhood-sweet. Melting colors on a hot day.",
+    "keywords": [
+      "Icecream",
+      "Summer",
+      "Pastel",
+      "Sweet",
+      "Melting",
+      "Treat"
+    ]
+  },
+  "lilith": {
+    "description": "A **\"Vampire's Kiss.\"** Deep black, dark purple, blood red, and bright crimson. It feels gothic and dangerous. A world of eternal night and sharp teeth.",
+    "keywords": [
+      "Vampire",
+      "Blood",
+      "Gothic",
+      "Red",
+      "Dark",
+      "Night"
+    ]
+  },
+  "newspaper": {
+    "description": "A **\"Printing Press.\"** Ink black, charcoal, grey, and off-white paper. It feels informative and industrial. The smell of fresh ink. A world in monochrome.",
+    "keywords": [
+      "News",
+      "Ink",
+      "Paper",
+      "Grey",
+      "Industrial",
+      "Print"
+    ]
+  },
+  "pastelmemory": {
+    "description": "A **\"Faded Polaroid.\"** Soft peach, dusty pink, slate blue, and dark grey. It feels nostalgic and washed out. A memory of a beach trip long ago.",
+    "keywords": [
+      "Polaroid",
+      "Faded",
+      "Memory",
+      "Peach",
+      "Soft",
+      "Nostalgia"
+    ]
+  },
+  "slimeboi": {
+    "description": "A **\"Sewer Level.\"** Murky yellow-green water, mossy stone, and dark shadows. It feels damp and gross. Creatures drip from the ceiling.",
+    "keywords": [
+      "Sewer",
+      "Slime",
+      "Green",
+      "Damp",
+      "Gross",
+      "Moss"
+    ]
+  },
+  "chipotle": {
+    "description": "A **\"Spicy Pepper.\"** Deep blood red, burning orange, and charcoal char. It feels hot and flavorful. The colors of fire and roasted chilies.",
+    "keywords": [
+      "Spice",
+      "Pepper",
+      "Fire",
+      "Red",
+      "Hot",
+      "Roast"
+    ]
+  },
+  "leshen": {
+    "description": "A **\"Deep Forest Spirit.\"** Bone white, wood brown, and forest green. It feels ancient and magic. The trees are watching you. A world of pagan folklore.",
+    "keywords": [
+      "Forest",
+      "Spirit",
+      "Bone",
+      "Wood",
+      "Ancient",
+      "Magic"
+    ]
+  },
+  "peonyslideshow": {
+    "description": "A **\"Flower Festival.\"** Bright white, hot pink, magenta, and deep purple. It feels floral and explosive. Petals rain from the sky.",
+    "keywords": [
+      "Flower",
+      "Pink",
+      "Festival",
+      "Bright",
+      "Garden",
+      "Bloom"
+    ]
+  },
+  "purplerain": {
+    "description": "A **\"Prince Song.\"** Creamy light, gold skin, rose, purple, and navy. It feels funky and soulful. A stage lit by purple spotlights in the rain.",
+    "keywords": [
+      "Prince",
+      "Rain",
+      "Purple",
+      "Soul",
+      "Music",
+      "Stage"
+    ]
+  },
+  "wanted": {
+    "description": "A **\"Saloon Poster.\"** Dark ink, brown wood, leather, and parchment. It feels western and dusty. The sun sets on a lawless town.",
+    "keywords": [
+      "Western",
+      "Cowboy",
+      "Parchment",
+      "Brown",
+      "Dust",
+      "Saloon"
+    ]
+  },
+  "burning": {
+    "description": "A **\"Coal Fire.\"** Bright salmon flame, deep red heart, maroon coals, and black ash. It feels incredibly hot and consuming. The fire breathes.",
+    "keywords": [
+      "Fire",
+      "Heat",
+      "Coal",
+      "Red",
+      "Ash",
+      "Burn"
+    ]
+  },
+  "neonabyss": {
+    "description": "A **\"Laser Tag Arena.\"** White lights, cyan beams, blue fog, and dark corners. It feels competitive and futuristic. The darkness is pierced by light.",
+    "keywords": [
+      "Laser",
+      "Neon",
+      "Blue",
+      "Dark",
+      "Arena",
+      "Future"
+    ]
+  },
+  "soft": {
+    "description": "A **\"Autumn Sweater.\"** Warm rust, beige, cream, and soft green. It feels woolly and comfortable. A cup of tea on a rainy day.",
+    "keywords": [
+      "Autumn",
+      "Wool",
+      "Cozy",
+      "Warm",
+      "Tea",
+      "Comfort"
+    ]
+  },
+  "steelreflect": {
+    "description": "A **\"Chrome Bumper.\"** Reflection of the world in metal. Black, brown earth, pink sunset, and white highlight. It feels shiny and distorted.",
+    "keywords": [
+      "Chrome",
+      "Reflection",
+      "Metal",
+      "Shiny",
+      "Distortion",
+      "Car"
+    ]
+  },
+  "tattoo": {
+    "description": "A **\"Ink on Skin.\"** Dark black ink, red roses, green leaves, and skin tones. It feels permanent and artistic. A story written on the body.",
+    "keywords": [
+      "Ink",
+      "Skin",
+      "Art",
+      "Permanent",
+      "Needle",
+      "Rose"
+    ]
+  }
+}

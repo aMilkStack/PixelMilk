@@ -119,9 +119,9 @@ export const StyleSelector: React.FC<StyleSelectorProps> = ({
     return LOSPEC_PALETTES.find(p => p.id === value.paletteMode);
   }, [value.paletteMode]);
 
-  // Get colors for the selected Lospec palette
+  // Get colors for the selected palette
   const selectedPaletteColors = useMemo(() => {
-    if (value.paletteMode.startsWith('lospec_')) {
+    if (value.paletteMode && value.paletteMode !== 'auto') {
       return getLospecColors(value.paletteMode);
     }
     return undefined;
