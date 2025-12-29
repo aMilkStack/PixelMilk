@@ -66,7 +66,7 @@ export interface TabConfig {
   icon: string; // Lucide icon name
 }
 
-export type ToolMode = 'select' | 'draw' | 'erase' | 'fill' | 'eyedropper' | 'hotspot';
+export type ToolMode = 'select' | 'draw' | 'erase' | 'fill' | 'eyedropper' | 'hotspot' | 'pan';
 
 export interface CanvasState {
   zoom: number;
@@ -80,6 +80,8 @@ export interface CanvasState {
   hotspotX: number | null;
   hotspotY: number | null;
   hotspotRadius: number;
+  hotspotScreenX: number;
+  hotspotScreenY: number;
 
   // Drawing state
   isDrawing: boolean;

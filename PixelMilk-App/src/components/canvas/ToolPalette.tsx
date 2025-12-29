@@ -18,12 +18,13 @@ interface ToolConfig {
 }
 
 const tools: ToolConfig[] = [
-  { id: 'select', label: 'Select', shortcut: 'V', icon: '\\u2316' },
-  { id: 'draw', label: 'Draw', shortcut: 'D', icon: '\\u270E' },
-  { id: 'erase', label: 'Erase', shortcut: 'E', icon: '\\u2421' },
-  { id: 'fill', label: 'Fill', shortcut: 'F', icon: '\\u25A7' },
-  { id: 'eyedropper', label: 'Pick', shortcut: 'I', icon: '\\u25C9' },
-  { id: 'hotspot', label: 'AI Edit', shortcut: 'H', icon: '\\u2726' },
+  { id: 'select', label: 'Select', shortcut: 'V', icon: '⌖' },
+  { id: 'pan', label: 'Pan', shortcut: 'Space', icon: '⊕' },
+  { id: 'draw', label: 'Draw', shortcut: 'D', icon: '✎' },
+  { id: 'erase', label: 'Erase', shortcut: 'E', icon: '␡' },
+  { id: 'fill', label: 'Fill', shortcut: 'F', icon: '▧' },
+  { id: 'eyedropper', label: 'Pick', shortcut: 'I', icon: '◉' },
+  { id: 'hotspot', label: 'AI Edit', shortcut: 'H', icon: '✦' },
 ];
 
 export const ToolPalette: React.FC = () => {
@@ -83,15 +84,43 @@ export const ToolPalette: React.FC = () => {
     cursor: 'var(--cursor-pointer)',
   };
 
-  const sliderStyle: React.CSSProperties = {
-    width: '100%',
-    accentColor: colors.mint,
-  };
+  // Custom square slider styles injected via style tag
+  const sliderCSS = `
+    .square-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: ${colors.mint}40;
+      outline: none;
+      border: none;
+      border-radius: 0;
+    }
+    .square-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      background: ${colors.mint};
+      cursor: var(--cursor-pointer);
+      border: none;
+      border-radius: 0;
+    }
+    .square-slider::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      background: ${colors.mint};
+      cursor: var(--cursor-pointer);
+      border: none;
+      border-radius: 0;
+    }
+  `;
 
   const showBrushSize = tool === 'draw' || tool === 'erase';
 
   return (
     <div style={containerStyle}>
+      <style>{sliderCSS}</style>
       {tools.map((t) => {
         const isActive = tool === t.id;
         return (
@@ -135,7 +164,7 @@ export const ToolPalette: React.FC = () => {
               max="8"
               value={brushSize}
               onChange={(e) => setBrushSize(Number(e.target.value))}
-              style={sliderStyle}
+              className="square-slider"
             />
           </div>
         </>

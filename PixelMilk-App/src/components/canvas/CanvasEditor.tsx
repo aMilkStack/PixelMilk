@@ -138,6 +138,7 @@ export const CanvasEditor: React.FC<CanvasEditorProps> = ({
     [EDITOR_SHORTCUTS.EYEDROPPER]: () => setTool('eyedropper'),
     [EDITOR_SHORTCUTS.SELECT]: () => setTool('select'),
     [EDITOR_SHORTCUTS.HOTSPOT]: () => setTool('hotspot'),
+    [EDITOR_SHORTCUTS.PAN]: () => setTool('pan'),
     [EDITOR_SHORTCUTS.ZOOM_IN]: () => setZoom(Math.min(32, zoom * 1.5)),
     [EDITOR_SHORTCUTS.ZOOM_OUT]: () => setZoom(Math.max(0.5, zoom / 1.5)),
     [EDITOR_SHORTCUTS.ZOOM_RESET]: () => setZoom(1),

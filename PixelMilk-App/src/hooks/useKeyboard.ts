@@ -52,6 +52,7 @@ export const EDITOR_SHORTCUTS = {
   EYEDROPPER: 'i',
   SELECT: 'v',
   HOTSPOT: 'h',
+  PAN: ' ',
   ZOOM_IN: '=',
   ZOOM_OUT: '-',
   ZOOM_RESET: '0',

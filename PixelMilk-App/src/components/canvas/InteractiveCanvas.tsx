@@ -75,8 +75,18 @@ export const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     isDrawing,
     setIsDrawing,
     setHotspot,
+    setHotspotScreenPos,
     setSelectedColor,
+    setPan,
   } = useCanvasStore();
+
+  // Track pan drag state
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0, panX: 0, panY: 0 });
+
+  // Track hotspot drag state
+  const [isDrawingHotspot, setIsDrawingHotspot] = useState(false);
+  const [hotspotStart, setHotspotStart] = useState<{ x: number; y: number } | null>(null);
 
   const CANVAS_SIZE = 640;
 
@@ -159,6 +169,13 @@ export const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   // Mouse handlers
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      // Handle pan tool
+      if (tool === 'pan') {
+        setIsPanning(true);
+        setPanStart({ x: e.clientX, y: e.clientY, panX, panY });
+        return;
+      }
+
       const pixel = screenToPixel(e.clientX, e.clientY);
       if (!pixel || !sprite) return;
 
@@ -175,8 +192,11 @@ export const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
           setSelectedColor(colour);
         }
       } else if (tool === 'hotspot') {
+        // Start drawing hotspot circle
+        setIsDrawingHotspot(true);
+        setHotspotStart(pixel);
         setHotspot(pixel.x, pixel.y);
-        onHotspotSelect?.(pixel.x, pixel.y, hotspotRadius);
+        useCanvasStore.getState().setHotspotRadius(1);
       } else if (tool === 'fill') {
         const targetColour = localPixels[pixel.y * sprite.width + pixel.x] || 'transparent';
         const filled = floodFill(
@@ -205,11 +225,33 @@ export const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       setHotspot,
       setIsDrawing,
       setSelectedColor,
+      panX,
+      panY,
     ]
   );
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
+      // Handle panning
+      if (isPanning) {
+        const dx = e.clientX - panStart.x;
+        const dy = e.clientY - panStart.y;
+        setPan(panStart.panX + dx, panStart.panY + dy);
+        return;
+      }
+
+      // Handle hotspot radius drawing
+      if (isDrawingHotspot && hotspotStart) {
+        const pixel = screenToPixel(e.clientX, e.clientY);
+        if (pixel) {
+          const dx = Math.abs(pixel.x - hotspotStart.x);
+          const dy = Math.abs(pixel.y - hotspotStart.y);
+          const radius = Math.max(1, Math.ceil(Math.max(dx, dy) * 2) + 1);
+          useCanvasStore.getState().setHotspotRadius(Math.min(radius, 16));
+        }
+        return;
+      }
+
       if (!isDrawing) return;
 
       const pixel = screenToPixel(e.clientX, e.clientY);
@@ -221,15 +263,41 @@ export const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
         setPixel(pixel.x, pixel.y, 'transparent');
       }
     },
-    [isDrawing, tool, screenToPixel, setPixel, selectedColor]
+    [isDrawing, isPanning, isDrawingHotspot, hotspotStart, panStart, tool, screenToPixel, setPixel, selectedColor, setPan]
   );
 
-  const handleMouseUp = useCallback(() => {
+  const handleMouseUp = useCallback((e: React.MouseEvent) => {
+    if (isPanning) {
+      setIsPanning(false);
+    }
+    if (isDrawingHotspot && hotspotStart) {
+      setIsDrawingHotspot(false);
+      setHotspotStart(null);
+
+      // Calculate screen position for the floating popup
+      // Position it to the right of the hotspot circle
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const metrics = getMetrics();
+        if (metrics) {
+          const { pixelSize, offsetX, offsetY } = metrics;
+          const half = Math.floor(hotspotRadius / 2);
+          // Calculate the right edge of the hotspot circle in screen coordinates
+          const screenX = rect.left + offsetX + (hotspotStart.x + half + 1) * pixelSize;
+          const screenY = rect.top + offsetY + hotspotStart.y * pixelSize;
+          setHotspotScreenPos(screenX, screenY);
+        }
+      }
+
+      // Trigger the hotspot selection callback
+      onHotspotSelect?.(hotspotStart.x, hotspotStart.y, hotspotRadius);
+    }
     if (isDrawing) {
       setIsDrawing(false);
       onPixelsChange?.(localPixels);
     }
-  }, [isDrawing, localPixels, onPixelsChange, setIsDrawing]);
+  }, [isDrawing, isPanning, isDrawingHotspot, hotspotStart, hotspotRadius, localPixels, onPixelsChange, onHotspotSelect, setIsDrawing, getMetrics, setHotspotScreenPos]);
 
   // Wheel zoom
   const handleWheel = useCallback(
@@ -335,9 +403,10 @@ export const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       case 'erase':
       case 'fill':
       case 'eyedropper':
-        return 'var(--cursor-crosshair)';
       case 'hotspot':
-        return 'var(--cursor-pointer)';
+        return 'var(--cursor-crosshair)';
+      case 'pan':
+        return isPanning ? 'grabbing' : 'grab';
       default:
         return 'var(--cursor-default)';
     }

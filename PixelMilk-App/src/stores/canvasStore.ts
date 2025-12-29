@@ -16,6 +16,7 @@ interface CanvasStore extends CanvasState {
   // Hotspot actions
   setHotspot: (x: number | null, y: number | null) => void;
   setHotspotRadius: (radius: number) => void;
+  setHotspotScreenPos: (x: number, y: number) => void;
   clearHotspot: () => void;
 
   // Drawing state actions
@@ -34,6 +35,8 @@ const initialState: CanvasState = {
   hotspotX: null,
   hotspotY: null,
   hotspotRadius: 4, // Default radius of 4 pixels
+  hotspotScreenX: 0,
+  hotspotScreenY: 0,
 
   // Drawing state
   isDrawing: false,
@@ -67,7 +70,8 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
 
   // Hotspot actions
   setHotspot: (x, y) => set({ hotspotX: x, hotspotY: y }),
-  setHotspotRadius: (radius) => set({ hotspotRadius: Math.max(1, Math.min(8, radius)) }),
+  setHotspotRadius: (radius) => set({ hotspotRadius: Math.max(1, Math.min(16, radius)) }),
+  setHotspotScreenPos: (x, y) => set({ hotspotScreenX: x, hotspotScreenY: y }),
   clearHotspot: () => set({ hotspotX: null, hotspotY: null }),
 
   // Drawing state actions

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '../shared/Button';
 import { Input } from '../shared/Input';
 import { useCanvasStore } from '../../stores';
@@ -20,8 +20,62 @@ export const HotspotEditModal: React.FC<HotspotEditModalProps> = ({ onEdit, onCl
   const [instruction, setInstruction] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
 
-  const { hotspotX, hotspotY, hotspotRadius, setHotspotRadius, clearHotspot } = useCanvasStore();
+  const {
+    hotspotX,
+    hotspotY,
+    hotspotRadius,
+    hotspotScreenX,
+    hotspotScreenY,
+    setHotspotRadius,
+    clearHotspot,
+  } = useCanvasStore();
+
+  // Position state for viewport-aware positioning
+  const [position, setPosition] = useState({ left: 0, top: 0 });
+
+  // Calculate position when screen coords change
+  useEffect(() => {
+    const popup = popupRef.current;
+    if (!popup) return;
+
+    const POPUP_WIDTH = 320;
+    const POPUP_HEIGHT = 280;
+    const OFFSET = 16; // Gap between hotspot and popup
+
+    let left = hotspotScreenX + OFFSET;
+    let top = hotspotScreenY;
+
+    // Viewport boundary checks
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // If popup would go off right edge, show it on the left of the hotspot
+    if (left + POPUP_WIDTH > viewportWidth - 16) {
+      left = hotspotScreenX - POPUP_WIDTH - OFFSET;
+    }
+
+    // If popup would go off bottom, move it up
+    if (top + POPUP_HEIGHT > viewportHeight - 16) {
+      top = viewportHeight - POPUP_HEIGHT - 16;
+    }
+
+    // Ensure it doesn't go off top or left
+    left = Math.max(16, left);
+    top = Math.max(16, top);
+
+    setPosition({ left, top });
+  }, [hotspotScreenX, hotspotScreenY]);
+
+  // Focus input on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const input = popupRef.current?.querySelector('input');
+      input?.focus();
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSubmit = async () => {
     if (!instruction.trim()) {
@@ -58,56 +112,49 @@ export const HotspotEditModal: React.FC<HotspotEditModalProps> = ({ onEdit, onCl
     }
   };
 
-  const overlayStyle: React.CSSProperties = {
+  const popupStyle: React.CSSProperties = {
     position: 'fixed',
-    inset: 0,
-    backgroundColor: 'rgba(2, 26, 26, 0.85)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-  };
-
-  const modalStyle: React.CSSProperties = {
+    left: position.left,
+    top: position.top,
     backgroundColor: colors.bgSecondary,
     border: `2px solid ${colors.mint}`,
-    padding: '24px',
-    width: '100%',
-    maxWidth: '400px',
-    margin: '16px',
+    padding: '16px',
+    width: '320px',
+    zIndex: 1000,
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
   };
 
   const titleStyle: React.CSSProperties = {
     fontFamily: 'monospace',
-    fontSize: '14px',
+    fontSize: '12px',
     fontWeight: 'bold',
     textTransform: 'uppercase',
     letterSpacing: '0.15em',
     color: colors.mint,
-    marginBottom: '16px',
+    marginBottom: '12px',
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    justifyContent: 'space-between',
   };
 
   const infoStyle: React.CSSProperties = {
     fontFamily: 'monospace',
-    fontSize: '12px',
+    fontSize: '11px',
     color: colors.cream + '80',
-    marginBottom: '16px',
+    marginBottom: '12px',
   };
 
   const sliderContainerStyle: React.CSSProperties = {
-    marginBottom: '16px',
+    marginBottom: '12px',
   };
 
   const labelStyle: React.CSSProperties = {
     fontFamily: 'monospace',
-    fontSize: '11px',
+    fontSize: '10px',
     color: colors.cream,
     textTransform: 'uppercase',
     letterSpacing: '0.1em',
-    marginBottom: '8px',
+    marginBottom: '6px',
     display: 'block',
   };
 
@@ -118,60 +165,72 @@ export const HotspotEditModal: React.FC<HotspotEditModalProps> = ({ onEdit, onCl
 
   const buttonRowStyle: React.CSSProperties = {
     display: 'flex',
-    gap: '12px',
+    gap: '8px',
     justifyContent: 'flex-end',
-    marginTop: '20px',
+    marginTop: '12px',
   };
 
   const errorStyle: React.CSSProperties = {
     fontFamily: 'monospace',
-    fontSize: '12px',
+    fontSize: '11px',
     color: colors.red,
-    marginTop: '12px',
+    marginTop: '8px',
+  };
+
+  const closeButtonStyle: React.CSSProperties = {
+    background: 'none',
+    border: 'none',
+    color: colors.cream + '80',
+    cursor: 'var(--cursor-pointer)',
+    fontFamily: 'monospace',
+    fontSize: '16px',
+    padding: '0',
+    lineHeight: 1,
   };
 
   return (
-    <div style={overlayStyle} onClick={handleClose}>
-      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-        <div style={titleStyle}>
-          <span>AI Hotspot Edit</span>
-        </div>
+    <div ref={popupRef} style={popupStyle}>
+      <div style={titleStyle}>
+        <span>Hotspot Edit</span>
+        <button style={closeButtonStyle} onClick={handleClose} title="Close">
+          ✕
+        </button>
+      </div>
 
-        <div style={infoStyle}>
-          Selected area: ({hotspotX}, {hotspotY}) with radius {hotspotRadius}px
-        </div>
+      <div style={infoStyle}>
+        Area: ({hotspotX}, {hotspotY}) · {hotspotRadius}px radius
+      </div>
 
-        <div style={sliderContainerStyle}>
-          <label style={labelStyle}>Edit Radius: {hotspotRadius}px</label>
-          <input
-            type="range"
-            min="1"
-            max="8"
-            value={hotspotRadius}
-            onChange={(e) => setHotspotRadius(Number(e.target.value))}
-            style={sliderStyle}
-          />
-        </div>
-
-        <Input
-          label="What should change?"
-          value={instruction}
-          onChange={(e) => setInstruction(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="e.g., make this part golden, add a scar, remove the hat"
-          disabled={isLoading}
+      <div style={sliderContainerStyle}>
+        <label style={labelStyle}>Radius: {hotspotRadius}px</label>
+        <input
+          type="range"
+          min="1"
+          max="16"
+          value={hotspotRadius}
+          onChange={(e) => setHotspotRadius(Number(e.target.value))}
+          style={sliderStyle}
         />
+      </div>
 
-        {error && <div style={errorStyle}>! {error}</div>}
+      <Input
+        label="What should change?"
+        value={instruction}
+        onChange={(e) => setInstruction(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder="e.g., make this golden, add a scar"
+        disabled={isLoading}
+      />
 
-        <div style={buttonRowStyle}>
-          <Button variant="ghost" onClick={handleClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={isLoading || !instruction.trim()}>
-            {isLoading ? 'Applying...' : 'Apply Edit'}
-          </Button>
-        </div>
+      {error && <div style={errorStyle}>! {error}</div>}
+
+      <div style={buttonRowStyle}>
+        <Button variant="ghost" size="sm" onClick={handleClose} disabled={isLoading}>
+          Cancel
+        </Button>
+        <Button size="sm" onClick={handleSubmit} disabled={isLoading || !instruction.trim()}>
+          {isLoading ? 'Applying...' : 'Apply'}
+        </Button>
       </div>
     </div>
   );
