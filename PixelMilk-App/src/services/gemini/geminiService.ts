@@ -464,6 +464,43 @@ ${techniquePrompt}`;
 };
 
 /**
+ * Requests changes to an existing sprite via the chat session.
+ * Continues the existing conversation - model has full context.
+ * Returns base64 encoded PNG data for processing through standard pipeline.
+ */
+export const requestSpriteChanges = async (
+  identityId: string,
+  changeRequest: string
+): Promise<string> => {
+  const chat = getSpriteSession(identityId);
+  if (!chat) {
+    throw new Error('No active session for this character. Generate a sprite first.');
+  }
+
+  let lastError;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const result = await sendSpriteMessage(chat, changeRequest);
+      return result.imageData;
+    } catch (e) {
+      console.warn(`Sprite change request attempt ${attempt + 1} failed:`, e);
+      lastError = e;
+
+      if (!isRetryableError(e)) {
+        break;
+      }
+
+      if (attempt < 2) {
+        const delay = getBackoffDelay(attempt);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  throw lastError || new Error("Failed to apply changes after multiple attempts");
+};
+
+/**
  * Reference image with direction label for reference stacking
  */
 export interface ReferenceImage {
@@ -753,4 +790,61 @@ Return a JSON object with:
   }
 
   throw lastError || new Error("Failed to optimize prompt after multiple attempts");
+};
+
+/**
+ * Analyses an image and generates a detailed character description.
+ * Used to seed the description input from a reference image.
+ *
+ * @param base64Data - Base64 encoded image data (no data URL prefix)
+ * @param mimeType - Image MIME type (defaults to image/png)
+ * @returns Text description suitable for character identity generation
+ */
+export const describeImageForPixelArt = async (
+  base64Data: string,
+  mimeType: string = 'image/png'
+): Promise<string> => {
+  const client = getClient();
+
+  const systemInstruction = `You are an expert at analysing images and describing characters, creatures, and subjects in rich detail. Focus on what you see - physical features, clothing, materials, colours, poses, expressions, and distinctive elements.`;
+
+  const prompt = `Analyse this image and describe the subject in a single detailed paragraph.
+
+Include:
+- Physical appearance (body type, features, expression)
+- Clothing and materials (textures, colours, layers)
+- Accessories, weapons, or props
+- Pose and stance
+- Any distinctive or unique elements
+
+Format: Single descriptive paragraph only. No intro, no outro, no markdown, no style recommendations.`;
+
+  const response = await client.models.generateContent({
+    model: 'gemini-3-pro-image-preview',
+    contents: [
+      {
+        role: 'user',
+        parts: [
+          { text: prompt },
+          {
+            inlineData: {
+              data: base64Data,
+              mimeType,
+            },
+          },
+        ],
+      },
+    ],
+    config: {
+      systemInstruction,
+      temperature: 1.0,
+    },
+  });
+
+  const text = response.text?.trim();
+  if (!text) {
+    throw new Error('No description generated from image');
+  }
+
+  return text;
 };

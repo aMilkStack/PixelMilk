@@ -4,7 +4,7 @@ import { StyleSelector } from './StyleSelector';
 import { IdentityCard } from './IdentityCard';
 import { GenerateControls } from './GenerateControls';
 import { PaletteDisplay } from './PaletteDisplay';
-import { SpriteCanvas } from '../canvas';
+import { SpriteCanvas, CanvasEditor } from '../canvas';
 import { Button } from '../shared/Button';
 import { useAppStore, useCanvasStore, useCharacterStore } from '../../stores';
 import {
@@ -13,6 +13,8 @@ import {
   generateRotatedSprite,
   optimizePrompt,
   generateSegmentationMask,
+  requestSpriteChanges,
+  describeImageForPixelArt,
 } from '../../services/gemini';
 import type { ReferenceImage } from '../../services/gemini';
 import { saveAsset, generateAssetId, getAssetsByType } from '../../services/storage';
@@ -407,6 +409,7 @@ const CharacterListItem: React.FC<CharacterListItemProps> = ({
 };
 
 type BackgroundType = 'transparent' | 'white' | 'black';
+type GenerationMode = 'current' | 'all';
 
 const getIsMobile = () => typeof window !== 'undefined' && window.innerWidth < 768;
 
@@ -485,6 +488,17 @@ export const CharacterTab: React.FC = () => {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizedPrompt, setOptimizedPrompt] = useState<string | null>(null);
   const [optimizeExplanation, setOptimizeExplanation] = useState<string | null>(null);
+  // Edit mode and generation mode state
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [generationMode, setGenerationMode] = useState<GenerationMode>('all');
+  // Reference image state
+  const [referenceImage, setReferenceImage] = useState<string | null>(null);
+  const [referenceImageName, setReferenceImageName] = useState<string | null>(null);
+  const [isDescribingImage, setIsDescribingImage] = useState(false);
+  // Sprite iteration chat state
+  const [chatHistory, setChatHistory] = useState<string[]>([]);
+  const [changeRequest, setChangeRequest] = useState('');
+  const [isRequestingChanges, setIsRequestingChanges] = useState(false);
 
   const { apiKey, openApiKeyModal, setApiKeyStatus } = useAppStore();
   const { zoom, setZoom } = useCanvasStore();
@@ -527,6 +541,11 @@ export const CharacterTab: React.FC = () => {
     currentSprites.get(currentDirection) ??
     currentSprites.get('S') ??
     null;
+
+  // Exit edit mode when sprite changes (regeneration or direction switch)
+  useEffect(() => {
+    setIsEditMode(false);
+  }, [currentSprite?.id]);
 
   // Check if description is valid
   const isDescriptionValid = description.length >= 10 && description.length <= 2000;
@@ -578,6 +597,71 @@ export const CharacterTab: React.FC = () => {
   const handleDismissOptimizedPrompt = () => {
     setOptimizedPrompt(null);
     setOptimizeExplanation(null);
+  };
+
+  // Handle reference image upload
+  const handleReferenceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please upload an image file');
+      return;
+    }
+
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      // Strip data URL prefix for API usage
+      const base64Data = base64.split(',')[1];
+      setReferenceImage(base64Data);
+      setReferenceImageName(file.name);
+    };
+    reader.onerror = () => {
+      setError('Failed to read image file');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleClearReference = () => {
+    setReferenceImage(null);
+    setReferenceImageName(null);
+  };
+
+  // Handle describe image - analyses reference and populates description
+  const handleDescribeImage = async () => {
+    if (!apiKey) {
+      openApiKeyModal();
+      return;
+    }
+
+    if (!referenceImage) {
+      setError('No reference image to describe');
+      return;
+    }
+
+    setError(null);
+    setIsDescribingImage(true);
+
+    try {
+      const generatedDescription = await describeImageForPixelArt(referenceImage);
+      setDescription(generatedDescription);
+      // Clear the reference image after successful description
+      setReferenceImage(null);
+      setReferenceImageName(null);
+    } catch (err) {
+      handleApiError({
+        err,
+        fallbackMessage: 'Failed to describe image',
+        setError,
+        setApiKeyStatus,
+        openApiKeyModal,
+      });
+    } finally {
+      setIsDescribingImage(false);
+    }
   };
 
   // Handle Generate Identity
@@ -718,7 +802,7 @@ export const CharacterTab: React.FC = () => {
     return { sprite, palette: paletteToLock };
   };
 
-  // Handle Generate Sprite - auto-generates all 4 cardinal directions
+  // Handle Generate Sprite - respects generation mode (current only vs all 4)
   const handleGenerateSprite = async () => {
     if (!apiKey) {
       openApiKeyModal();
@@ -730,10 +814,15 @@ export const CharacterTab: React.FC = () => {
       return;
     }
 
-    // If we already have sprites, just generate the current direction
-    if (currentSprites.size > 0) {
-      setError(null);
-      setGeneratingSprite(true);
+    setError(null);
+    setGeneratingSprite(true);
+
+    // Determine what to generate based on mode
+    // Only generate all if mode is 'all' AND we don't have any sprites yet
+    const generateAll = generationMode === 'all' && currentSprites.size === 0;
+
+    if (!generateAll) {
+      // Generate current direction only
       setGeneratingDirection(currentDirection);
       setAutoGenerationProgress(`Generating ${currentDirection}...`);
 
@@ -744,6 +833,12 @@ export const CharacterTab: React.FC = () => {
           lockedPalette
         );
         addSprite(currentDirection, sprite);
+
+        // Lock palette on first sprite
+        if (!lockedPalette) {
+          lockPalette(palette);
+        }
+
         setLastFailedGeneration(null);
       } catch (err) {
         setLastFailedGeneration('sprite');
@@ -762,11 +857,7 @@ export const CharacterTab: React.FC = () => {
       return;
     }
 
-    // First time - auto-generate all 4 cardinal directions
-    setError(null);
-    setGeneratingSprite(true);
-
-    // Build sprites map locally to track progress
+    // Generate all 4 directions (only when mode is 'all' and no sprites exist)
     const newSprites = new Map<Direction, SpriteData>();
     let currentPalette: string[] | null = null;
 
@@ -882,10 +973,97 @@ export const CharacterTab: React.FC = () => {
     }
   };
 
+  // Handle requesting changes to existing sprite
+  const handleRequestChanges = async () => {
+    if (!apiKey) {
+      openApiKeyModal();
+      return;
+    }
+
+    if (!currentSprite) {
+      setError('Generate a sprite first before requesting changes');
+      return;
+    }
+
+    if (!changeRequest.trim()) {
+      setError('Please describe what changes you want');
+      return;
+    }
+
+    setError(null);
+    setIsRequestingChanges(true);
+    setAutoGenerationProgress('Applying changes...');
+
+    // Add to chat history
+    setChatHistory(prev => [...prev, changeRequest]);
+    const message = changeRequest;
+    setChangeRequest('');
+
+    try {
+      // Get raw image from model (same format as generateSprite)
+      const rawImageBase64 = await requestSpriteChanges(identity.id, message);
+
+      // Same pipeline as generateSingleDirection
+      const size = identity.styleParameters.canvasSize;
+      const paletteMode = styleParams.paletteMode;
+
+      let chromaKey = DEFAULT_CHROMA_KEY;
+      let chromaTolerance: number | undefined;
+      if (paletteMode && paletteMode !== 'auto') {
+        const chromaData = getChromaKeyWithDistance(paletteMode);
+        if (chromaData) {
+          chromaKey = chromaData.chromaKey;
+          chromaTolerance = chromaData.distance / 2;
+        }
+      }
+
+      const imageBase64 = await removeCheckerboardBackground(rawImageBase64);
+
+      let segmentationMask: ParsedMask | undefined;
+      try {
+        const { maskData } = await generateSegmentationMask(imageBase64);
+        segmentationMask = await parseSegmentationMask(maskData);
+      } catch (maskError) {
+        console.warn('[CharacterTab] Segmentation mask failed:', maskError);
+      }
+
+      const { pixels, palette } = await pngToPixelArray(imageBase64, size, size, chromaKey, chromaTolerance, segmentationMask);
+      const pixelData = validateAndSnapPixelData(
+        { name: identity.name, width: size, height: size, palette, pixels },
+        lockedPalette ?? undefined
+      );
+
+      const updatedSprite: SpriteData = {
+        id: `sprite-${currentDirection}-${Date.now()}`,
+        direction: currentDirection,
+        createdAt: Date.now(),
+        ...pixelData,
+      };
+      addSprite(currentDirection, updatedSprite);
+      setAutoGenerationProgress('Changes applied!');
+      setTimeout(() => setAutoGenerationProgress(null), 2000);
+    } catch (err) {
+      handleApiError({
+        err,
+        fallbackMessage: 'Failed to apply changes',
+        setError,
+        setApiKeyStatus,
+        openApiKeyModal,
+      });
+    } finally {
+      setIsRequestingChanges(false);
+    }
+  };
+
   // Handle Clear
   const handleClear = () => {
     clearCharacter();
   };
+
+  // Handle sprite changes from CanvasEditor
+  const handleSpriteChange = useCallback((updatedSprite: SpriteData) => {
+    addSprite(updatedSprite.direction ?? currentDirection, updatedSprite);
+  }, [addSprite, currentDirection]);
 
   const handleDownloadSprite = async () => {
     if (!currentSprite) return;
@@ -1012,9 +1190,127 @@ export const CharacterTab: React.FC = () => {
 
       {/* Left Column - Input & Controls */}
       <div style={leftColumnStyle}>
-        {/* Description Input */}
-        <div style={sectionStyle}>
-          <DescriptionInput
+        {currentSprite ? (
+          /* Iteration Mode - Request Changes replaces generation UI */
+          <>
+            <div style={sectionStyle}>
+              <div style={sectionTitleStyle}>Chat</div>
+              {/* Chat history */}
+              {chatHistory.length > 0 && (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  marginBottom: '12px',
+                  maxHeight: '200px',
+                  overflowY: 'auto',
+                }}>
+                  {chatHistory.map((msg, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        padding: '8px 12px',
+                        fontFamily: 'monospace',
+                        fontSize: '12px',
+                        backgroundColor: colors.mint + '15',
+                        border: `1px solid ${colors.mint}30`,
+                        color: colors.cream,
+                      }}
+                    >
+                      {msg}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {/* Input */}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="text"
+                  value={changeRequest}
+                  onChange={(e) => setChangeRequest(e.target.value)}
+                  placeholder={chatHistory.length === 0 ? "Describe a change..." : "Continue..."}
+                  disabled={isRequestingChanges || isGeneratingSprite}
+                  style={{
+                    flex: 1,
+                    padding: '10px 12px',
+                    fontFamily: 'monospace',
+                    fontSize: '13px',
+                    backgroundColor: colors.bgPrimary,
+                    border: `1px solid ${colors.mint}40`,
+                    color: colors.cream,
+                    outline: 'none',
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && changeRequest.trim()) {
+                      handleRequestChanges();
+                    }
+                  }}
+                />
+                <Button
+                  variant="primary"
+                  onClick={handleRequestChanges}
+                  disabled={!changeRequest.trim() || isRequestingChanges || isGeneratingSprite}
+                >
+                  {isRequestingChanges ? '...' : 'Send'}
+                </Button>
+              </div>
+            </div>
+
+            <div style={sectionStyle}>
+              <div style={sectionTitleStyle}>Generation Mode</div>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                <Button
+                  variant={generationMode === 'current' ? 'primary' : 'secondary'}
+                  size="sm"
+                  onClick={() => setGenerationMode('current')}
+                  disabled={isGeneratingSprite}
+                >
+                  Current Only
+                </Button>
+                <Button
+                  variant={generationMode === 'all' ? 'primary' : 'secondary'}
+                  size="sm"
+                  onClick={() => setGenerationMode('all')}
+                  disabled={isGeneratingSprite}
+                >
+                  All 4 Directions
+                </Button>
+              </div>
+              <Button
+                variant="secondary"
+                onClick={handleGenerateSprite}
+                disabled={isGeneratingSprite || !identity}
+              >
+                {isGeneratingSprite ? 'Generating...' : 'Regenerate Sprite'}
+              </Button>
+            </div>
+
+            <div style={sectionStyle}>
+              <Button
+                variant="secondary"
+                onClick={handleSaveToLibrary}
+                disabled={isGeneratingSprite || isRequestingChanges || !currentSprite}
+              >
+                Save to Library
+              </Button>
+            </div>
+
+            <div style={sectionStyle}>
+              <Button
+                variant="ghost"
+                onClick={handleClear}
+                disabled={isGeneratingSprite || isRequestingChanges}
+              >
+                Start New Character
+              </Button>
+            </div>
+          </>
+        ) : (
+          /* Generation Mode - Full creation UI */
+          <>
+            {/* Description Input */}
+            <div style={sectionStyle}>
+              <DescriptionInput
             value={description}
             onChange={setDescription}
             disabled={isGeneratingIdentity || isGeneratingSprite}
@@ -1074,6 +1370,86 @@ export const CharacterTab: React.FC = () => {
           )}
         </div>
 
+        {/* Reference Image Upload */}
+        <div style={sectionStyle}>
+          <div style={sectionTitleStyle}>Reference Image (Optional)</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {referenceImage ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <img
+                  src={`data:image/png;base64,${referenceImage}`}
+                  alt="Reference"
+                  style={{
+                    width: '64px',
+                    height: '64px',
+                    objectFit: 'contain',
+                    border: `1px solid ${colors.mint}40`,
+                    imageRendering: 'pixelated',
+                  }}
+                />
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    fontFamily: 'monospace',
+                    fontSize: '12px',
+                    color: colors.cream,
+                    marginBottom: '8px',
+                  }}>
+                    {referenceImageName}
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={handleDescribeImage}
+                      disabled={isDescribingImage}
+                    >
+                      {isDescribingImage ? 'Describing...' : 'Describe Image'}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleClearReference}
+                      disabled={isDescribingImage}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <label style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '16px',
+                border: `2px dashed ${colors.mint}40`,
+                cursor: 'var(--cursor-pointer)',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                color: colors.cream,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+              }}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleReferenceUpload}
+                  style={{ display: 'none' }}
+                />
+                Click to upload reference
+              </label>
+            )}
+            <p style={{
+              fontFamily: 'monospace',
+              fontSize: '11px',
+              color: colors.cream + '80',
+              margin: 0,
+            }}>
+              Upload an image and click Describe to generate a text description
+            </p>
+          </div>
+        </div>
+
         {/* Style Selector */}
         <div style={sectionStyle}>
           <div style={sectionTitleStyle}>Style Options</div>
@@ -1102,7 +1478,41 @@ export const CharacterTab: React.FC = () => {
             lastFailedGeneration={lastFailedGeneration}
             onRetry={handleRetry}
           />
+
+          {/* Generation Mode Selector */}
+          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: `1px solid ${colors.mint}20` }}>
+            <div style={{
+              fontFamily: 'monospace',
+              fontSize: '11px',
+              color: colors.cream,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              marginBottom: '8px'
+            }}>
+              Generate Directions
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <Button
+                variant={generationMode === 'current' ? 'primary' : 'secondary'}
+                size="sm"
+                onClick={() => setGenerationMode('current')}
+                disabled={isGeneratingSprite}
+              >
+                Current Only
+              </Button>
+              <Button
+                variant={generationMode === 'all' ? 'primary' : 'secondary'}
+                size="sm"
+                onClick={() => setGenerationMode('all')}
+                disabled={isGeneratingSprite}
+              >
+                All 4 Directions
+              </Button>
+            </div>
+          </div>
         </div>
+          </>
+        )}
       </div>
 
       {/* Center Column - Canvas */}
@@ -1111,107 +1521,129 @@ export const CharacterTab: React.FC = () => {
         <div style={sectionStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={sectionTitleStyle}>Sprite Canvas</div>
-            {autoGenerationProgress && (
-              <span style={{
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                color: colors.mint,
-                animation: 'terminal-blink 1s step-end infinite',
-              }}>
-                {autoGenerationProgress}
-              </span>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {autoGenerationProgress && (
+                <span style={{
+                  fontFamily: 'monospace',
+                  fontSize: '12px',
+                  color: colors.mint,
+                  animation: 'terminal-blink 1s step-end infinite',
+                }}>
+                  {autoGenerationProgress}
+                </span>
+              )}
+              {currentSprite && !isGeneratingSprite && (
+                <Button
+                  variant={isEditMode ? 'primary' : 'secondary'}
+                  size="sm"
+                  onClick={() => setIsEditMode(!isEditMode)}
+                  disabled={isGeneratingSprite}
+                >
+                  {isEditMode ? 'Exit Edit' : 'Edit Mode'}
+                </Button>
+              )}
+            </div>
           </div>
           <div style={canvasWrapperStyle}>
-            <SpriteCanvas sprite={currentSprite} showGrid background={background} isLoading={isGeneratingSprite} />
-            <div style={controlsStackStyle}>
-              {/* Direction Picker and Zoom/Download row */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-                {/* Direction Picker */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <span style={{ fontFamily: 'monospace', fontSize: '12px', color: colors.cream, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                    Direction
-                  </span>
-                  <DirectionPicker
-                    currentDirection={currentDirection}
-                    spritesMap={currentSprites}
-                    onDirectionChange={setCurrentDirection}
-                    disabled={isGeneratingSprite}
-                  />
-                </div>
+            {isEditMode && currentSprite ? (
+              <CanvasEditor
+                sprite={currentSprite}
+                lockedPalette={lockedPalette ?? []}
+                onSpriteChange={handleSpriteChange}
+              />
+            ) : (
+              <>
+                <SpriteCanvas sprite={currentSprite} showGrid background={background} isLoading={isGeneratingSprite} />
+                <div style={controlsStackStyle}>
+                  {/* Direction Picker and Zoom/Download row */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+                    {/* Direction Picker */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <span style={{ fontFamily: 'monospace', fontSize: '12px', color: colors.cream, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                        Direction
+                      </span>
+                      <DirectionPicker
+                        currentDirection={currentDirection}
+                        spritesMap={currentSprites}
+                        onDirectionChange={setCurrentDirection}
+                        disabled={isGeneratingSprite}
+                      />
+                    </div>
 
-                {/* Zoom and Download controls */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-end' }}>
-                  <div style={zoomControlsStyle}>
-                    <span>Zoom</span>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={handleZoomOut}
-                      disabled={isGeneratingSprite}
-                    >
-                      -
-                    </Button>
-                    <span style={zoomValueStyle}>{zoomLabel}</span>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={handleZoomIn}
-                      disabled={isGeneratingSprite}
-                    >
-                      +
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleZoomReset}
-                      disabled={isGeneratingSprite}
-                    >
-                      Reset
-                    </Button>
+                    {/* Zoom and Download controls */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-end' }}>
+                      <div style={zoomControlsStyle}>
+                        <span>Zoom</span>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={handleZoomOut}
+                          disabled={isGeneratingSprite}
+                        >
+                          -
+                        </Button>
+                        <span style={zoomValueStyle}>{zoomLabel}</span>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={handleZoomIn}
+                          disabled={isGeneratingSprite}
+                        >
+                          +
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleZoomReset}
+                          disabled={isGeneratingSprite}
+                        >
+                          Reset
+                        </Button>
+                      </div>
+
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleDownloadSprite}
+                        disabled={!currentSprite || isGeneratingSprite}
+                      >
+                        Download PNG
+                      </Button>
+                    </div>
                   </div>
 
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={handleDownloadSprite}
-                    disabled={!currentSprite || isGeneratingSprite}
-                  >
-                    Download PNG
-                  </Button>
+                  <div style={backgroundControlsStyle}>
+                    <span>Display Background</span>
+                    <div style={backgroundButtonsStyle}>
+                      <Button
+                        variant={background === 'transparent' ? 'primary' : 'secondary'}
+                        size="sm"
+                        onClick={() => setBackground('transparent')}
+                        disabled={isGeneratingSprite}
+                      >
+                        Transparent
+                      </Button>
+                      <Button
+                        variant={background === 'white' ? 'primary' : 'secondary'}
+                        size="sm"
+                        onClick={() => setBackground('white')}
+                        disabled={isGeneratingSprite}
+                      >
+                        White
+                      </Button>
+                      <Button
+                        variant={background === 'black' ? 'primary' : 'secondary'}
+                        size="sm"
+                        onClick={() => setBackground('black')}
+                        disabled={isGeneratingSprite}
+                      >
+                        Black
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-
-              <div style={backgroundControlsStyle}>
-                <span>Display Background</span>
-                <div style={backgroundButtonsStyle}>
-                  <Button
-                    variant={background === 'transparent' ? 'primary' : 'secondary'}
-                    size="sm"
-                    onClick={() => setBackground('transparent')}
-                    disabled={isGeneratingSprite}
-                  >
-                    Transparent
-                  </Button>
-                  <Button
-                    variant={background === 'white' ? 'primary' : 'secondary'}
-                    size="sm"
-                    onClick={() => setBackground('white')}
-                    disabled={isGeneratingSprite}
-                  >
-                    White
-                  </Button>
-                  <Button
-                    variant={background === 'black' ? 'primary' : 'secondary'}
-                    size="sm"
-                    onClick={() => setBackground('black')}
-                    disabled={isGeneratingSprite}
-                  >
-                    Black
-                  </Button>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         </div>
 

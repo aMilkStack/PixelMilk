@@ -23,6 +23,8 @@ export {
   generateRotatedSprite,
   generateRotatedSpriteLegacy,
   optimizePrompt,
+  describeImageForPixelArt,
+  requestSpriteChanges,
 } from './geminiService';
 
 export { applyHotspotEdit } from './editing';
