@@ -2,12 +2,12 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Select, type SelectOption } from '../shared/Select';
 import type { StyleParameters } from '../../types';
 import {
-  LOSPEC_PALETTES,
-  getLospecColors,
-  getLospecPalettesByCategory,
+  PALETTES,
+  getPaletteColors,
+  getPalettesByCategory,
   type PaletteCategory,
   type ExtendedPalette,
-} from '../../data/lospecPalettes';
+} from '../../data/palettes';
 
 export interface StyleSelectorProps {
   value: StyleParameters;
@@ -92,8 +92,8 @@ export const StyleSelector: React.FC<StyleSelectorProps> = ({
   // Filter palettes based on category, tags, and search
   const filteredPalettes = useMemo(() => {
     let palettes: ExtendedPalette[] = selectedCategory === 'all'
-      ? LOSPEC_PALETTES
-      : getLospecPalettesByCategory(selectedCategory);
+      ? PALETTES
+      : getPalettesByCategory(selectedCategory);
 
     // Filter by selected tags (AND logic)
     if (selectedTags.length > 0) {
@@ -116,13 +116,13 @@ export const StyleSelector: React.FC<StyleSelectorProps> = ({
 
   // Get the currently selected palette
   const selectedPalette = useMemo(() => {
-    return LOSPEC_PALETTES.find(p => p.id === value.paletteMode);
+    return PALETTES.find(p => p.id === value.paletteMode);
   }, [value.paletteMode]);
 
   // Get colors for the selected palette
   const selectedPaletteColors = useMemo(() => {
-    if (value.paletteMode && value.paletteMode !== 'auto') {
-      return getLospecColors(value.paletteMode);
+    if (value.paletteMode) {
+      return getPaletteColors(value.paletteMode);
     }
     return undefined;
   }, [value.paletteMode]);
@@ -534,11 +534,9 @@ export const StyleSelector: React.FC<StyleSelectorProps> = ({
                   fontSize: '14px',
                   color: colors.mint,
                 }}>
-                  {value.paletteMode === 'auto'
-                    ? 'Auto (AI Chooses)'
-                    : selectedPalette
-                      ? `${selectedPalette.name} (${selectedPalette.colourCount})`
-                      : value.paletteMode
+                  {selectedPalette
+                    ? `${selectedPalette.name} (${selectedPalette.colourCount})`
+                    : value.paletteMode || 'Select a palette'
                   }
                 </span>
                 <span style={{
@@ -614,7 +612,7 @@ export const StyleSelector: React.FC<StyleSelectorProps> = ({
                 marginLeft: '12px',
                 fontWeight: 'normal',
               }}>
-                {LOSPEC_PALETTES.length} palettes
+                {PALETTES.length} palettes
               </span>
             </div>
             <button
@@ -646,7 +644,7 @@ export const StyleSelector: React.FC<StyleSelectorProps> = ({
                 style={categoryTabStyle(selectedCategory === 'all')}
                 onClick={() => setSelectedCategory('all')}
               >
-                All ({LOSPEC_PALETTES.length})
+                All ({PALETTES.length})
               </button>
               {(Object.keys(CATEGORY_CONFIG) as PaletteCategory[]).map(cat => (
                 <button
@@ -701,29 +699,6 @@ export const StyleSelector: React.FC<StyleSelectorProps> = ({
                   Clear Filters
                 </button>
               )}
-            </div>
-
-            {/* Auto Option */}
-            <div style={{ padding: '12px 20px 0', flexShrink: 0 }}>
-              <button
-                type="button"
-                style={paletteCardStyle(value.paletteMode === 'auto')}
-                onClick={() => selectPalette('auto')}
-              >
-                <div style={paletteNameStyle}>
-                  <span>Auto (AI Chooses)</span>
-                  {value.paletteMode === 'auto' && (
-                    <span style={{ color: colors.mint }}>[*]</span>
-                  )}
-                </div>
-                <div style={{
-                  fontFamily: 'monospace',
-                  fontSize: '11px',
-                  color: colors.mintDim,
-                }}>
-                  Let the AI select an appropriate palette for your character
-                </div>
-              </button>
             </div>
 
             {/* Palette Grid - Grouped by Category when viewing All */}

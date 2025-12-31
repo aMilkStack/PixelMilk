@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Wand2, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { PxZap, PxLoader } from '../shared/PixelIcon';
+import { checkForbiddenWords, formatForbiddenWordWarning } from '../../utils/forbiddenWords';
 
 interface DescriptionInputProps {
   value: string;
@@ -8,6 +9,8 @@ interface DescriptionInputProps {
   error?: string;
   onEnhance?: () => void;
   isEnhancing?: boolean;
+  /** Callback when forbidden word validation changes */
+  onForbiddenWordsChange?: (hasForbidden: boolean) => void;
 }
 
 const MIN_CHARS = 10;
@@ -20,6 +23,7 @@ const colors = {
   cream: '#d8c8b8',
   error: '#f04e4e',
   warning: '#ffa500',
+  forbidden: '#ff6b9d', // Pink/magenta for forbidden words
 };
 
 export const DescriptionInput: React.FC<DescriptionInputProps> = ({
@@ -29,6 +33,7 @@ export const DescriptionInput: React.FC<DescriptionInputProps> = ({
   error,
   onEnhance,
   isEnhancing = false,
+  onForbiddenWordsChange,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [internalError, setInternalError] = useState<string>('');
@@ -36,6 +41,18 @@ export const DescriptionInput: React.FC<DescriptionInputProps> = ({
   const characterCount = value.length;
   const isOverLimit = characterCount > MAX_CHARS;
   const isUnderLimit = characterCount > 0 && characterCount < MIN_CHARS;
+
+  // Check for forbidden words in real-time
+  const forbiddenResult = useMemo(() => checkForbiddenWords(value), [value]);
+  const forbiddenWarning = useMemo(
+    () => formatForbiddenWordWarning(forbiddenResult),
+    [forbiddenResult]
+  );
+
+  // Notify parent of forbidden word status changes
+  useEffect(() => {
+    onForbiddenWordsChange?.(forbiddenResult.hasForbiddenWords);
+  }, [forbiddenResult.hasForbiddenWords, onForbiddenWordsChange]);
 
   useEffect(() => {
     if (value.length === 0) {
@@ -165,9 +182,9 @@ export const DescriptionInput: React.FC<DescriptionInputProps> = ({
             aria-label="Enhance prompt"
           >
             {isEnhancing ? (
-              <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+              <PxLoader size={14} style={{ animation: 'spin 1s linear infinite' }} />
             ) : (
-              <Wand2 size={14} />
+              <PxZap size={14} />
             )}
           </button>
         )}
@@ -185,6 +202,28 @@ export const DescriptionInput: React.FC<DescriptionInputProps> = ({
       {displayError && (
         <div id="description-error" style={errorStyle} role="alert">
           {displayError}
+        </div>
+      )}
+
+      {/* Forbidden words warning - shown separately from errors */}
+      {forbiddenWarning && !displayError && (
+        <div
+          id="forbidden-warning"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 12px',
+            backgroundColor: colors.forbidden + '15',
+            border: `1px solid ${colors.forbidden}40`,
+            fontFamily: 'monospace',
+            fontSize: '12px',
+            color: colors.forbidden,
+          }}
+          role="alert"
+        >
+          <span style={{ fontSize: '14px' }}>!</span>
+          <span>{forbiddenWarning}</span>
         </div>
       )}
 

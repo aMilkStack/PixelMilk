@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Key, X, Loader, CheckCircle, AlertCircle } from 'lucide-react';
+import { PxKey, PxClose, PxLoader, PxCheckDouble, PxAlert } from '../shared/PixelIcon';
 import { GoogleGenAI } from '@google/genai';
 import { Button, Input } from '../shared';
 import { useAppStore } from '../../stores';
@@ -238,11 +238,11 @@ export const ApiKeyModal: React.FC = () => {
           onClick={closeApiKeyModal}
           aria-label="Close"
         >
-          <X size={20} />
+          <PxClose size={20} />
         </button>
 
         <div style={styles.header}>
-          <Key size={24} color="var(--color-accent)" />
+          <PxKey size={24} style={{ color: 'var(--color-accent)' }} />
           <h2 style={styles.title}>API Configuration</h2>
         </div>
 
@@ -277,21 +277,21 @@ export const ApiKeyModal: React.FC = () => {
 
         {validationStatus === 'validating' && (
           <div style={styles.statusRow}>
-            <Loader size={16} className="spin" />
+            <PxLoader size={16} className="spin" />
             <span>Validating API key...</span>
           </div>
         )}
 
         {validationStatus === 'valid' && (
           <div style={{ ...styles.statusRow, ...styles.statusValid }}>
-            <CheckCircle size={16} />
+            <PxCheckDouble size={16} />
             <span>API key validated successfully!</span>
           </div>
         )}
 
         {validationStatus === 'invalid' && (
           <div style={{ ...styles.statusRow, ...styles.statusInvalid }}>
-            <AlertCircle size={16} />
+            <PxAlert size={16} />
             <span>Validation failed</span>
           </div>
         )}

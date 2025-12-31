@@ -1,0 +1,1 @@
+add a pre import skeleton creator with draggable nodes, use this to give to the ai as a guideline 

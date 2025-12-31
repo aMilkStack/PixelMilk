@@ -44,16 +44,46 @@ export function useKeyboard(bindings: KeyBindings, enabled = true) {
 // Common shortcuts for pixel editing
 export const EDITOR_SHORTCUTS = {
   UNDO: 'ctrl+z',
+  UNDO_SIMPLE: 'z',
   REDO: 'ctrl+shift+z',
   REDO_ALT: 'ctrl+y',
-  DRAW: 'd',
+  DRAW: 'b',
+  DRAW_ALT: 'd',
   ERASE: 'e',
-  FILL: 'f',
+  FILL: 'g',
+  FILL_ALT: 'f',
   EYEDROPPER: 'i',
   SELECT: 'v',
   HOTSPOT: 'h',
   PAN: ' ',
   ZOOM_IN: '=',
+  ZOOM_IN_ALT: '+',
   ZOOM_OUT: '-',
   ZOOM_RESET: '0',
+  // Quick palette selection (1-9)
+  PALETTE_1: '1',
+  PALETTE_2: '2',
+  PALETTE_3: '3',
+  PALETTE_4: '4',
+  PALETTE_5: '5',
+  PALETTE_6: '6',
+  PALETTE_7: '7',
+  PALETTE_8: '8',
+  PALETTE_9: '9',
+} as const;
+
+// Human-readable shortcut labels for tooltips
+export const SHORTCUT_LABELS = {
+  draw: 'B',
+  erase: 'E',
+  fill: 'G',
+  eyedropper: 'I',
+  select: 'V',
+  hotspot: 'H',
+  pan: 'Space',
+  undo: 'Z / Ctrl+Z',
+  redo: 'Ctrl+Y',
+  zoomIn: '+ / =',
+  zoomOut: '-',
+  zoomReset: '0',
 } as const;

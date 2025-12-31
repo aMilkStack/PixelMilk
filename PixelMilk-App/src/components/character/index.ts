@@ -5,3 +5,6 @@ export { IdentityCard } from './IdentityCard';
 export { SpritePreview } from './SpritePreview';
 export { GenerateControls } from './GenerateControls';
 export { PaletteDisplay } from './PaletteDisplay';
+
+// Stage-based flow components
+export * from './stages';

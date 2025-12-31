@@ -11,7 +11,7 @@ export interface StyleParameters {
   shadingStyle: 'flat' | 'basic' | 'detailed';
   detailLevel: 'low' | 'medium' | 'high';
   canvasSize: 16 | 32 | 64 | 128 | 256; // 128/256 active, smaller sizes coming soon
-  paletteMode: string; // 'auto' or palette ID (e.g., 'lospec_sweetie-16')
+  paletteMode: string; // Palette ID (e.g., 'rooted', 'sweetie16') - required, no 'auto' option
   viewType: 'standard' | 'isometric';
 }
 

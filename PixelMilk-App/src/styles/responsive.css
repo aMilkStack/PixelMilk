@@ -1,0 +1,354 @@
+/**
+ * PixelMilk Responsive Design System
+ *
+ * Mobile-first breakpoints:
+ * - Mobile: 0 - 767px (touch-first, stacked layouts)
+ * - Tablet: 768px - 1023px (hybrid layouts)
+ * - Desktop: 1024px+ (full Photoshop-style layouts)
+ *
+ * Touch targets: 44px minimum (Apple HIG), 48px recommended (Google MD)
+ */
+
+/* ============================================
+ * CSS CUSTOM PROPERTIES FOR RESPONSIVE
+ * ============================================ */
+
+:root {
+  /* Tap target sizes */
+  --tap-target-min: 44px;
+  --tap-target-comfortable: 48px;
+
+  /* Breakpoint values (for reference) */
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+
+  /* Default spacing (desktop) */
+  --responsive-spacing-xs: 4px;
+  --responsive-spacing-sm: 8px;
+  --responsive-spacing-md: 16px;
+  --responsive-spacing-lg: 24px;
+  --responsive-spacing-xl: 32px;
+}
+
+/* ============================================
+ * MOBILE OVERRIDES (< 768px)
+ * ============================================ */
+
+@media (max-width: 767px) {
+  :root {
+    --responsive-spacing-md: 12px;
+    --responsive-spacing-lg: 16px;
+    --responsive-spacing-xl: 24px;
+  }
+
+  /* Force minimum tap targets on mobile */
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  select,
+  .tap-target {
+    min-height: var(--tap-target-min);
+    min-width: var(--tap-target-min);
+  }
+
+  /* Mobile layout utilities */
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .show-mobile {
+    display: block !important;
+  }
+
+  .mobile-stack {
+    flex-direction: column !important;
+  }
+
+  .mobile-full-width {
+    width: 100% !important;
+  }
+
+  /* Mobile toolbar positioning */
+  .mobile-bottom-toolbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Canvas stage mobile layout */
+  .canvas-stage {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .canvas-stage .toolbar-left {
+    display: none;
+  }
+
+  .canvas-stage .toolbar-bottom {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 8px 4px;
+    background-color: var(--color-bg-secondary);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .canvas-stage .identity-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 80%;
+    max-width: 300px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 200;
+  }
+
+  .canvas-stage .identity-panel.open {
+    transform: translateX(0);
+  }
+
+  /* Stage container mobile */
+  .stage-container .left-dock {
+    display: none;
+  }
+
+  .stage-container .center-stage {
+    padding: 16px;
+  }
+
+  /* Header mobile */
+  .app-header {
+    padding: var(--responsive-spacing-sm) var(--responsive-spacing-md);
+  }
+
+  .app-header .logo img {
+    height: 48px;
+  }
+
+  .app-header .status-text {
+    display: none;
+  }
+
+  /* Form inputs mobile */
+  .form-input,
+  .form-textarea,
+  .form-select {
+    font-size: 16px; /* Prevent iOS zoom */
+    padding: 12px;
+  }
+
+  /* Panel mobile */
+  .panel {
+    padding: var(--responsive-spacing-md);
+  }
+
+  /* Title sizing mobile */
+  .stage-title {
+    font-size: 32px;
+  }
+
+  .step-indicator {
+    font-size: 10px;
+  }
+
+  /* Direction picker mobile */
+  .direction-picker {
+    position: static;
+    justify-content: center;
+    padding: 8px 0;
+  }
+
+  .sprite-indicators {
+    position: static;
+    justify-content: center;
+    padding: 4px 0;
+  }
+
+  /* Bottom bar mobile */
+  .bottom-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .bottom-bar button {
+    flex: 1 1 auto;
+    min-width: 80px;
+  }
+}
+
+/* ============================================
+ * TABLET OVERRIDES (768px - 1023px)
+ * ============================================ */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  :root {
+    --responsive-spacing-md: 14px;
+    --responsive-spacing-lg: 20px;
+    --responsive-spacing-xl: 28px;
+  }
+
+  /* Tablet utilities */
+  .hide-tablet {
+    display: none !important;
+  }
+
+  .show-tablet {
+    display: block !important;
+  }
+
+  /* Stage container tablet */
+  .stage-container .left-dock {
+    width: 240px;
+    min-width: 240px;
+  }
+
+  /* Canvas stage tablet */
+  .canvas-stage .identity-panel {
+    width: 220px;
+  }
+
+  /* Toolbar tablet - smaller buttons */
+  .toolbar-button {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* ============================================
+ * DESKTOP OVERRIDES (>= 1024px)
+ * ============================================ */
+
+@media (min-width: 1024px) {
+  /* Desktop utilities */
+  .hide-desktop {
+    display: none !important;
+  }
+
+  .show-desktop {
+    display: block !important;
+  }
+
+  /* Full desktop layout */
+  .stage-container .left-dock {
+    width: 320px;
+    min-width: 320px;
+  }
+
+  .canvas-stage .identity-panel {
+    width: 260px;
+  }
+}
+
+/* ============================================
+ * TOUCH DEVICE STYLES
+ * ============================================ */
+
+@media (pointer: coarse) {
+  /* Touch devices - larger tap targets */
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  select {
+    min-height: var(--tap-target-min);
+  }
+
+  /* Disable hover effects on touch */
+  .hover-effect:hover {
+    background-color: inherit;
+  }
+
+  /* Increase spacing for touch */
+  .touch-spacing {
+    gap: 12px;
+  }
+}
+
+/* ============================================
+ * LANDSCAPE MOBILE OVERRIDES
+ * ============================================ */
+
+@media (max-width: 767px) and (orientation: landscape) {
+  .canvas-stage .bottom-bar {
+    padding: 8px 16px;
+  }
+
+  .stage-container .center-stage {
+    padding: 8px 16px;
+  }
+
+  /* Reduce header in landscape */
+  .app-header {
+    padding: var(--responsive-spacing-xs) var(--responsive-spacing-md);
+  }
+
+  .app-header .logo img {
+    height: 40px;
+  }
+}
+
+/* ============================================
+ * SAFE AREA INSETS (iOS)
+ * ============================================ */
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* ============================================
+ * ANIMATION UTILITIES
+ * ============================================ */
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.slide-in-right {
+  animation: slideInFromRight 0.3s ease forwards;
+}
+
+.slide-out-right {
+  animation: slideOutToRight 0.3s ease forwards;
+}
+
+.slide-in-bottom {
+  animation: slideInFromBottom 0.3s ease forwards;
+}

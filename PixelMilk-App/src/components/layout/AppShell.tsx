@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Settings } from 'lucide-react';
+import { PxSettings } from '../shared/PixelIcon';
 import { TabBar } from './TabBar';
 import { ApiKeyModal } from './ApiKeyModal';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -189,7 +189,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
               onClick={openApiKeyModal}
               aria-label="Settings"
             >
-              <Settings size={isMobile ? 20 : 18} />
+              <PxSettings size={isMobile ? 20 : 18} />
             </Button>
           </div>
         </header>

@@ -136,14 +136,14 @@ function buildPalettes(): ExtendedPalette[] {
 // ============================================
 
 /** All loaded Lospec palettes */
-export const LOSPEC_PALETTES: ExtendedPalette[] = buildPalettes();
+export const PALETTES: ExtendedPalette[] = buildPalettes();
 
 /** Legacy ID mapping for backwards compatibility */
 const legacyIdMap = new Map<string, string>();
 
 // Build legacy mapping: "lospec_sweetie-16" -> "lospec_sweetie16"
 // This handles cases where old code might use hyphenated IDs
-LOSPEC_PALETTES.forEach(p => {
+PALETTES.forEach(p => {
   // The current ID format is lospec_palettename (no hyphens)
   // Old format might have been lospec_palette-name
   // We normalize by stripping hyphens for lookup
@@ -157,14 +157,14 @@ LOSPEC_PALETTES.forEach(p => {
  * Get palette by ID
  * Supports both new format (lospec_palettename) and legacy format (lospec_palette-name)
  */
-export function getLospecPalette(id: string): ExtendedPalette | undefined {
+export function getPalette(id: string): ExtendedPalette | undefined {
   // Direct lookup first
-  let palette = LOSPEC_PALETTES.find(p => p.id === id);
+  let palette = PALETTES.find(p => p.id === id);
   if (palette) return palette;
 
   // Try normalizing the input ID (remove hyphens)
   const normalizedId = id.replace(/-/g, '');
-  palette = LOSPEC_PALETTES.find(p => p.id === normalizedId);
+  palette = PALETTES.find(p => p.id === normalizedId);
 
   return palette;
 }
@@ -173,12 +173,12 @@ export function getLospecPalette(id: string): ExtendedPalette | undefined {
  * Get palette colors by ID (for quick lookup)
  * Supports legacy IDs with hyphens like "lospec_sweetie-16"
  */
-export function getLospecColors(id: string): string[] | undefined {
-  const palette = getLospecPalette(id);
+export function getPaletteColors(id: string): string[] | undefined {
+  const palette = getPalette(id);
   if (!palette) {
     console.warn(
       `[PixelMilk] Palette not found: "${id}". ` +
-      `Available palettes: ${LOSPEC_PALETTES.slice(0, 10).map(p => p.id).join(', ')}...`
+      `Available palettes: ${PALETTES.slice(0, 10).map(p => p.id).join(', ')}...`
     );
     return undefined;
   }
@@ -190,9 +190,9 @@ export function getLospecColors(id: string): string[] | undefined {
  * @param tag - Tag to filter by (case-insensitive)
  * @returns Array of palettes that have the specified tag
  */
-export function getLospecPalettesByTag(tag: string): ExtendedPalette[] {
+export function getPalettesByTag(tag: string): ExtendedPalette[] {
   const normalizedTag = tag.toLowerCase();
-  return LOSPEC_PALETTES.filter(p =>
+  return PALETTES.filter(p =>
     p.tags?.some(t => t.toLowerCase() === normalizedTag)
   );
 }
@@ -202,8 +202,8 @@ export function getLospecPalettesByTag(tag: string): ExtendedPalette[] {
  * @param category - Category to filter by (Micro, Limited, Extended, Full)
  * @returns Array of palettes in the specified category
  */
-export function getLospecPalettesByCategory(category: PaletteCategory): ExtendedPalette[] {
-  return LOSPEC_PALETTES.filter(p => p.category === category);
+export function getPalettesByCategory(category: PaletteCategory): ExtendedPalette[] {
+  return PALETTES.filter(p => p.category === category);
 }
 
 /**
@@ -211,8 +211,8 @@ export function getLospecPalettesByCategory(category: PaletteCategory): Extended
  * @param min - Minimum colours (inclusive)
  * @param max - Maximum colours (inclusive)
  */
-export function getLospecPalettesByColourCount(min: number, max: number): ExtendedPalette[] {
-  return LOSPEC_PALETTES.filter(p => p.colourCount >= min && p.colourCount <= max);
+export function getPalettesByColourCount(min: number, max: number): ExtendedPalette[] {
+  return PALETTES.filter(p => p.colourCount >= min && p.colourCount <= max);
 }
 
 /**
@@ -221,7 +221,7 @@ export function getLospecPalettesByColourCount(min: number, max: number): Extend
  */
 export function getAllTags(): string[] {
   const tagSet = new Set<string>();
-  for (const palette of LOSPEC_PALETTES) {
+  for (const palette of PALETTES) {
     if (palette.tags) {
       for (const tag of palette.tags) {
         tagSet.add(tag);
@@ -250,7 +250,7 @@ export function getPaletteCounts(): Record<PaletteCategory, number> {
     Full: 0,
   };
 
-  for (const palette of LOSPEC_PALETTES) {
+  for (const palette of PALETTES) {
     counts[palette.category]++;
   }
 

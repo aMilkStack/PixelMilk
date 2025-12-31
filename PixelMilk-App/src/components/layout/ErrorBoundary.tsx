@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { PxWarning, PxReload } from '../shared/PixelIcon';
 import { Button } from '../shared';
 
 interface Props {
@@ -94,7 +94,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div style={styles.container}>
           <div style={styles.icon}>
-            <AlertTriangle size={64} color="var(--color-error)" />
+            <PxWarning size={64} style={{ color: 'var(--color-error)' }} />
           </div>
 
           <h1 style={styles.title}>Something went wrong</h1>
@@ -119,7 +119,7 @@ export class ErrorBoundary extends Component<Props, State> {
           )}
 
           <Button variant="primary" onClick={this.handleReset}>
-            <RefreshCw size={16} style={{ marginRight: '8px' }} />
+            <PxReload size={16} style={{ marginRight: '8px' }} />
             Refresh Application
           </Button>
         </div>

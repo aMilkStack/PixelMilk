@@ -231,14 +231,18 @@ export const SpriteCanvas: React.FC<SpriteCanvasProps> = ({
   };
 
   const containerStyle: React.CSSProperties = {
-    width: '100%',
-    height: '100%',
+    width: CANVAS_SIZE,
+    height: CANVAS_SIZE,
+    maxWidth: '100%',
+    maxHeight: '100%',
+    aspectRatio: '1 / 1',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.bgPrimary,
     border: `1px solid ${colors.checkerLight}`,
     position: 'relative',
+    flexShrink: 1, // Allow container to shrink if needed
   };
 
   const loadingOverlayStyle: React.CSSProperties = {
@@ -323,6 +327,8 @@ export const SpriteCanvas: React.FC<SpriteCanvasProps> = ({
         height={CANVAS_SIZE}
         onClick={handleClick}
         style={{
+          width: '100%',
+          height: '100%',
           cursor: interactive ? 'var(--cursor-crosshair)' : 'var(--cursor-default)',
           imageRendering: 'pixelated',
         }}

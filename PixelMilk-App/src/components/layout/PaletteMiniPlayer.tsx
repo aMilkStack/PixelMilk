@@ -1,20 +1,20 @@
 /**
- * PaletteMiniPlayer - Floating Spotify-style music player for palette selection
+ * PaletteMiniPlayer - Compact Spotify-style floating widget for palette selection
  *
- * Collapsed: Mini widget bottom-right
+ * Collapsed: Tiny square widget (draggable)
  * Expanded: Full-screen music player with descriptions
  */
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
-  Play, Pause, SkipBack, SkipForward, Shuffle,
-  Volume2, VolumeX, ChevronUp, ChevronDown, Music, X, Maximize2, Minimize2
-} from 'lucide-react';
+  PxPlay, PxPause, PxPrev, PxNext, PxShuffle,
+  PxVolume, PxVolumeX, PxChevronUp, PxChevronDown, PxMusic, PxClose, PxScale, PxScaleDown, PxDrag
+} from '../shared/PixelIcon';
 import { useCharacterStore } from '../../stores';
 import {
-  LOSPEC_PALETTES,
+  PALETTES,
   type ExtendedPalette,
   type PaletteCategory,
-} from '../../data/lospecPalettes';
+} from '../../data/palettes';
 import soundtrackData from '../../data/soundtrack.json';
 import paletteDescriptions from '../../data/paletteDescriptions.json';
 
@@ -63,13 +63,16 @@ interface Track extends ExtendedPalette {
   keywords?: string[];
 }
 
-const ALL_TRACKS: Track[] = LOSPEC_PALETTES.map(p => ({
+const ALL_TRACKS: Track[] = PALETTES.map(p => ({
   ...p,
   hasAudio: AVAILABLE_AUDIO.has(p.id),
   bpm: soundtrack[p.id]?.bpm,
   description: descriptions[p.id]?.description,
   keywords: descriptions[p.id]?.keywords,
 }));
+
+// Mini player size (35% bigger than original 72px)
+const MINI_SIZE = 96;
 
 export const PaletteMiniPlayer: React.FC = () => {
   const { styleParams, setStyleParams } = useCharacterStore();
@@ -82,6 +85,17 @@ export const PaletteMiniPlayer: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<PaletteCategory | 'all'>('all');
   const [waveHeights, setWaveHeights] = useState<number[]>(Array(32).fill(20));
   const [audioLoaded, setAudioLoaded] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+
+  // Internal track ID - decoupled from styleParams so shuffle works
+  const [internalTrackId, setInternalTrackId] = useState<string | null>(null);
+
+  // Drag state
+  const [position, setPosition] = useState({ x: 16, y: 16 }); // bottom-right offset
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Audio
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -92,12 +106,11 @@ export const PaletteMiniPlayer: React.FC = () => {
     return ALL_TRACKS.filter(t => t.category === selectedCategory);
   }, [selectedCategory]);
 
-  // Current track from styleParams
+  // Current track from internal state (decoupled from styleParams for shuffle)
   const currentTrack = useMemo(() => {
-    const id = styleParams.paletteMode;
-    if (!id || id === 'auto') return null;
-    return ALL_TRACKS.find(t => t.id === id) || null;
-  }, [styleParams.paletteMode]);
+    if (!internalTrackId) return null;
+    return ALL_TRACKS.find(t => t.id === internalTrackId) || null;
+  }, [internalTrackId]);
 
   // Current index in filtered list
   const currentIndex = useMemo(() => {
@@ -145,6 +158,44 @@ export const PaletteMiniPlayer: React.FC = () => {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
+  // Drag handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    e.preventDefault();
+    setIsDragging(true);
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startPosX: position.x,
+      startPosY: position.y,
+    };
+  }, [position]);
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!dragRef.current) return;
+      const dx = dragRef.current.startX - e.clientX;
+      const dy = dragRef.current.startY - e.clientY;
+      const newX = Math.max(8, Math.min(window.innerWidth - MINI_SIZE - 8, dragRef.current.startPosX + dx));
+      const newY = Math.max(8, Math.min(window.innerHeight - MINI_SIZE - 8, dragRef.current.startPosY + dy));
+      setPosition({ x: newX, y: newY });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      dragRef.current = null;
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
   // Load audio for track
   const loadAudio = useCallback((track: Track) => {
     if (!audioRef.current) return;
@@ -162,6 +213,7 @@ export const PaletteMiniPlayer: React.FC = () => {
 
   // Select a track
   const selectTrack = useCallback((track: Track) => {
+    setInternalTrackId(track.id);
     setStyleParams({ paletteMode: track.id });
     loadAudio(track);
     setIsPlaying(true);
@@ -193,140 +245,218 @@ export const PaletteMiniPlayer: React.FC = () => {
   }, [currentTrack, isPlaying, audioLoaded, loadAudio]);
 
   // ============================================
-  // MINI PLAYER (Collapsed State)
+  // MINI PLAYER (Collapsed State) - Compact Square
   // ============================================
   if (!isExpanded) {
     return (
-      <div style={{
-        position: 'fixed',
-        bottom: '20px',
-        right: '20px',
-        zIndex: 1000,
-        background: colors.bgPrimary,
-        border: `1px solid ${colors.mintFaint}`,
-        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-        width: '320px',
-      }}>
-        {/* Header */}
+      <div
+        ref={containerRef}
+        onMouseDown={handleMouseDown}
+        onMouseEnter={() => { setShowTooltip(true); setIsHovering(true); }}
+        onMouseLeave={() => { setShowTooltip(false); setIsHovering(false); }}
+        style={{
+          position: 'fixed',
+          bottom: position.y,
+          right: position.x,
+          zIndex: 1000,
+          width: MINI_SIZE,
+          height: MINI_SIZE,
+          background: colors.bgPrimary,
+          border: `1px solid ${colors.mintFaint}`,
+          boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
+          cursor: isDragging ? 'grabbing' : 'grab',
+          userSelect: 'none',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Palette colour bars as background */}
         <div style={{
+          position: 'absolute',
+          inset: 0,
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '8px 12px',
-          borderBottom: `1px solid ${colors.mintFaint}`,
-          background: colors.bgSecondary,
+          flexDirection: 'column',
+          opacity: 0.4,
         }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontFamily: 'monospace',
-            fontSize: '10px',
-            color: colors.mintDim,
-            textTransform: 'uppercase',
-            letterSpacing: '0.1em',
-          }}>
-            <Music size={10} />
-            Palette Player
-          </div>
-          <button
-            onClick={() => setIsExpanded(true)}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: colors.mint,
-              cursor: 'pointer',
-              padding: '4px',
-              display: 'flex',
-            }}
-            title="Expand"
-          >
-            <Maximize2 size={14} />
-          </button>
+          {(currentTrack ? activeColors.slice(0, 6) : [colors.mintFaint]).map((c, i) => (
+            <div key={i} style={{ flex: 1, backgroundColor: c }} />
+          ))}
         </div>
 
-        {/* Current Track */}
-        <div style={{ padding: '10px 12px' }}>
-          {currentTrack ? (
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              {/* Mini album art */}
-              <div style={{
-                width: '44px',
-                height: '44px',
-                display: 'flex',
-                flexDirection: 'column',
-                border: `1px solid ${colors.mintFaint}`,
-                flexShrink: 0,
-              }}>
-                {activeColors.slice(0, 5).map((c, i) => (
-                  <div key={i} style={{ flex: 1, backgroundColor: c }} />
-                ))}
-              </div>
-
-              {/* Info */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{
-                  fontFamily: 'Georgia, serif',
-                  fontSize: '13px',
-                  color: colors.cream,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}>
-                  {currentTrack.name}
-                </div>
-                <div style={{
-                  fontFamily: 'monospace',
-                  fontSize: '10px',
-                  color: colors.mintDim,
-                  marginTop: '2px',
-                }}>
-                  {currentTrack.colourCount} colours · {currentTrack.category}
-                </div>
-              </div>
-
-              {/* Controls */}
-              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                <button onClick={prevTrack} style={iconBtnStyle}><SkipBack size={12} /></button>
-                <button onClick={togglePlay} style={playBtnStyle}>
-                  {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-                </button>
-                <button onClick={nextTrack} style={iconBtnStyle}><SkipForward size={12} /></button>
-              </div>
-            </div>
-          ) : (
-            <div style={{
-              textAlign: 'center',
-              fontFamily: 'monospace',
-              fontSize: '11px',
-              color: colors.mintDim,
-              padding: '8px',
-            }}>
-              Click <Maximize2 size={10} style={{ verticalAlign: 'middle' }} /> to browse palettes
-            </div>
-          )}
-        </div>
-
-        {/* Mini waveform */}
-        {currentTrack && (
+        {/* Waveform overlay when playing */}
+        {isPlaying && currentTrack && (
           <div style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '20px',
             display: 'flex',
             alignItems: 'flex-end',
-            gap: '2px',
-            height: '20px',
-            padding: '0 12px 8px',
+            gap: '1px',
+            padding: '0 6px',
           }}>
             {waveHeights.slice(0, 16).map((h, i) => (
               <div
                 key={i}
                 style={{
                   flex: 1,
-                  height: `${isPlaying ? h : 20}%`,
+                  height: `${h * 0.2}px`,
                   backgroundColor: activeColors[i % activeColors.length],
-                  transition: 'height 0.12s ease-out',
+                  transition: 'height 0.1s ease-out',
                 }}
               />
             ))}
+          </div>
+        )}
+
+        {/* Central play/pause button */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: isHovering ? 1 : 0,
+          transition: 'opacity 0.2s ease',
+        }}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (currentTrack) {
+                togglePlay();
+              } else {
+                setIsExpanded(true);
+              }
+            }}
+            style={{
+              width: 44,
+              height: 44,
+              background: `${colors.bgPrimary}cc`,
+              border: `1px solid ${colors.mint}`,
+              color: colors.mint,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'transform 0.1s',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            {currentTrack ? (
+              isPlaying ? <PxPause size={18} /> : <PxPlay size={18} />
+            ) : (
+              <PxMusic size={18} />
+            )}
+          </button>
+        </div>
+
+        {/* Corner controls */}
+        <div style={{
+          position: 'absolute',
+          top: 4,
+          right: 4,
+          display: 'flex',
+          gap: 2,
+          opacity: isHovering ? 1 : 0,
+          transition: 'opacity 0.2s ease',
+        }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); setIsExpanded(true); }}
+            style={{
+              width: 22,
+              height: 22,
+              background: `${colors.bgPrimary}cc`,
+              border: 'none',
+              color: colors.mint,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            title="Browse palettes"
+          >
+            <PxScale size={12} />
+          </button>
+        </div>
+
+        {/* Skip controls - bottom corners */}
+        {currentTrack && (
+          <>
+            <button
+              onClick={(e) => { e.stopPropagation(); prevTrack(); }}
+              style={{
+                position: 'absolute',
+                bottom: 4,
+                left: 4,
+                width: 22,
+                height: 22,
+                background: `${colors.bgPrimary}aa`,
+                border: 'none',
+                color: colors.mint,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: isHovering ? 1 : 0,
+                transition: 'opacity 0.2s ease',
+              }}
+            >
+              <PxPrev size={12} />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); nextTrack(); }}
+              style={{
+                position: 'absolute',
+                bottom: 4,
+                right: 4,
+                width: 22,
+                height: 22,
+                background: `${colors.bgPrimary}aa`,
+                border: 'none',
+                color: colors.mint,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: isHovering ? 1 : 0,
+                transition: 'opacity 0.2s ease',
+              }}
+            >
+              <PxNext size={12} />
+            </button>
+          </>
+        )}
+
+        {/* Tooltip on hover */}
+        {showTooltip && !isDragging && (
+          <div style={{
+            position: 'absolute',
+            bottom: MINI_SIZE + 8,
+            right: 0,
+            background: colors.bgSecondary,
+            border: `1px solid ${colors.mintFaint}`,
+            padding: '6px 10px',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+          }}>
+            <div style={{
+              fontFamily: 'monospace',
+              fontSize: '11px',
+              color: colors.cream,
+            }}>
+              {currentTrack ? currentTrack.name : 'Select a palette'}
+            </div>
+            {currentTrack && (
+              <div style={{
+                fontFamily: 'monospace',
+                fontSize: '9px',
+                color: colors.mintDim,
+                marginTop: 2,
+              }}>
+                {currentTrack.colourCount} colours
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -355,14 +485,14 @@ export const PaletteMiniPlayer: React.FC = () => {
         background: colors.bgSecondary,
       }}>
         <div style={{
-          fontFamily: 'Georgia, serif',
-          fontSize: '20px',
+          fontFamily: 'FaytePixel, monospace',
+          fontSize: '32px',
           color: colors.cream,
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
         }}>
-          <Music size={20} style={{ color: colors.mint }} />
+          <PxMusic size={24} style={{ color: colors.mint }} />
           Palette Playlist
           <span style={{
             fontFamily: 'monospace',
@@ -387,7 +517,7 @@ export const PaletteMiniPlayer: React.FC = () => {
             fontSize: '12px',
           }}
         >
-          <Minimize2 size={14} />
+          <PxScaleDown size={14} />
           Minimize
         </button>
       </div>
@@ -486,7 +616,7 @@ export const PaletteMiniPlayer: React.FC = () => {
                     fontSize: '12px',
                     color: isActive ? colors.mint : colors.mintFaint,
                   }}>
-                    {isActive && isPlaying ? '▶' : String(idx + 1).padStart(2, '0')}
+                    {isActive && isPlaying ? <PxPlay size={12} /> : String(idx + 1).padStart(2, '0')}
                   </span>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -505,7 +635,7 @@ export const PaletteMiniPlayer: React.FC = () => {
                       gap: '6px',
                     }}>
                       {track.name}
-                      {track.hasAudio && <Volume2 size={10} style={{ opacity: 0.5 }} />}
+                      {track.hasAudio && <PxVolume size={10} style={{ opacity: 0.5 }} />}
                     </span>
                   </div>
 
@@ -554,8 +684,8 @@ export const PaletteMiniPlayer: React.FC = () => {
 
               {/* Track name */}
               <div style={{
-                fontFamily: 'Georgia, serif',
-                fontSize: '24px',
+                fontFamily: 'FaytePixel, monospace',
+                fontSize: '36px',
                 color: colors.cream,
                 marginBottom: '4px',
               }}>
@@ -603,8 +733,8 @@ export const PaletteMiniPlayer: React.FC = () => {
               {/* Description */}
               {currentTrack.description && (
                 <div style={{
-                  fontFamily: 'Georgia, serif',
-                  fontSize: '13px',
+                  fontFamily: 'monospace',
+                  fontSize: '12px',
                   lineHeight: '1.6',
                   color: colors.cream,
                   opacity: 0.8,
@@ -653,16 +783,16 @@ export const PaletteMiniPlayer: React.FC = () => {
                   }}
                   title="Shuffle"
                 >
-                  <Shuffle size={16} />
+                  <PxShuffle size={16} />
                 </button>
                 <button onClick={prevTrack} style={iconBtnStyleLarge}>
-                  <SkipBack size={18} />
+                  <PxPrev size={18} />
                 </button>
                 <button onClick={togglePlay} style={playBtnStyleLarge}>
-                  {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+                  {isPlaying ? <PxPause size={24} /> : <PxPlay size={24} />}
                 </button>
                 <button onClick={nextTrack} style={iconBtnStyleLarge}>
-                  <SkipForward size={18} />
+                  <PxNext size={18} />
                 </button>
                 <button
                   onClick={() => setIsMuted(!isMuted)}
@@ -673,7 +803,7 @@ export const PaletteMiniPlayer: React.FC = () => {
                   }}
                   title={isMuted ? 'Unmute' : 'Mute'}
                 >
-                  {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                  {isMuted ? <PxVolumeX size={16} /> : <PxVolume size={16} />}
                 </button>
               </div>
             </>
@@ -687,7 +817,7 @@ export const PaletteMiniPlayer: React.FC = () => {
               color: colors.mintDim,
               textAlign: 'center',
             }}>
-              <Music size={48} style={{ marginBottom: '16px', opacity: 0.3 }} />
+              <PxMusic size={48} style={{ marginBottom: '16px', opacity: 0.3 }} />
               <div style={{ fontFamily: 'monospace', fontSize: '14px' }}>
                 Select a palette to preview
               </div>

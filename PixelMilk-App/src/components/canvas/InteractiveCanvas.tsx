@@ -413,13 +413,17 @@ export const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   };
 
   const containerStyle: React.CSSProperties = {
-    width: '100%',
-    height: '100%',
+    width: CANVAS_SIZE,
+    height: CANVAS_SIZE,
+    maxWidth: '100%',
+    maxHeight: '100%',
+    aspectRatio: '1 / 1',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.bgPrimary,
     border: `1px solid ${colors.checkerLight}`,
+    flexShrink: 1, // Allow container to shrink if needed
   };
 
   return (
@@ -434,6 +438,8 @@ export const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
         onMouseLeave={handleMouseUp}
         onWheel={handleWheel}
         style={{
+          width: '100%',
+          height: '100%',
           cursor: getCursor(),
           imageRendering: 'pixelated',
         }}

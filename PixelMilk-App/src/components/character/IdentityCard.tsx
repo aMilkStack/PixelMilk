@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CharacterIdentity } from '../../types';
 import { Panel } from '../shared/Panel';
-import { ChevronDown, ChevronUp, Palette, User, Tag } from 'lucide-react';
+import { PxChevronDown, PxChevronUp, PxPalette, PxUser, PxTag } from '../shared/PixelIcon';
 
 export interface IdentityCardProps {
   identity: CharacterIdentity | null;
@@ -53,7 +53,7 @@ export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading 
     return (
       <Panel title="CHARACTER IDENTITY">
         <div className="flex flex-col items-center justify-center py-12 text-[#8bd0ba]/40">
-          <User className="w-16 h-16 mb-4" />
+          <PxUser size={64} style={{ marginBottom: '16px' }} />
           <p className="font-mono text-sm uppercase tracking-widest">NO IDENTITY DATA</p>
           <p className="font-mono text-xs mt-2 text-center">
             Generate a character to view identity details
@@ -84,7 +84,7 @@ export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading 
         {/* Color Palette Swatches */}
         <div>
           <h3 className="text-xs uppercase tracking-widest text-[#d8c8b8] mb-3 flex items-center gap-2">
-            <Palette className="w-4 h-4" />
+            <PxPalette size={16} />
             {lockedPalette && lockedPalette.length > 0 ? 'Locked Palette' : 'Color Palette'}
           </h3>
 
@@ -139,7 +139,7 @@ export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading 
         {/* Physical Description Summary */}
         <div>
           <h3 className="text-xs uppercase tracking-widest text-[#d8c8b8] mb-3 flex items-center gap-2">
-            <User className="w-4 h-4" />
+            <PxUser size={16} />
             Physical Description
           </h3>
           <div className="border border-[#8bd0ba]/30 bg-[#021a1a]/50">
@@ -176,7 +176,7 @@ export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading 
         {distinctiveFeatures && distinctiveFeatures.length > 0 && (
           <div>
             <h3 className="text-xs uppercase tracking-widest text-[#d8c8b8] mb-3 flex items-center gap-2">
-              <Tag className="w-4 h-4" />
+              <PxTag size={16} />
               Distinctive Features
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -204,9 +204,9 @@ export const IdentityCard: React.FC<IdentityCardProps> = ({ identity, isLoading 
               </span>
               <span className="flex items-center justify-center w-4 h-4">
                 {notesExpanded ? (
-                  <ChevronUp className="w-4 h-4" />
+                  <PxChevronUp size={16} />
                 ) : (
-                  <ChevronDown className="w-4 h-4" />
+                  <PxChevronDown size={16} />
                 )}
               </span>
             </button>

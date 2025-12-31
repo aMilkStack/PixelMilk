@@ -1246,5 +1246,18 @@
                                    "ink"
                                ],
                       "colours":  5
-                  }
+                  },
+    "deep":  {
+                 "path":  "Extended (16-28)/16/deep.hex",
+                 "tags":  [
+                              "mixed",
+                              "muted",
+                              "high-contrast",
+                              "dark",
+                              "horror",
+                              "underwater",
+                              "bioluminescent"
+                          ],
+                 "colours":  16
+             }
 }

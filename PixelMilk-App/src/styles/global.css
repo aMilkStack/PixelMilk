@@ -8,9 +8,27 @@
  * ============================================ */
 
 @import url('./variables.css');
+@import url('./responsive.css');
 
-/* Google Fonts - VT323 (terminal) & Playfair Display (headings) */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=VT323&display=swap');
+/* Google Fonts - VT323 (terminal) */
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+/* FaytePixel - Custom pixel fonts for headings */
+@font-face {
+  font-family: 'FaytePixel';
+  src: url('/fonts/faytepixel-hard.ttf') format('truetype');
+  font-weight: 600 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'FaytePixel';
+  src: url('/fonts/faytepixel-soft.ttf') format('truetype');
+  font-weight: 400 500;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* ============================================
  * TAILWIND v4 - Using CSS import syntax
@@ -286,24 +304,6 @@ table {
 
 .cursor-blink {
   animation: terminal-blink 1s step-end infinite;
-}
-
-/* CRT scanline effect (optional, can be applied to containers) */
-.crt-effect::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.1) 0px,
-    rgba(0, 0, 0, 0.1) 1px,
-    transparent 1px,
-    transparent 2px
-  );
-  pointer-events: none;
 }
 
 /* Glow effect for terminal elements */

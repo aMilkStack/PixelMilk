@@ -4,3 +4,5 @@ export { ZoomControls } from './ZoomControls';
 export { ToolPalette } from './ToolPalette';
 export { HotspotEditModal } from './HotspotEditModal';
 export { CanvasEditor } from './CanvasEditor';
+export { ResizeModal } from './ResizeModal';
+export { MobileToolbar } from './MobileToolbar';

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Lock, Palette, Unlock } from 'lucide-react';
+import { PxLock, PxPalette, PxUnlock } from '../shared/PixelIcon';
 import { useCharacterStore, useCanvasStore } from '../../stores';
-import { getLospecColors, getLospecPalette } from '../../data/lospecPalettes';
+import { getPaletteColors, getPalette } from '../../data/palettes';
 
 const colors = {
   bgPrimary: '#021a1a',
@@ -15,9 +15,9 @@ export const PaletteDisplay: React.FC = () => {
   const { selectedColor, setSelectedColor } = useCanvasStore();
 
   // Derive effective palette: locked takes precedence, then selected palette
-  const hasPaletteSelected = styleParams.paletteMode && styleParams.paletteMode !== 'auto';
-  const paletteColors = hasPaletteSelected ? getLospecColors(styleParams.paletteMode) : undefined;
-  const selectedPalette = hasPaletteSelected ? getLospecPalette(styleParams.paletteMode) : undefined;
+  const hasPaletteSelected = !!styleParams.paletteMode;
+  const paletteColors = hasPaletteSelected ? getPaletteColors(styleParams.paletteMode) : undefined;
+  const selectedPalette = hasPaletteSelected ? getPalette(styleParams.paletteMode) : undefined;
   const effectivePalette = lockedPalette ?? paletteColors;
   const isLocked = lockedPalette !== null && lockedPalette.length > 0;
   const isPalettePreset = !isLocked && paletteColors && paletteColors.length > 0;
@@ -105,7 +105,7 @@ export const PaletteDisplay: React.FC = () => {
       ? `Preset: ${selectedPalette.name}`
       : 'Active Palette';
 
-  const PaletteIcon = isLocked ? Lock : Palette;
+  const PaletteIcon = isLocked ? PxLock : PxPalette;
 
   return (
     <div style={containerStyle}>
@@ -131,7 +131,7 @@ export const PaletteDisplay: React.FC = () => {
                 e.currentTarget.style.color = colors.cream;
               }}
             >
-              <Unlock size={14} />
+              <PxUnlock size={14} />
             </button>
           )}
           <span style={countStyle}>{effectivePalette.length}</span>

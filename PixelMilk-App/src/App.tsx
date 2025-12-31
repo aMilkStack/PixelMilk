@@ -4,17 +4,17 @@ import { Panel } from './components/shared';
 import { CharacterTab } from './components/character';
 import { useAppStore } from './stores';
 import { TabId } from './types';
-import { User, Grid3X3, Box, Layers, Combine, Library } from 'lucide-react';
+import { PxUser, PxAddGrid, PxArchive, PxLayout, PxGroup, PxBook } from './components/shared/PixelIcon';
 
 // Placeholder content for each tab
 const TabPlaceholder: React.FC<{ tabId: TabId }> = ({ tabId }) => {
   const icons: Record<TabId, React.ReactNode> = {
-    character: <User size={48} />,
-    tile: <Grid3X3 size={48} />,
-    object: <Box size={48} />,
-    texture: <Layers size={48} />,
-    compose: <Combine size={48} />,
-    library: <Library size={48} />,
+    character: <PxUser size={48} />,
+    tile: <PxAddGrid size={48} />,
+    object: <PxArchive size={48} />,
+    texture: <PxLayout size={48} />,
+    compose: <PxGroup size={48} />,
+    library: <PxBook size={48} />,
   };
 
   const descriptions: Record<TabId, string> = {

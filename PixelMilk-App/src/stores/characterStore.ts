@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Asset, CharacterIdentity, Direction, SpriteData, StyleParameters } from '../types';
 import { clearSpriteSession, clearAllSpriteSessions, getSpriteSession } from '../services/gemini/client';
+import { resizeAllSprites, type CanvasSize, type ResizeMode } from '../utils/spriteResize';
 
 interface CharacterState {
   // Current working character
@@ -12,6 +13,8 @@ interface CharacterState {
   // Form state
   description: string;
   styleParams: StyleParameters;
+  referenceImage: string | null; // base64
+  referenceImageName: string | null;
 
   // UI State
   isGeneratingIdentity: boolean;
@@ -24,6 +27,8 @@ interface CharacterState {
   // Actions
   setDescription: (desc: string) => void;
   setStyleParams: (params: Partial<StyleParameters>) => void;
+  setReferenceImage: (image: string | null, name: string | null) => void;
+  clearReferenceImage: () => void;
   setIdentity: (identity: CharacterIdentity | null) => void;
   addSprite: (direction: Direction, sprite: SpriteData) => void;
   updateSprite: (direction: Direction, sprite: SpriteData) => void;
@@ -41,6 +46,9 @@ interface CharacterState {
   clearSession: () => void;
   clearAllSessions: () => void;
   checkSessionStatus: () => void;
+
+  // Resize action
+  resizeSprites: (newSize: CanvasSize, mode: ResizeMode) => void;
 }
 
 const defaultStyleParams: StyleParameters = {
@@ -48,7 +56,7 @@ const defaultStyleParams: StyleParameters = {
   shadingStyle: 'basic',
   detailLevel: 'medium',
   canvasSize: 128,
-  paletteMode: 'auto',
+  paletteMode: 'rooted', // Default to 'rooted' - a versatile 16-colour palette
   viewType: 'standard',
 };
 
@@ -59,6 +67,8 @@ export const useCharacterStore = create<CharacterState>((set, get) => ({
   currentDirection: 'S',
   description: '',
   styleParams: defaultStyleParams,
+  referenceImage: null,
+  referenceImageName: null,
   isGeneratingIdentity: false,
   isGeneratingSprite: false,
   error: null,
@@ -70,6 +80,12 @@ export const useCharacterStore = create<CharacterState>((set, get) => ({
     set((state) => ({
       styleParams: { ...state.styleParams, ...params },
     })),
+
+  setReferenceImage: (image, name) =>
+    set({ referenceImage: image, referenceImageName: name }),
+
+  clearReferenceImage: () =>
+    set({ referenceImage: null, referenceImageName: null }),
 
   setIdentity: (identity) =>
     set({
@@ -188,5 +204,41 @@ export const useCharacterStore = create<CharacterState>((set, get) => ({
     } else {
       set({ hasActiveSession: false });
     }
+  },
+
+  resizeSprites: (newSize: CanvasSize, mode: ResizeMode) => {
+    const { currentSprites, currentIdentity, styleParams } = get();
+
+    if (currentSprites.size === 0) {
+      console.warn('[characterStore] No sprites to resize');
+      return;
+    }
+
+    // Resize all sprites
+    const resizedSprites = resizeAllSprites(currentSprites, newSize, mode);
+
+    // Update styleParams with new canvas size
+    const newStyleParams = {
+      ...styleParams,
+      canvasSize: newSize as StyleParameters['canvasSize'],
+    };
+
+    // Update identity if present
+    let updatedIdentity = currentIdentity;
+    if (currentIdentity) {
+      updatedIdentity = {
+        ...currentIdentity,
+        styleParameters: newStyleParams,
+        updatedAt: Date.now(),
+      };
+    }
+
+    set({
+      currentSprites: resizedSprites,
+      styleParams: newStyleParams,
+      currentIdentity: updatedIdentity,
+    });
+
+    console.log(`[characterStore] Resized ${resizedSprites.size} sprites to ${newSize}px using ${mode} mode`);
   },
 }));

@@ -3,6 +3,136 @@ import { snapToGrid } from './pixelSnapper';
 import type { SpriteData, Direction } from '../types';
 
 /**
+ * Sprite sheet layout type
+ */
+export type SpriteSheetLayout = '2x2' | '1x4';
+
+/**
+ * Direction order for sprite sheet exports (clockwise from top)
+ */
+const SPRITE_SHEET_DIRECTION_ORDER: Direction[] = ['N', 'E', 'S', 'W'];
+
+/**
+ * Creates a sprite sheet from all 4 direction sprites.
+ *
+ * @param sprites - Map of direction to sprite data (must contain all 4 cardinal directions)
+ * @param layout - Layout type: '2x2' grid or '1x4' horizontal strip
+ * @param background - Optional background colour (null for transparent)
+ * @returns Data URL of the combined sprite sheet PNG
+ */
+export function createSpriteSheet(
+  sprites: Map<Direction, SpriteData>,
+  layout: SpriteSheetLayout = '2x2',
+  background?: string | null
+): string | null {
+  // Verify all 4 directions are present
+  const missingDirections = SPRITE_SHEET_DIRECTION_ORDER.filter(dir => !sprites.has(dir));
+  if (missingDirections.length > 0) {
+    console.warn(`[createSpriteSheet] Missing directions: ${missingDirections.join(', ')}`);
+    return null;
+  }
+
+  // Get sprite size from first sprite (all should be same size)
+  const firstSprite = sprites.get('N')!;
+  const spriteSize = firstSprite.width;
+
+  // Calculate canvas dimensions based on layout
+  const canvas = document.createElement('canvas');
+  if (layout === '2x2') {
+    canvas.width = spriteSize * 2;
+    canvas.height = spriteSize * 2;
+  } else {
+    // 1x4 horizontal strip
+    canvas.width = spriteSize * 4;
+    canvas.height = spriteSize;
+  }
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    console.error('[createSpriteSheet] Canvas context not available');
+    return null;
+  }
+
+  // Ensure crisp pixel rendering
+  ctx.imageSmoothingEnabled = false;
+
+  // Clear with transparent or fill with background
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (background) {
+    ctx.fillStyle = background;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // Define positions for each direction based on layout
+  // 2x2: N(0,0), E(1,0), S(0,1), W(1,1)
+  // 1x4: N, E, S, W left to right
+  const positions = layout === '2x2'
+    ? [
+        { dir: 'N' as Direction, x: 0, y: 0 },
+        { dir: 'E' as Direction, x: 1, y: 0 },
+        { dir: 'S' as Direction, x: 0, y: 1 },
+        { dir: 'W' as Direction, x: 1, y: 1 },
+      ]
+    : [
+        { dir: 'N' as Direction, x: 0, y: 0 },
+        { dir: 'E' as Direction, x: 1, y: 0 },
+        { dir: 'S' as Direction, x: 2, y: 0 },
+        { dir: 'W' as Direction, x: 3, y: 0 },
+      ];
+
+  // Draw each sprite
+  for (const { dir, x, y } of positions) {
+    const sprite = sprites.get(dir);
+    if (!sprite?.pixels) continue;
+
+    const offsetX = x * spriteSize;
+    const offsetY = y * spriteSize;
+
+    for (let i = 0; i < sprite.pixels.length; i++) {
+      const px = i % sprite.width;
+      const py = Math.floor(i / sprite.width);
+      const color = sprite.pixels[i];
+
+      if (color && color !== 'transparent') {
+        ctx.fillStyle = color;
+        ctx.fillRect(offsetX + px, offsetY + py, 1, 1);
+      }
+    }
+  }
+
+  return canvas.toDataURL('image/png');
+}
+
+/**
+ * Downloads a sprite sheet PNG file.
+ *
+ * @param sprites - Map of direction to sprite data
+ * @param characterName - Character name for the filename
+ * @param layout - Layout type: '2x2' grid or '1x4' horizontal strip
+ * @param background - Optional background colour (null for transparent)
+ * @returns true if successful, false otherwise
+ */
+export function downloadSpriteSheet(
+  sprites: Map<Direction, SpriteData>,
+  characterName: string,
+  layout: SpriteSheetLayout = '2x2',
+  background?: string | null
+): boolean {
+  const dataUrl = createSpriteSheet(sprites, layout, background);
+  if (!dataUrl) return false;
+
+  const sanitisedName = characterName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+  const filename = `${sanitisedName}_spritesheet_${layout}.png`;
+
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = dataUrl;
+  link.click();
+
+  return true;
+}
+
+/**
  * Default chroma key colour for background removal.
  * This dark grey is used by Gemini when generating sprites.
  * Exported so callers can use the same value.

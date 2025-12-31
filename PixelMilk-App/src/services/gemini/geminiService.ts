@@ -7,7 +7,7 @@ import { characterIdentitySchema } from "./schemas";
 import { normalizeIdentity } from "../../utils/normalizeIdentity";
 import { buildTechniquePrompt, getSystemInstruction, getProhibitionsPrompt } from "../../data/pixelArtTechniques";
 import { prepareCanvasForGemini } from "../../utils/imageUtils";
-import { getLospecColors } from "../../data/lospecPalettes";
+import { getPaletteColors } from "../../data/palettes";
 
 /**
  * Maps our string-based thinkingLevel to SDK enum values
@@ -62,8 +62,7 @@ const getBackoffDelay = (attempt: number): number => {
 
 /**
  * Builds the palette instruction for Gemini based on paletteMode setting
- * - If 'auto': Uses the character's identity colours (6 semantic colours)
- * - If 'lospec_xxx': Uses the specific Lospec palette colours
+ * A palette is always required - uses the specific palette colours
  */
 const buildPalettePrompt = (identity: CharacterIdentity): string => {
   const { paletteMode } = identity.styleParameters;
@@ -72,9 +71,9 @@ const buildPalettePrompt = (identity: CharacterIdentity): string => {
   // Always include identity colours for semantic meaning
   const semanticColors = `Character colours - Primary: ${identityPalette.primary}, Secondary: ${identityPalette.secondary}, Accent: ${identityPalette.accent}, Skin: ${identityPalette.skin}, Hair: ${identityPalette.hair}, Outline: ${identityPalette.outline}`;
 
-  // Check if using a curated palette
-  if (paletteMode && paletteMode !== 'auto') {
-    const paletteColors = getLospecColors(paletteMode);
+  // Check if using a curated palette (always required now)
+  if (paletteMode) {
+    const paletteColors = getPaletteColors(paletteMode);
     if (paletteColors && paletteColors.length > 0) {
       const colorList = paletteColors.join(', ');
       return `COLOR PALETTE CONSTRAINT:
@@ -806,18 +805,26 @@ export const describeImageForPixelArt = async (
 ): Promise<string> => {
   const client = getClient();
 
-  const systemInstruction = `You are an expert at analysing images and describing characters, creatures, and subjects in rich detail. Focus on what you see - physical features, clothing, materials, colours, poses, expressions, and distinctive elements.`;
+  const systemInstruction = `You are an expert at analysing images and describing characters, creatures, and subjects for pixel art generation. Your descriptions must focus ONLY on the subject itself - what they look like, what they wear, what they carry. Never describe the environment, setting, or how the image was captured.`;
 
   const prompt = `Analyse this image and describe the subject in a single detailed paragraph.
 
-Include:
-- Physical appearance (body type, features, expression)
-- Clothing and materials (textures, colours, layers)
-- Accessories, weapons, or props
-- Pose and stance
-- Any distinctive or unique elements
+INCLUDE (focus on these):
+- Physical appearance (body type, face, hair, skin, expression)
+- Clothing and materials (textures, colours, layers, fabric types)
+- Accessories, weapons, or props they are holding or wearing
+- Pose and stance (how they are standing/positioned)
+- Distinctive or unique visual elements
 
-Format: Single descriptive paragraph only. No intro, no outro, no markdown, no style recommendations.`;
+EXCLUDE (never mention these):
+- Camera angles or viewpoints (front view, side view, 3/4 angle, etc.)
+- Background or environment (indoor, outdoor, studio, etc.)
+- Lighting conditions (dramatic lighting, backlit, shadows from environment)
+- Perspective or framing
+- Image quality or style (photo, illustration, etc.)
+- Any setting or context around the subject
+
+Format: Single descriptive paragraph focusing purely on the subject. No intro, no outro, no markdown.`;
 
   const response = await client.models.generateContent({
     model: 'gemini-3-pro-image-preview',

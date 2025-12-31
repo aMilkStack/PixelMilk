@@ -4,7 +4,7 @@ import { ToolPalette } from './ToolPalette';
 import { ZoomControls } from './ZoomControls';
 import { HotspotEditModal } from './HotspotEditModal';
 import { useHistory } from '../../hooks';
-import { useKeyboard, EDITOR_SHORTCUTS } from '../../hooks/useKeyboard';
+import { useKeyboard, EDITOR_SHORTCUTS, SHORTCUT_LABELS } from '../../hooks/useKeyboard';
 import { useCanvasStore } from '../../stores';
 import { applyHotspotEdit } from '../../services/gemini';
 import type { SpriteData } from '../../types';
@@ -37,6 +37,7 @@ export const CanvasEditor: React.FC<CanvasEditorProps> = ({
     hotspotY,
     hotspotRadius,
     clearHotspot,
+    resetZoomToFit,
   } = useCanvasStore();
 
   // History for undo/redo
@@ -112,14 +113,19 @@ export const CanvasEditor: React.FC<CanvasEditorProps> = ({
     [sprite, pixels, hotspotX, hotspotY, hotspotRadius, lockedPalette, pushHistory, onSpriteChange]
   );
 
+  // Get selected color setter from canvas store for palette shortcuts
+  const { setSelectedColor } = useCanvasStore();
+
   // Keyboard shortcuts
   useKeyboard({
     [EDITOR_SHORTCUTS.UNDO]: () => {
       if (canUndo) {
         undo();
-        if (sprite && onSpriteChange) {
-          // Note: pixels state will update on next render
-        }
+      }
+    },
+    [EDITOR_SHORTCUTS.UNDO_SIMPLE]: () => {
+      if (canUndo) {
+        undo();
       }
     },
     [EDITOR_SHORTCUTS.REDO]: () => {
@@ -133,15 +139,28 @@ export const CanvasEditor: React.FC<CanvasEditorProps> = ({
       }
     },
     [EDITOR_SHORTCUTS.DRAW]: () => setTool('draw'),
+    [EDITOR_SHORTCUTS.DRAW_ALT]: () => setTool('draw'),
     [EDITOR_SHORTCUTS.ERASE]: () => setTool('erase'),
     [EDITOR_SHORTCUTS.FILL]: () => setTool('fill'),
+    [EDITOR_SHORTCUTS.FILL_ALT]: () => setTool('fill'),
     [EDITOR_SHORTCUTS.EYEDROPPER]: () => setTool('eyedropper'),
     [EDITOR_SHORTCUTS.SELECT]: () => setTool('select'),
     [EDITOR_SHORTCUTS.HOTSPOT]: () => setTool('hotspot'),
     [EDITOR_SHORTCUTS.PAN]: () => setTool('pan'),
     [EDITOR_SHORTCUTS.ZOOM_IN]: () => setZoom(Math.min(32, zoom * 1.5)),
+    [EDITOR_SHORTCUTS.ZOOM_IN_ALT]: () => setZoom(Math.min(32, zoom * 1.5)),
     [EDITOR_SHORTCUTS.ZOOM_OUT]: () => setZoom(Math.max(0.5, zoom / 1.5)),
-    [EDITOR_SHORTCUTS.ZOOM_RESET]: () => setZoom(1),
+    [EDITOR_SHORTCUTS.ZOOM_RESET]: () => resetZoomToFit(),
+    // Quick palette selection (1-9)
+    [EDITOR_SHORTCUTS.PALETTE_1]: () => lockedPalette[0] && setSelectedColor(lockedPalette[0]),
+    [EDITOR_SHORTCUTS.PALETTE_2]: () => lockedPalette[1] && setSelectedColor(lockedPalette[1]),
+    [EDITOR_SHORTCUTS.PALETTE_3]: () => lockedPalette[2] && setSelectedColor(lockedPalette[2]),
+    [EDITOR_SHORTCUTS.PALETTE_4]: () => lockedPalette[3] && setSelectedColor(lockedPalette[3]),
+    [EDITOR_SHORTCUTS.PALETTE_5]: () => lockedPalette[4] && setSelectedColor(lockedPalette[4]),
+    [EDITOR_SHORTCUTS.PALETTE_6]: () => lockedPalette[5] && setSelectedColor(lockedPalette[5]),
+    [EDITOR_SHORTCUTS.PALETTE_7]: () => lockedPalette[6] && setSelectedColor(lockedPalette[6]),
+    [EDITOR_SHORTCUTS.PALETTE_8]: () => lockedPalette[7] && setSelectedColor(lockedPalette[7]),
+    [EDITOR_SHORTCUTS.PALETTE_9]: () => lockedPalette[8] && setSelectedColor(lockedPalette[8]),
   });
 
   // Sync undo results back to sprite
@@ -158,6 +177,8 @@ export const CanvasEditor: React.FC<CanvasEditorProps> = ({
     display: 'flex',
     gap: '12px',
     height: '100%',
+    maxHeight: '100%',
+    minHeight: 0, // Critical: allows flex child to shrink below content size
   };
 
   const canvasAreaStyle: React.CSSProperties = {
@@ -166,6 +187,7 @@ export const CanvasEditor: React.FC<CanvasEditorProps> = ({
     flexDirection: 'column',
     gap: '8px',
     minWidth: 0,
+    minHeight: 0, // Allow shrinking in flex column
   };
 
   const controlsRowStyle: React.CSSProperties = {
@@ -201,7 +223,7 @@ export const CanvasEditor: React.FC<CanvasEditorProps> = ({
   return (
     <div style={containerStyle}>
       {/* Tool Palette */}
-      <ToolPalette />
+      <ToolPalette lockedPalette={lockedPalette} />
 
       {/* Canvas Area */}
       <div style={canvasAreaStyle}>
@@ -213,7 +235,7 @@ export const CanvasEditor: React.FC<CanvasEditorProps> = ({
               style={buttonStyle(canUndo)}
               onClick={undo}
               disabled={!canUndo}
-              title="Undo (Ctrl+Z)"
+              title={`Undo (${SHORTCUT_LABELS.undo})`}
             >
               Undo
             </button>
@@ -221,7 +243,7 @@ export const CanvasEditor: React.FC<CanvasEditorProps> = ({
               style={buttonStyle(canRedo)}
               onClick={redo}
               disabled={!canRedo}
-              title="Redo (Ctrl+Y)"
+              title={`Redo (${SHORTCUT_LABELS.redo})`}
             >
               Redo
             </button>

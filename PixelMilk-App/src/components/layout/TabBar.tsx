@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Grid3X3, Box, Layers, Combine, Library } from 'lucide-react';
+import { PxUser, PxAddGrid, PxArchive, PxLayout, PxGroup, PxBook } from '../shared/PixelIcon';
 import { TabId, TabConfig } from '../../types';
 import { useAppStore } from '../../stores';
 
@@ -13,12 +13,12 @@ const tabs: TabConfig[] = [
 ];
 
 const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
-  User,
-  Grid3X3,
-  Box,
-  Layers,
-  Combine,
-  Library,
+  User: PxUser,
+  Grid3X3: PxAddGrid,
+  Box: PxArchive,
+  Layers: PxLayout,
+  Combine: PxGroup,
+  Library: PxBook,
 };
 
 const getIsMobile = () => typeof window !== 'undefined' && window.innerWidth < 640;

@@ -12,6 +12,7 @@ interface CanvasStore extends CanvasState {
   setSelectedColor: (color: string) => void;
   resetCanvas: () => void;
   loadPersistedState: () => Promise<void>;
+  resetZoomToFit: () => void;
 
   // Hotspot actions
   setHotspot: (x: number | null, y: number | null) => void;
@@ -23,8 +24,11 @@ interface CanvasStore extends CanvasState {
   setIsDrawing: (isDrawing: boolean) => void;
 }
 
+// Default zoom shows sprite at ~70% of canvas size for comfortable viewing with padding
+const DEFAULT_FIT_ZOOM = 0.7;
+
 const initialState: CanvasState = {
-  zoom: 1,
+  zoom: DEFAULT_FIT_ZOOM,
   panX: 0,
   panY: 0,
   tool: 'draw',
@@ -61,11 +65,18 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
 
   loadPersistedState: async () => {
     try {
-      const savedZoom = await getSetting<number>(ZOOM_SETTING_KEY, initialState.zoom);
+      const savedZoom = await getSetting<number>(ZOOM_SETTING_KEY, DEFAULT_FIT_ZOOM);
       set({ zoom: savedZoom });
     } catch (err) {
       console.error('Failed to load persisted canvas state:', err);
     }
+  },
+
+  resetZoomToFit: () => {
+    set({ zoom: DEFAULT_FIT_ZOOM, panX: 0, panY: 0 });
+    setSetting(ZOOM_SETTING_KEY, DEFAULT_FIT_ZOOM).catch((err) =>
+      console.error('Failed to persist zoom level:', err)
+    );
   },
 
   // Hotspot actions

@@ -147,7 +147,7 @@ export async function getDefaultStyleParams(): Promise<StyleParameters> {
     shadingStyle: 'basic',
     detailLevel: 'medium',
     canvasSize: 128,
-    paletteMode: 'auto',
+    paletteMode: 'rooted', // Default to 'rooted' - a versatile 16-colour palette
     viewType: 'standard',
   });
 }

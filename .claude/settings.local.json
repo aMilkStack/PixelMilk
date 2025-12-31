@@ -7,7 +7,11 @@
       "Bash(npx tsc:*)",
       "Bash(timeout 10 npm run dev:*)",
       "Bash(ls:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Skill(frontend-design:frontend-design)",
+      "Bash(\"C:\\\\Program Files\\\\nodejs\\\\node.exe\" \"C:\\\\Users\\\\User\\\\documents\\\\milkstack\\\\projects\\\\software\\\\pixelmilk\\\\PixelMilk-App\\\\node_modules\\\\typescript\\\\bin\\\\tsc\" --noEmit -p \"C:\\\\Users\\\\User\\\\documents\\\\milkstack\\\\projects\\\\software\\\\pixelmilk\\\\PixelMilk-App\")",
+      "Bash(\"C:\\\\Program Files\\\\nodejs\\\\node.exe\" \"node_modules\\\\typescript\\\\bin\\\\tsc\" --noEmit)",
+      "Bash(timeout:*)"
     ]
   }
 }

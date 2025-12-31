@@ -34,7 +34,7 @@
 
   /* Font Families */
   --font-mono: 'VT323', monospace;           /* Terminal font */
-  --font-display: 'Playfair Display', serif; /* Headings */
+  --font-display: 'FaytePixel', sans-serif;  /* Headings - custom pixel font */
 
   /* Font Sizes */
   --font-size-sm: 14px;

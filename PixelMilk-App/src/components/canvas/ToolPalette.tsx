@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useCanvasStore } from '../../stores';
+import { SHORTCUT_LABELS } from '../../hooks/useKeyboard';
+import { PxPalette, PxCursor, PxMove, PxPencil, PxEraser, PxDrop, PxPipette, PxZap } from '../shared/PixelIcon';
 import type { ToolMode } from '../../types';
 
 const colors = {
@@ -14,21 +16,26 @@ interface ToolConfig {
   id: ToolMode;
   label: string;
   shortcut: string;
-  icon: string;
+  Icon: React.FC<{ size?: number }>;
 }
 
 const tools: ToolConfig[] = [
-  { id: 'select', label: 'Select', shortcut: 'V', icon: '⌖' },
-  { id: 'pan', label: 'Pan', shortcut: 'Space', icon: '⊕' },
-  { id: 'draw', label: 'Draw', shortcut: 'D', icon: '✎' },
-  { id: 'erase', label: 'Erase', shortcut: 'E', icon: '␡' },
-  { id: 'fill', label: 'Fill', shortcut: 'F', icon: '▧' },
-  { id: 'eyedropper', label: 'Pick', shortcut: 'I', icon: '◉' },
-  { id: 'hotspot', label: 'AI Edit', shortcut: 'H', icon: '✦' },
+  { id: 'select', label: 'Select', shortcut: SHORTCUT_LABELS.select, Icon: PxCursor },
+  { id: 'pan', label: 'Pan', shortcut: SHORTCUT_LABELS.pan, Icon: PxMove },
+  { id: 'draw', label: 'Draw', shortcut: SHORTCUT_LABELS.draw, Icon: PxPencil },
+  { id: 'erase', label: 'Erase', shortcut: SHORTCUT_LABELS.erase, Icon: PxEraser },
+  { id: 'fill', label: 'Fill', shortcut: SHORTCUT_LABELS.fill, Icon: PxDrop },
+  { id: 'eyedropper', label: 'Pick', shortcut: SHORTCUT_LABELS.eyedropper, Icon: PxPipette },
+  { id: 'hotspot', label: 'AI Edit', shortcut: SHORTCUT_LABELS.hotspot, Icon: PxZap },
 ];
 
-export const ToolPalette: React.FC = () => {
+interface ToolPaletteProps {
+  lockedPalette?: string[];
+}
+
+export const ToolPalette: React.FC<ToolPaletteProps> = ({ lockedPalette = [] }) => {
   const { tool, setTool, brushSize, setBrushSize, selectedColor, setSelectedColor } = useCanvasStore();
+  const [showPalettePopup, setShowPalettePopup] = useState(false);
 
   const containerStyle: React.CSSProperties = {
     display: 'flex',
@@ -82,7 +89,43 @@ export const ToolPalette: React.FC = () => {
     backgroundColor: selectedColor,
     border: `2px solid ${colors.mint}`,
     cursor: 'var(--cursor-pointer)',
+    position: 'relative',
   };
+
+  const paletteButtonStyle: React.CSSProperties = {
+    width: '36px',
+    height: '36px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    border: `2px solid ${colors.mint}40`,
+    backgroundColor: 'transparent',
+    color: colors.cream,
+    cursor: 'var(--cursor-pointer)',
+  };
+
+  const palettePopupStyle: React.CSSProperties = {
+    position: 'absolute',
+    left: '44px',
+    top: 0,
+    backgroundColor: colors.bgSecondary,
+    border: `1px solid ${colors.mint}40`,
+    padding: '8px',
+    zIndex: 100,
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 24px)',
+    gap: '4px',
+    maxHeight: '200px',
+    overflowY: 'auto',
+  };
+
+  const paletteSwatchStyle = (colour: string, isSelected: boolean): React.CSSProperties => ({
+    width: '24px',
+    height: '24px',
+    backgroundColor: colour,
+    border: isSelected ? `2px solid ${colors.mint}` : `1px solid ${colors.mint}40`,
+    cursor: 'var(--cursor-pointer)',
+  });
 
   // Custom square slider styles injected via style tag
   const sliderCSS = `
@@ -123,6 +166,7 @@ export const ToolPalette: React.FC = () => {
       <style>{sliderCSS}</style>
       {tools.map((t) => {
         const isActive = tool === t.id;
+        const IconComponent = t.Icon;
         return (
           <button
             key={t.id}
@@ -130,28 +174,59 @@ export const ToolPalette: React.FC = () => {
             onClick={() => setTool(t.id)}
             title={`${t.label} (${t.shortcut})`}
           >
-            {t.icon}
+            <IconComponent size={18} />
           </button>
         );
       })}
 
       <div style={dividerStyle} />
 
-      {/* Color swatch */}
-      <div
-        style={colorSwatchStyle}
-        title="Selected Color"
-        onClick={() => {
-          // Simple color picker - could be enhanced
-          const input = document.createElement('input');
-          input.type = 'color';
-          input.value = selectedColor;
-          input.addEventListener('input', (e) => {
-            setSelectedColor((e.target as HTMLInputElement).value);
-          });
-          input.click();
-        }}
-      />
+      {/* Palette section */}
+      <div style={{ position: 'relative' }}>
+        {/* Current colour swatch */}
+        <div
+          style={colorSwatchStyle}
+          title={`Selected: ${selectedColor}`}
+        />
+
+        {/* Palette toggle button */}
+        <button
+          style={paletteButtonStyle}
+          onClick={() => setShowPalettePopup(!showPalettePopup)}
+          title="Select from palette (1-9 for quick select)"
+        >
+          <PxPalette size={16} />
+        </button>
+
+        {/* Palette popup */}
+        {showPalettePopup && lockedPalette.length > 0 && (
+          <div style={palettePopupStyle}>
+            {lockedPalette.map((colour, index) => {
+              const shortcutKey = index < 9 ? `${index + 1}` : undefined;
+              return (
+                <div
+                  key={`${colour}-${index}`}
+                  style={paletteSwatchStyle(colour, colour.toLowerCase() === selectedColor.toLowerCase())}
+                  title={shortcutKey ? `${colour} (${shortcutKey})` : colour}
+                  onClick={() => {
+                    setSelectedColor(colour);
+                    setShowPalettePopup(false);
+                  }}
+                />
+              );
+            })}
+          </div>
+        )}
+
+        {/* No palette message */}
+        {showPalettePopup && lockedPalette.length === 0 && (
+          <div style={{ ...palettePopupStyle, gridTemplateColumns: '1fr', minWidth: '120px' }}>
+            <span style={{ color: colors.cream, fontSize: '11px', fontFamily: 'monospace' }}>
+              No palette locked
+            </span>
+          </div>
+        )}
+      </div>
 
       {showBrushSize && (
         <>

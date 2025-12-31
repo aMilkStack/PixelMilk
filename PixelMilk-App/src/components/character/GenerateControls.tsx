@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader2, RotateCcw, Check } from 'lucide-react';
+import { PxLoader, PxUndo, PxCheck } from '../shared/PixelIcon';
 import { Button } from '../shared/Button';
 
 type SaveStatus = 'idle' | 'saving' | 'success' | 'error';
@@ -160,7 +160,7 @@ export const GenerateControls: React.FC<GenerateControlsProps> = ({
           disabled={disabled || isAnyGenerating}
         >
           <span style={buttonContentStyle}>
-            {isGeneratingIdentity && <Loader2 size={16} style={spinnerStyle} />}
+            {isGeneratingIdentity && <PxLoader size={16} style={spinnerStyle} />}
             Generate Identity
           </span>
         </Button>
@@ -172,7 +172,7 @@ export const GenerateControls: React.FC<GenerateControlsProps> = ({
           disabled={!hasIdentity || disabled || isAnyGenerating}
         >
           <span style={buttonContentStyle}>
-            {isGeneratingSprite && <Loader2 size={16} style={spinnerStyle} />}
+            {isGeneratingSprite && <PxLoader size={16} style={spinnerStyle} />}
             Generate Sprite
           </span>
         </Button>
@@ -184,7 +184,7 @@ export const GenerateControls: React.FC<GenerateControlsProps> = ({
           disabled={!hasSprite || disabled || isAnyGenerating || isSaving}
         >
           <span style={buttonContentStyle}>
-            {isSaving && <Loader2 size={16} style={spinnerStyle} />}
+            {isSaving && <PxLoader size={16} style={spinnerStyle} />}
             {isSaving ? 'Saving...' : 'Save to Library'}
           </span>
         </Button>
@@ -212,7 +212,7 @@ export const GenerateControls: React.FC<GenerateControlsProps> = ({
       {showSuccess && (
         <div style={successStyle} role="status">
           <span style={successIconStyle}>
-            <Check size={14} strokeWidth={3} />
+            <PxCheck size={14} />
           </span>
           <span>Saved to library successfully!</span>
         </div>
@@ -232,7 +232,7 @@ export const GenerateControls: React.FC<GenerateControlsProps> = ({
                   onClick={onRetry}
                 >
                   <span style={buttonContentStyle}>
-                    <RotateCcw size={14} />
+                    <PxUndo size={14} />
                     Retry {lastFailedGeneration === 'identity' ? 'Identity' : 'Sprite'}
                   </span>
                 </Button>

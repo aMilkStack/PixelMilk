@@ -9,12 +9,12 @@
  * - Album art showing color stripes
  */
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Play, Pause, SkipBack, SkipForward, Shuffle, Volume2, VolumeX, X, Music, ChevronDown, ChevronUp } from 'lucide-react';
+import { PxPlay, PxPause, PxPrev, PxNext, PxShuffle, PxVolume, PxVolumeX, PxClose, PxMusic, PxChevronDown, PxChevronUp } from '../shared/PixelIcon';
 import {
-  LOSPEC_PALETTES,
+  PALETTES,
   type ExtendedPalette,
   type PaletteCategory,
-} from '../../data/lospecPalettes';
+} from '../../data/palettes';
 import soundtrackData from '../../data/soundtrack.json';
 
 // Terminal aesthetic colors
@@ -74,7 +74,7 @@ const AVAILABLE_AUDIO = new Set([
 ]);
 
 function buildPlaylistTracks(): PlaylistTrack[] {
-  return LOSPEC_PALETTES.map(palette => {
+  return PALETTES.map(palette => {
     const info = getSoundtrackInfo(palette.id);
     return {
       ...palette,
@@ -100,7 +100,7 @@ function getAudioUrl(paletteId: string): string | null {
 const ALL_TRACKS = buildPlaylistTracks();
 
 // Group by category
-const TRACKS_BY_CATEGORY = LOSPEC_PALETTES.reduce((acc, palette) => {
+const TRACKS_BY_CATEGORY = PALETTES.reduce((acc, palette) => {
   if (!acc[palette.category]) acc[palette.category] = [];
   acc[palette.category].push(palette);
   return acc;
@@ -311,7 +311,7 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
           }}>
-            <Music size={12} />
+            <PxMusic size={12} />
             <span>Palette Playlist</span>
           </div>
           <button
@@ -332,7 +332,7 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
               gap: '4px',
             }}
           >
-            <ChevronDown size={12} />
+            <PxChevronDown size={12} />
             Expand
           </button>
         </div>
@@ -405,7 +405,7 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
                     justifyContent: 'center',
                   }}
                 >
-                  <SkipBack size={14} />
+                  <PxPrev size={14} />
                 </button>
                 <button
                   type="button"
@@ -424,7 +424,7 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
                     justifyContent: 'center',
                   }}
                 >
-                  {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+                  {isPlaying ? <PxPause size={16} /> : <PxPlay size={16} />}
                 </button>
                 <button
                   type="button"
@@ -443,7 +443,7 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
                     justifyContent: 'center',
                   }}
                 >
-                  <SkipForward size={14} />
+                  <PxNext size={14} />
                 </button>
               </div>
             </div>
@@ -542,7 +542,7 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
               fontSize: '10px',
             }}
           >
-            <ChevronUp size={12} />
+            <PxChevronUp size={12} />
             Compact
           </button>
         </div>
@@ -683,7 +683,7 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
                   }}>
                     {track.name}
                     {track.hasAudio && (
-                      <Volume2 size={10} style={{ color: colors.mintDim, opacity: 0.7 }} />
+                      <PxVolume size={10} style={{ color: colors.mintDim, opacity: 0.7 }} />
                     )}
                   </span>
                   <span style={{
@@ -835,7 +835,7 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
                   }}
                   title="Shuffle"
                 >
-                  <Shuffle size={14} />
+                  <PxShuffle size={14} />
                 </button>
                 <button
                   type="button"
@@ -852,7 +852,7 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
                     justifyContent: 'center',
                   }}
                 >
-                  <SkipBack size={14} />
+                  <PxPrev size={14} />
                 </button>
                 <button
                   type="button"
@@ -869,7 +869,7 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
                     justifyContent: 'center',
                   }}
                 >
-                  {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+                  {isPlaying ? <PxPause size={18} /> : <PxPlay size={18} />}
                 </button>
                 <button
                   type="button"
@@ -886,7 +886,7 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
                     justifyContent: 'center',
                   }}
                 >
-                  <SkipForward size={14} />
+                  <PxNext size={14} />
                 </button>
                 <button
                   type="button"
@@ -904,7 +904,7 @@ export const PalettePlaylist: React.FC<PalettePlaylistProps> = ({
                   }}
                   title={isMuted ? 'Unmute' : 'Mute'}
                 >
-                  {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                  {isMuted ? <PxVolumeX size={14} /> : <PxVolume size={14} />}
                 </button>
               </div>
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '../shared/Button';
 import { useCanvasStore } from '../../stores';
+import { SHORTCUT_LABELS } from '../../hooks/useKeyboard';
 
 const colors = {
   bgSecondary: '#0d2b2b',
@@ -11,7 +12,7 @@ const colors = {
 const ZOOM_LEVELS = [0.5, 1, 2, 4, 8, 16, 32];
 
 export const ZoomControls: React.FC = () => {
-  const { zoom, setZoom } = useCanvasStore();
+  const { zoom, setZoom, resetZoomToFit } = useCanvasStore();
 
   const handleZoomIn = () => {
     const currentIndex = ZOOM_LEVELS.findIndex((z) => z >= zoom);
@@ -26,7 +27,7 @@ export const ZoomControls: React.FC = () => {
   };
 
   const handleReset = () => {
-    setZoom(1);
+    resetZoomToFit();
   };
 
   const containerStyle: React.CSSProperties = {
@@ -61,14 +62,14 @@ export const ZoomControls: React.FC = () => {
   return (
     <div style={containerStyle}>
       <span style={labelStyle}>Zoom</span>
-      <Button variant="secondary" size="sm" onClick={handleZoomOut} title="Zoom Out (-)">
+      <Button variant="secondary" size="sm" onClick={handleZoomOut} title={`Zoom Out (${SHORTCUT_LABELS.zoomOut})`}>
         -
       </Button>
       <span style={zoomTextStyle}>{zoomLabel}</span>
-      <Button variant="secondary" size="sm" onClick={handleZoomIn} title="Zoom In (=)">
+      <Button variant="secondary" size="sm" onClick={handleZoomIn} title={`Zoom In (${SHORTCUT_LABELS.zoomIn})`}>
         +
       </Button>
-      <Button variant="ghost" size="sm" onClick={handleReset} title="Reset Zoom (0)">
+      <Button variant="ghost" size="sm" onClick={handleReset} title={`Reset Zoom (${SHORTCUT_LABELS.zoomReset})`}>
         Reset
       </Button>
     </div>
